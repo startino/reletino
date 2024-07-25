@@ -39,9 +39,8 @@ class RedditStreamWorker:
                 if not REDDIT_USERNAME or not REDDIT_PASSWORD:
                     raise TypeError("couldnt find username or password in env vars")
 
-                for submission in self.subreddits.stream.submissions(pause_after=-1):
-                    if submission is None:
-                        break
+                for submission in self.subreddits.stream.submissions():
+
                     # Skip if not a submission (for typing)
                     if not isinstance(submission, Submission):
                         continue
@@ -59,9 +58,15 @@ class RedditStreamWorker:
                     # Save to db and cache
                     update_db_with_submission(evaluated_submission)
                     cache.set(submission.id, submission.id)
+
             except Exception as e:
                 logging.error(f"Error when evalauting submission. Error: {e} \n Submission: {submission}")
-                cache.set(submission.id, submission.id)
+
+                if isinstance(submission, Submission):
+                        cache.set(submission.id, submission.id)
+                else: 
+                    print("IDK WHAT TO DO BRO \n \n BRO WHAT TO DO LOL ")
+                
 
     def stop(self):
         self._running = False
