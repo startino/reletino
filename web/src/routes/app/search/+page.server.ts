@@ -1,4 +1,4 @@
-import { fetchSubredditPosts } from "$lib/server/reddit/fetchSubredditPosts";
+import { fetchSubredditPosts } from "../../../api/fetchSubredditPosts";
 
 export const load = async () => {
   const result = await fetchSubredditPosts();
