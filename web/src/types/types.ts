@@ -9,3 +9,15 @@ export interface Post {
   author_fullname: string;
   permalink: string;
 }
+
+export interface RelevanceResult {
+  isRelevant: boolean;
+  reason: string;
+}
+
+export interface EvaluatedSubmission {
+  post: Post;
+  isRelevant: boolean;
+  cost: number;
+  reason: string;
+}
