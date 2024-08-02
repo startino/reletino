@@ -1,5 +1,5 @@
-import { fetchSubredditPosts } from "../../../redditClient/fetchSubredditPosts";
-import { processPosts } from "../../../controllers/evaluation";
+import { fetchSubredditPosts } from "$lib/redditClient/fetchSubredditPosts";
+import { processPosts } from "../../../lib/controllers/evaluation";
 
 export const load = async () => {
   const result = await fetchSubredditPosts();

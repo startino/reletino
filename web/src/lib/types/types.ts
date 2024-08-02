@@ -1,5 +1,5 @@
 // Interface for reddit post
-export interface Post {
+export type Post = {
   title: string;
   author: string;
   url: string;
@@ -8,16 +8,17 @@ export interface Post {
   selftext: string;
   author_fullname: string;
   permalink: string;
-}
+};
 
-export interface RelevanceResult {
+export type RelevanceResult = {
   isRelevant: boolean;
   reason: string;
-}
+  alignmentScore: number;
+};
 
-export interface EvaluatedSubmission {
+export type EvaluatedSubmission = {
   post: Post;
   isRelevant: boolean;
-  cost: number;
   reason: string;
-}
+  alignmentScore: number;
+};

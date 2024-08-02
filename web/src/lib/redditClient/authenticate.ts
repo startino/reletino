@@ -1,9 +1,12 @@
-const clientId = "GK6LMyd6RhaqB1q8OW0-0Q"; // client ID
-const clientSecret = "Sy3uTNE4nNnBKjmz4Ab2Zta9Ss7yFg"; // Client secret
-export const userAgent = "biwas"; // name
+import { PUBLIC_REDDIT_PASSWORD } from "$env/static/public";
+import { PUBLIC_REDDIT_USERNAME } from "$env/static/public";
+import { PUBLIC_USER_AGENT } from "$env/static/public";
+
+const clientId = PUBLIC_REDDIT_USERNAME; // client ID
+const clientSecret = PUBLIC_REDDIT_PASSWORD; // Client secret
+export const userAgent = PUBLIC_USER_AGENT; // name
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
-
 // Function to authenticate and get the access token
 export async function authenticate() {
   if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {

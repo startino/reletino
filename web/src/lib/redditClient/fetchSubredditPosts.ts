@@ -7,10 +7,10 @@ const SUBREDDIT_NAMES =
 
 // Function to fetch posts from relevant subreddits
 export async function fetchSubredditPosts(
-  limit = 10, // Number of posts to fetch per page
+  limit = 6, // Number of posts to fetch per page
   maxPages = 1 // Maximum number of pages to fetch
 ): Promise<Post[]> {
-  console.log(`Fetching posts from subreddits: ${SUBREDDIT_NAMES}`);
+  // console.log(`Fetching posts from subreddits: ${SUBREDDIT_NAMES}`);
 
   // Authenticate and get access token
   const accessToken = await authenticate();

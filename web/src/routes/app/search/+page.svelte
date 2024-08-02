@@ -38,13 +38,16 @@
   }
 </style>
 
-{#if data.result}
+{#if data.fetch}
   <div class="post-container">
-      {#each data.result as post}
+      {#each data.fetch as posts}
           <div class="post">
-              <h2 class="post-title">{post.title}</h2>
-              <p class="post-author">Posted by: {post.author}</p>
-              <p class="post-selftext">{post.selftext}</p>
+              <h2 class="post-title">{posts.post.title}</h2>
+              <h2 class="post-title">Subreddit: {posts.post.subreddit}</h2>
+              <p class="post-author">Posted by: {posts.post.author}</p>
+              <p class="post-selftext">Post: {posts.post.selftext}</p>
+              <p class="post-selftext">Is relevant: {posts.isRelevant}</p>
+              <p class="post-selftext">Why: {posts.reason}</p>
           </div>
       {/each}
   </div>
