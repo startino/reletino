@@ -88,3 +88,37 @@ export const markAsIrrelevant = async (
 		});
 	return success;
 };
+
+export const markAsDone = async (
+	leadId: string,
+	submissionId: string,
+	correct_reason: string
+): Promise<boolean> => {
+	const success: boolean = await fetch(`${PUBLIC_API_URL}/mark-lead-as-irrelevant`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			lead_id: leadId,
+			submission_id: submissionId,
+			correct_reason: correct_reason
+		})
+	})
+		.then(async (response) => {
+			if (!response.ok) {
+				console.error(
+					`Failed to mark as irrelevant. Bad response`,
+					response,
+					await response.json()
+				);
+				return false;
+			}
+			return true;
+		})
+		.catch((error) => {
+			console.error('Error occured when marking as irrelevant: ', error);
+			return false;
+		});
+	return success;
+};
