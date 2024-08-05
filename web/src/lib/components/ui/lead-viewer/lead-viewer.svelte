@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fullFormatter, relativeFormatter } from "$lib/utils";
-  import { formatDistanceToNowStrict } from "date-fns";
+  import { format, formatDistanceToNowStrict } from "date-fns";
   import { Button, buttonVariants } from "$lib/components/ui/button";
   import * as Tooltip from "$lib/components/ui/tooltip";
   import { Separator } from "$lib/components/ui/separator";
@@ -13,6 +13,7 @@
   import { Input } from "$lib/components/ui/input";
   import { Calendar } from "$lib/components/ui/calendar";
   import * as Dialog from "$lib/components/ui/dialog";
+
   import {
     Archive,
     ArchiveX,
@@ -135,6 +136,8 @@
             Posted {formatDistanceToNowStrict(lead.discovered_at, {
               addSuffix: true,
             })}
+            <br />
+            {format(lead.discovered_at, "dd/MM")}
           </div>
         {/if}
       </div>
