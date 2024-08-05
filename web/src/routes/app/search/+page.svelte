@@ -48,7 +48,8 @@
               <p class="post-selftext">Post: {posts.post.selftext}</p>
               <p class="post-selftext">Is relevant: {posts.isRelevant}</p>
               <p class="post-selftext">Why: {posts.reason}</p>
-          </div>
+              <p class="post-selftext">Aligment score: {posts.alignmentScore}</p>
+                        </div>
       {/each}
   </div>
 {/if}

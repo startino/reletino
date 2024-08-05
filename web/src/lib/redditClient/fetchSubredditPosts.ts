@@ -7,7 +7,7 @@ const SUBREDDIT_NAMES =
 
 // Function to fetch posts from relevant subreddits
 export async function fetchSubredditPosts(
-  limit = 6, // Number of posts to fetch per page
+  limit = 1, // Number of posts to fetch per page
   maxPages = 1 // Maximum number of pages to fetch
 ): Promise<Post[]> {
   // console.log(`Fetching posts from subreddits: ${SUBREDDIT_NAMES}`);
@@ -39,9 +39,11 @@ export async function fetchSubredditPosts(
 
       // Parse the response data
       const data = await response.json();
-      // console.log("Fetched posts data:", data);
+      console.log("Fetched posts data:", data);
+      console.log("children", data.data.children);
 
       const newPosts: Post[] = data.data.children.map((post: any) => ({
+        reddit_id: post.data.id,
         title: post.data.title,
         subreddit: post.data.subreddit,
         selftext: post.data.selftext,

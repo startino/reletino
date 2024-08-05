@@ -1,5 +1,6 @@
 // Interface for reddit post
 export type Post = {
+  reddit_id: string;
   title: string;
   author: string;
   url: string;
@@ -11,14 +12,14 @@ export type Post = {
 };
 
 export type RelevanceResult = {
-  isRelevant: boolean;
+  is_relevant: boolean;
   reason: string;
-  alignmentScore: number;
+  alignment_score: number;
 };
 
 export type EvaluatedSubmission = {
   post: Post;
-  isRelevant: boolean;
+  is_relevant: boolean;
   reason: string;
-  alignmentScore: number;
+  alignment_score: number;
 };

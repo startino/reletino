@@ -2,7 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MemoryVectorStore } from "langchain/vectorstores/memory"; // Consider changing to a more robust vector store
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { companyContext, relevancePrompt } from "../prompts/prompt";
@@ -43,16 +43,16 @@ async function createVectorStore(documents: Document<Record<string, any>>[]) {
     documents,
     embeddings
   );
-  console.log("Vector store created successfully");
+  // console.log("Vector store created successfully");
   return vectorStore;
 }
 
 // Create a relevance chain
 async function createRelevanceChain(
-  modelName: string,
-  vectorStore: MemoryVectorStore
+  modelName: string
+  // vectorStore: MemoryVectorStore
 ) {
-  console.log("Creating relevance chain with RAG model...");
+  // console.log("Creating relevance chain with RAG model...");
   const llm = new ChatOpenAI({
     model: modelName,
     temperature: 0.1,
@@ -60,14 +60,14 @@ async function createRelevanceChain(
   });
 
   const parser = new JsonOutputParser<RelevanceResult>();
-  const retriever = vectorStore.asRetriever();
+  // const retriever = vectorStore.asRetriever();
 
   const prompt = new PromptTemplate({
     template: `
     ${relevancePrompt}
-    Here is the relevant context from the website:
+    Here is the relevant context for the company:
+   
     ${companyContext}
-    {context}
     
     Now, evaluate the following Reddit post for alignment with the above context:
     {post}
@@ -75,19 +75,20 @@ async function createRelevanceChain(
     {format_instructions}
     
     Respond with a JSON object containing:
-    1. isRelevant: A boolean indicating if the post aligns with the context from the website.
+    1. is_relevant: A boolean indicating if the post aligns with the context from the website.
     2. reason: A detailed explanation of why the post does or doesn't align, citing specific examples from both the post and the context.
-    3. alignmentScore: A number between 0 and 5 indicating how closely the post aligns with the context (0 being not at all, 5 being perfect alignment).`,
-    inputVariables: ["context", "post"],
+    3. alignment_score: A number between 0 and 5 indicating how closely the post aligns with the context (0 being not at all, 5 being perfect alignment).`,
+    inputVariables: ["post"],
     partialVariables: { format_instructions: parser.getFormatInstructions() },
   });
 
   return async (input: { post: string }): Promise<RelevanceResult> => {
-    console.log("Retrieving relevant documents for input...");
-    const relevantDocs = await retriever.invoke(input.post); // Retrieve documents based on semantic similarity
-    const context = relevantDocs.map((doc) => doc.pageContent).join("\n\n");
+    // console.log("Retrieving relevant documents for input...");
+    // const relevantDocs = await retriever.invoke(input.post); // Retrieve documents based on semantic similarity
+    // const context = relevantDocs.map((doc) => doc.pageContent).join("\n\n");
+    // console.log("context:", context);
 
-    const formattedPrompt = await prompt.format({ ...input, context });
+    const formattedPrompt = await prompt.format({ ...input });
     const result = await llm.invoke(formattedPrompt);
     const resultString: string = result.content as string;
 
@@ -137,20 +138,20 @@ export async function evaluatePostRelevance(
   post: Post,
   modelName: string = "gpt-4"
 ): Promise<EvaluatedSubmission> {
-  console.log(`Evaluating post relevance using RAG model: ${post.title}`);
-  const store = await initializeVectorStore();
-  const chain = await createRelevanceChain(modelName, store);
+  console.log(`Evaluating post relevance: ${post.title}`);
+  // const store = await initializeVectorStore();
+  const chain = await createRelevanceChain(modelName);
 
   const result = await invokeRelevanceChain(chain, post);
 
   console.log(
-    `Relevance: ${result.isRelevant}, Alignment Score: ${result.alignmentScore}`
+    `Relevance: ${result.is_relevant}, Alignment Score: ${result.alignment_score}`
   );
 
   return {
     post,
-    isRelevant: result.isRelevant,
+    is_relevant: result.is_relevant,
     reason: result.reason,
-    alignmentScore: result.alignmentScore,
+    alignment_score: result.alignment_score,
   };
 }
