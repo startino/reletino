@@ -104,7 +104,7 @@ export type Database = {
           qualifying_question?: string | null;
           reason?: string | null;
           reddit_id: string;
-          title?: string;
+          title: string;
           url: string;
         };
         Update: {

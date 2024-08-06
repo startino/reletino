@@ -10,8 +10,6 @@ export async function fetchSubredditPosts(
   limit = 1, // Number of posts to fetch per page
   maxPages = 1 // Maximum number of pages to fetch
 ): Promise<Post[]> {
-  // console.log(`Fetching posts from subreddits: ${SUBREDDIT_NAMES}`);
-
   // Authenticate and get access token
   const accessToken = await authenticate();
   let posts: Post[] = [];
@@ -39,8 +37,8 @@ export async function fetchSubredditPosts(
 
       // Parse the response data
       const data = await response.json();
-      console.log("Fetched posts data:", data);
-      console.log("children", data.data.children);
+      // console.log("Fetched posts data:", data);
+      // console.log("children", data.data.children);
 
       const newPosts: Post[] = data.data.children.map((post: any) => ({
         reddit_id: post.data.id,

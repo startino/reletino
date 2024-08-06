@@ -2,39 +2,65 @@ import { fetchSubredditPosts } from "../redditClient/fetchSubredditPosts";
 import { evaluatePostRelevance } from "../ai/agent/relevanceChecker";
 import type { EvaluatedSubmission, Post } from "../types/types";
 import type { TablesInsert } from "$lib/types/supabase";
-import { saveEvaluatedPosts } from "$lib/db";
+import { saveEvaluatedSubmissions, saveLeads } from "$lib/db";
 
 export async function processPosts(): Promise<void> {
   try {
     const posts: Post[] = await fetchSubredditPosts();
-    // console.log("Fetched posts count:", posts.length);
+    console.log("Posts fetched successfully.......");
+
     const evaluatedPosts: EvaluatedSubmission[] = [];
+
     for (const post of posts) {
       const evaluatedPost = await evaluatePostRelevance(post);
       evaluatedPosts.push(evaluatedPost);
+      console.log("Evaluated post:", evaluatedPost.post.title);
     }
 
-    // console.log("Evaluated posts count:", evaluatedPosts.length);
-
-    const postsToInsert: TablesInsert<"evaluated_submissions">[] =
-      evaluatedPosts.map((post) => ({
-        body: post.post.selftext,
-        reddit_id: post.post.reddit_id,
-        is_relevant: post.is_relevant,
-        qualifying_question: null,
-        reason: post.reason,
-        title: post.post.title,
-        url: post.post.url,
+    const submissionsToSave: TablesInsert<"evaluated_submissions">[] =
+      evaluatedPosts.map((evaluatedPost) => ({
+        body: evaluatedPost.post.selftext,
+        reddit_id: evaluatedPost.post.reddit_id,
+        is_relevant: evaluatedPost.is_relevant,
+        qualifying_question: evaluatedPost.qualifying_question,
+        reason: evaluatedPost.reason,
+        title: evaluatedPost.post.title,
+        url: evaluatedPost.post.url,
       }));
 
-    // console.log("Posts prepared for insertion:", postsToInsert.length);
-    // console.log("Sample post to insert:", postsToInsert[0]);
+    const savedSubmissionData =
+      await saveEvaluatedSubmissions(submissionsToSave);
 
-    await saveEvaluatedPosts(postsToInsert);
+    if (savedSubmissionData.length > 0) {
+      console.log(`${savedSubmissionData.length} new submissions saved`);
 
-    console.log("All posts have been processed and saved successfully");
+      const leads: TablesInsert<"leads">[] = savedSubmissionData.map(
+        (savedSubmission, index) => {
+          const evaluatedPost = evaluatedPosts[index];
+          return {
+            submission_id: savedSubmission.id,
+            prospect_username: evaluatedPost.post.author,
+            source: "their_post",
+            last_event: "discovered",
+            status: "under_review",
+            data: {
+              title: evaluatedPost.post.title,
+              body: evaluatedPost.post.selftext,
+              url: evaluatedPost.post.url,
+            },
+            reddit_id: evaluatedPost.post.reddit_id,
+            comment: null,
+          };
+        }
+      );
+
+      await saveLeads(leads);
+      console.log(`${leads.length} new leads saved`);
+    } else {
+      console.log("No new submissions to save. Skipping to update lead.");
+    }
   } catch (error) {
-    console.error("Error processing and saving posts:", error);
+    console.error("Error processing and saving posts and leads:", error);
     throw error;
   }
 }

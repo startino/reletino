@@ -138,7 +138,7 @@ export async function evaluatePostRelevance(
   post: Post,
   modelName: string = "gpt-4"
 ): Promise<EvaluatedSubmission> {
-  console.log(`Evaluating post relevance: ${post.title}`);
+  // console.log(`Evaluating post relevance: ${post.title}`);
   // const store = await initializeVectorStore();
   const chain = await createRelevanceChain(modelName);
 
@@ -150,6 +150,7 @@ export async function evaluatePostRelevance(
 
   return {
     post,
+    qualifying_question: null,
     is_relevant: result.is_relevant,
     reason: result.reason,
     alignment_score: result.alignment_score,

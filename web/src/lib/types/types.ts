@@ -18,6 +18,7 @@ export type RelevanceResult = {
 };
 
 export type EvaluatedSubmission = {
+  qualifying_question: string | null | undefined;
   post: Post;
   is_relevant: boolean;
   reason: string;
