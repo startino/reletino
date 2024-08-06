@@ -5,6 +5,7 @@ import { superValidate } from 'sveltekit-superforms/server';
 import type { Database, Tables, Enums } from '$lib/types/supabase';
 import type { Lead } from '$lib/types/';
 import { markAsDone } from '$lib/api.js';
+import { fetchPostAndEvaluate } from '$lib/server/controllers/evaluation';
 
 export const load = async ({ locals }) => {
 	const session = await locals.getSession();
@@ -15,11 +16,7 @@ export const load = async ({ locals }) => {
 	return { leads };
 };
 export const actions: Actions = {
-	done: async ({ params, locals }) => {
-		const leadId = params.id as string;
-		const data = supabase.from('leads').update({status: 'subscriber'}).eq('id', leadId);
-		if (!data) {
-			throw error(500, 'Failed attempt at updating lead');
-		}
-	}
+	fetchPostAndEvaluate: async ({ params, locals }) => {
+		await fetchPostAndEvaluate();
+	  },
 };

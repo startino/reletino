@@ -35,6 +35,9 @@ export async function fetchPostAndEvaluate(): Promise<void> {
     const leads: TablesInsert<"leads">[] = savedSubmissionData.map(
       (savedSubmission, index) => {
         const evaluatedPost = evaluatedPosts[index];
+        if (!savedSubmission.is_relevant) {
+          return null;
+        }
         return {
           submission_id: savedSubmission.id,
           prospect_username: evaluatedPost.post.author,
@@ -50,7 +53,7 @@ export async function fetchPostAndEvaluate(): Promise<void> {
           comment: null,
         };
       }
-    );
+    ).filter((lead) => lead !== null);
 
     await saveLeads(leads);
     console.log(`${leads.length} new leads saved`);

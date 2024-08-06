@@ -1,8 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { OpenAIEmbeddings } from "@langchain/openai";
-import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+;
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { companyContext, relevancePrompt } from "../prompts/prompt";
@@ -11,8 +8,7 @@ import type {
   RelevanceResult,
   EvaluatedSubmission,
 } from "$lib/types/types";
-import { PUBLIC_API_URL } from "$env/static/public";
-import type { Document } from "@langchain/core/documents";
+import { OPENAI_API_KEY } from "$env/static/private";
 
 // Load and process documents
 // async function loadAndProcessDocuments() {
@@ -55,7 +51,7 @@ async function createRelevanceChain(
   const llm = new ChatOpenAI({
     model: modelName,
     temperature: 0.1,
-    apiKey: PUBLIC_API_URL,
+    apiKey: OPENAI_API_KEY,
   });
 
   const parser = new JsonOutputParser<RelevanceResult>();

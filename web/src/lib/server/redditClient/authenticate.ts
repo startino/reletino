@@ -7,6 +7,7 @@ const clientSecret = PUBLIC_REDDIT_PASSWORD; // Client secret
 export const userAgent = PUBLIC_USER_AGENT; // name
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
+
 // Function to authenticate and get the access token
 export async function authenticate() {
   if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
