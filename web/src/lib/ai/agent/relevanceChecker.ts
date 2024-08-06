@@ -6,7 +6,6 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { companyContext, relevancePrompt } from "../prompts/prompt";
-
 import type {
   Post,
   RelevanceResult,
@@ -16,36 +15,36 @@ import { PUBLIC_API_URL } from "$env/static/public";
 import type { Document } from "@langchain/core/documents";
 
 // Load and process documents
-async function loadAndProcessDocuments() {
-  console.log("Loading and processing documents for RAG model...");
-  const urls = ["https://starti.no"];
-  const loaders = urls.map((url) => new CheerioWebBaseLoader(url));
-  const docs = await Promise.all(loaders.map((loader) => loader.load()));
-  const flatDocs = docs.flat();
+// async function loadAndProcessDocuments() {
+//   console.log("Loading and processing documents for RAG model...");
+//   const urls = ["https://starti.no"];
+//   const loaders = urls.map((url) => new CheerioWebBaseLoader(url));
+//   const docs = await Promise.all(loaders.map((loader) => loader.load()));
+//   const flatDocs = docs.flat();
 
-  const textSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 500,
-    chunkOverlap: 0,
-  });
+//   const textSplitter = new RecursiveCharacterTextSplitter({
+//     chunkSize: 500,
+//     chunkOverlap: 0,
+//   });
 
-  const splitDocs = await textSplitter.splitDocuments(flatDocs);
-  console.log("Loaded and split documents into chunks");
-  return splitDocs;
-}
+//   const splitDocs = await textSplitter.splitDocuments(flatDocs);
+//   console.log("Loaded and split documents into chunks");
+//   return splitDocs;
+// }
 
 // Create a vector store from documents
-async function createVectorStore(documents: Document<Record<string, any>>[]) {
-  console.log("Creating vector store for RAG model...");
-  const embeddings = new OpenAIEmbeddings({
-    apiKey: PUBLIC_API_URL,
-  });
-  const vectorStore = await MemoryVectorStore.fromDocuments(
-    documents,
-    embeddings
-  );
-  // console.log("Vector store created successfully");
-  return vectorStore;
-}
+// async function createVectorStore(documents: Document<Record<string, any>>[]) {
+//   console.log("Creating vector store for RAG model...");
+//   const embeddings = new OpenAIEmbeddings({
+//     apiKey: PUBLIC_API_URL,
+//   });
+//   const vectorStore = await MemoryVectorStore.fromDocuments(
+//     documents,
+//     embeddings
+//   );
+//   // console.log("Vector store created successfully");
+//   return vectorStore;
+// }
 
 // Create a relevance chain
 async function createRelevanceChain(
@@ -120,18 +119,18 @@ async function invokeRelevanceChain(
   throw new Error("This should never be reached due to the throw in the loop");
 }
 
-let vectorStore: MemoryVectorStore | null = null;
+// let vectorStore: MemoryVectorStore | null = null;
 
 // Initialize vector store if not already done
-async function initializeVectorStore() {
-  if (!vectorStore) {
-    console.log("Initializing vector store for RAG model...");
-    const documents = await loadAndProcessDocuments();
-    vectorStore = await createVectorStore(documents);
-    console.log("Vector store initialized successfully");
-  }
-  return vectorStore;
-}
+// async function initializeVectorStore() {
+//   if (!vectorStore) {
+//     console.log("Initializing vector store for RAG model...");
+//     const documents = await loadAndProcessDocuments();
+//     vectorStore = await createVectorStore(documents);
+//     console.log("Vector store initialized successfully");
+//   }
+//   return vectorStore;
+// }
 
 // Evaluate post relevance
 export async function evaluatePostRelevance(
@@ -143,10 +142,9 @@ export async function evaluatePostRelevance(
   const chain = await createRelevanceChain(modelName);
 
   const result = await invokeRelevanceChain(chain, post);
-
-  console.log(
-    `Relevance: ${result.is_relevant}, Alignment Score: ${result.alignment_score}`
-  );
+  // console.log(
+  //   `Relevance: ${result.is_relevant}, Alignment Score: ${result.alignment_score}`
+  // );
 
   return {
     post,

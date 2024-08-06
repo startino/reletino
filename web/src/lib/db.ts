@@ -1,52 +1,22 @@
 import { supabase } from "./supabase";
 import type { TablesInsert } from "./types/supabase";
 
-// Function to filter out the submissions and save it in lead
+// Function to save evaluated submissions
 export async function saveEvaluatedSubmissions(
   submissions: TablesInsert<"evaluated_submissions">[]
 ) {
   try {
     console.log(`Attempting to process ${submissions.length} submissions`);
-    // Fetch existing submissions
-    const { data: existingSubmissions, error: fetchError } = await supabase
-      .from("evaluated_submissions")
-      .select("reddit_id, title")
-      .in(
-        "reddit_id",
-        submissions.map((s) => s.reddit_id)
-      );
-    if (fetchError) {
-      console.error("Error fetching existing submissions:", fetchError);
-      throw new Error(
-        `Error fetching existing submissions: ${fetchError.message}`
-      );
-    }
-    const existingRedditIds = new Set(
-      existingSubmissions.map((s) => s.reddit_id)
-    );
-    const existingTitles = new Set(existingSubmissions.map((s) => s.title));
-    console.log(
-      "Number of existing submissions found:",
-      existingSubmissions.length
-    );
-    // Filter out submissions that already exist
-    const newSubmissions = submissions.filter(
-      (submission) =>
-        !existingRedditIds.has(submission.reddit_id) &&
-        !existingTitles.has(submission.title)
-    );
-    console.log(`Filtered down to ${newSubmissions.length} new submissions`);
-    if (newSubmissions.length > 0) {
+    if (submissions.length > 0) {
       console.log(
         "About to save the following Reddit IDs:",
-        newSubmissions.map((sub) => sub.reddit_id)
+        submissions.map((sub) => sub.reddit_id)
       );
       // Insert new submissions
       const { data, error } = await supabase
         .from("evaluated_submissions")
-        .insert(newSubmissions)
+        .insert(submissions)
         .select();
-
       if (error) {
         console.error("Supabase error details:", error);
         throw new Error(`Error saving new submissions: ${error.message}`);

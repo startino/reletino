@@ -1,3 +1,4 @@
+import { supabase } from "$lib/supabase";
 import { authenticate, userAgent } from "./authenticate";
 import { type Post } from "../types/types";
 
@@ -7,7 +8,7 @@ const SUBREDDIT_NAMES =
 
 // Function to fetch posts from relevant subreddits
 export async function fetchSubredditPosts(
-  limit = 1, // Number of posts to fetch per page
+  limit = 15, // Number of posts to fetch per page
   maxPages = 1 // Maximum number of pages to fetch
 ): Promise<Post[]> {
   // Authenticate and get access token
@@ -37,9 +38,6 @@ export async function fetchSubredditPosts(
 
       // Parse the response data
       const data = await response.json();
-      // console.log("Fetched posts data:", data);
-      // console.log("children", data.data.children);
-
       const newPosts: Post[] = data.data.children.map((post: any) => ({
         reddit_id: post.data.id,
         title: post.data.title,
@@ -67,7 +65,53 @@ export async function fetchSubredditPosts(
     }
   }
 
-  // console.log("Fetched all posts:", posts);
-  // Go to localhost:5173/app/search to see the fetched data in the frontend
-  return posts;
+  // Filter out existing submissions from the fetched posts
+  const filteredPosts = await filterExistingSubmissions(posts);
+
+  return filteredPosts;
+}
+
+// Function to filter out the submissions that already exist in the evaluated_submissions table
+async function filterExistingSubmissions(posts: Post[]): Promise<Post[]> {
+  try {
+    // Fetch existing submissions
+    const { data: existingSubmissions, error: fetchError } = await supabase
+      .from("evaluated_submissions")
+      .select("reddit_id, title")
+      .in(
+        "reddit_id",
+        posts.map((post) => post.reddit_id)
+      );
+
+    if (fetchError) {
+      console.error("Error fetching existing submissions:", fetchError);
+      throw new Error(
+        `Error fetching existing submissions: ${fetchError.message}`
+      );
+    }
+
+    const existingRedditIds = new Set(
+      existingSubmissions.map((s: { reddit_id: string }) => s.reddit_id)
+    );
+    const existingTitles = new Set(
+      existingSubmissions.map((s: { title: string }) => s.title)
+    );
+
+    // Filter out submissions that already exist
+    const newPosts = posts.filter((post) => {
+      const isDuplicate =
+        existingRedditIds.has(post.reddit_id) || existingTitles.has(post.title);
+      if (isDuplicate) {
+        console.log("Duplicate post:", post.title);
+      } else {
+        console.log("Unique post:", post.title);
+      }
+      return !isDuplicate;
+    });
+
+    return newPosts;
+  } catch (error) {
+    console.error("Error filtering existing submissions:", error);
+    throw error;
+  }
 }
