@@ -10,7 +10,7 @@ import type {
   Post,
   RelevanceResult,
   EvaluatedSubmission,
-} from "../../types/types";
+} from "$lib/types/types";
 import { PUBLIC_API_URL } from "$env/static/public";
 import type { Document } from "@langchain/core/documents";
 
@@ -62,15 +62,13 @@ async function createRelevanceChain(
   // const retriever = vectorStore.asRetriever();
 
   const prompt = new PromptTemplate({
-    template: `
-    ${relevancePrompt}
-    Here is the relevant context for the company:
-   
-    ${companyContext}
-    
-    Now, evaluate the following Reddit post for alignment with the above context:
+    template:
+      relevancePrompt +
+      `
+    Here is the context for the company:` +
+      companyContext +
+      `Now, evaluate the following Reddit post for alignment with the above context:
     {post}
-    
     {format_instructions}
     
     Respond with a JSON object containing:

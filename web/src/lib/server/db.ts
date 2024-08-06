@@ -1,5 +1,5 @@
-import { supabase } from "./supabase";
-import type { TablesInsert } from "./types/supabase";
+import { supabase } from "$lib/supabase";
+import { type TablesInsert } from "$lib/types/supabase";
 
 // Function to save evaluated submissions
 export async function saveEvaluatedSubmissions(
@@ -15,7 +15,7 @@ export async function saveEvaluatedSubmissions(
       // Insert new submissions
       const { data, error } = await supabase
         .from("evaluated_submissions")
-        .insert(submissions)
+        .upsert(submissions, { onConflict: "title" })
         .select();
       if (error) {
         console.error("Supabase error details:", error);

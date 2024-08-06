@@ -95,16 +95,32 @@
 	const { selectedDataIds } = pluginStates.select;
 
 	const hideableCols = ['status', 'amount'];
+
+	const fetchPostAndEvaluate = async () => {
+		const res = await fetch('?/fetchPostAndEvaluate', {
+			method: 'POST',
+			// headers: {
+			// 	'Content-Type': 'appliation/json'
+			// },
+			body: JSON.stringify({})
+		});
+		
+		const data = await res.json();
+		console.log(data);
+	};
 </script>
 
 <div class="w-full">
-	<div class="mb-4 flex items-center gap-4">
+	<div class="mb-4 flex flex-row items-center gap-4">
 		<Input
 			class="max-w-sm"
 			placeholder="Filter using id or smt..."
 			type="text"
 			bind:value={$filterValue}
 		/>
+		<Button on:click={()=>fetchPostAndEvaluate()}>
+			Fetch Posts (Don't spam!!)
+			</Button>
 	</div>
 	<div class="rounded-md border">
 		<Table.Root {...$tableAttrs}>

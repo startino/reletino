@@ -1,7 +1,7 @@
 // This agent is not being used...........
 
 import { ChatOpenAI } from "@langchain/openai";
-import { type Post } from "../../types/types";
+import { type Post } from "$lib/types/types";
 import { companyContext } from "../prompts/prompt";
 import { PUBLIC_API_URL } from "$env/static/public";
 

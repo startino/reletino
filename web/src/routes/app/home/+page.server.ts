@@ -4,6 +4,7 @@ import type { Actions, PageServerLoad } from "./$types";
 import { superValidate } from "sveltekit-superforms/server";
 import type { Database, Tables, Enums } from "$lib/types/supabase";
 import type { Lead } from "$lib/types/";
+import { fetchPostAndEvaluate } from "$lib/server/controllers/evaluation";
 
 export const load = async ({ locals }) => {
   const session = await locals.getSession();
@@ -13,4 +14,8 @@ export const load = async ({ locals }) => {
   let leads = data as Lead[];
   return { leads };
 };
-export const actions: Actions = {};
+export const actions: Actions = {
+  fetchPostAndEvaluate: async ({ params, locals }) => {
+    await fetchPostAndEvaluate();
+  },
+};
