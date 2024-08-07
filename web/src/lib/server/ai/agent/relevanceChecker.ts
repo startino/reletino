@@ -2,7 +2,8 @@ import { ChatOpenAI } from "@langchain/openai";
 ;
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
-import { companyContext, relevancePrompt } from "../prompts/prompt";
+import { companyContext } from "../prompts/companyContext";
+import { relevancePrompt } from "../prompts/relevancePrompt";
 import type {
   Post,
   RelevanceResult,
@@ -76,11 +77,6 @@ async function createRelevanceChain(
   });
 
   return async (input: { post: string }): Promise<RelevanceResult> => {
-    // console.log("Retrieving relevant documents for input...");
-    // const relevantDocs = await retriever.invoke(input.post); // Retrieve documents based on semantic similarity
-    // const context = relevantDocs.map((doc) => doc.pageContent).join("\n\n");
-    // console.log("context:", context);
-
     const formattedPrompt = await prompt.format({ ...input });
     const result = await llm.invoke(formattedPrompt);
     const resultString: string = result.content as string;
@@ -129,7 +125,7 @@ async function invokeRelevanceChain(
 // Evaluate post relevance
 export async function evaluatePostRelevance(
   post: Post,
-  modelName: string = "gpt-4"
+  modelName: string = "gpt-4o"
 ): Promise<EvaluatedSubmission> {
   // console.log(`Evaluating post relevance: ${post.title}`);
   // const store = await initializeVectorStore();

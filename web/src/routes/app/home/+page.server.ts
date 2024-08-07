@@ -6,6 +6,7 @@ import type { Database, Tables, Enums } from '$lib/types/supabase';
 import type { Lead } from '$lib/types/';
 import { markAsDone } from '$lib/api.js';
 import { fetchPostAndEvaluate } from '$lib/server/controllers/evaluation';
+import { generateDM } from '$lib/server/ai/agent/dmGenerator.js';
 
 export const load = async ({ locals }) => {
 	const session = await locals.getSession();
@@ -19,4 +20,9 @@ export const actions: Actions = {
 	fetchPostAndEvaluate: async ({ params, locals }) => {
 		await fetchPostAndEvaluate();
 	  },
+	generateDM: async ({ params, locals }) => {
+		const { post } = params.post;
+		const message = await generateDM(post);
+		return { message };
+	}
 };
