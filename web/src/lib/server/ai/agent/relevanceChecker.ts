@@ -1,5 +1,4 @@
 import { ChatOpenAI } from "@langchain/openai";
-;
 import { PromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
 import { companyContext } from "../prompts/companyContext";
@@ -33,7 +32,7 @@ import { OPENAI_API_KEY } from "$env/static/private";
 // async function createVectorStore(documents: Document<Record<string, any>>[]) {
 //   console.log("Creating vector store for RAG model...");
 //   const embeddings = new OpenAIEmbeddings({
-//     apiKey: PUBLIC_API_URL,
+//     apiKey: OPENAI_API_KEY,
 //   });
 //   const vectorStore = await MemoryVectorStore.fromDocuments(
 //     documents,
@@ -59,12 +58,12 @@ async function createRelevanceChain(
   // const retriever = vectorStore.asRetriever();
 
   const prompt = new PromptTemplate({
-    template:
-      relevancePrompt +
-      `
-    Here is the context for the company:` +
-      companyContext +
-      `Now, evaluate the following Reddit post for alignment with the above context:
+    template: `
+      {relevancePrompt} 
+    Here is the context for the company: 
+
+      {companyContext} 
+      Now, evaluate the following Reddit post for alignment with the above context:
     {post}
     {format_instructions}
     
@@ -77,7 +76,16 @@ async function createRelevanceChain(
   });
 
   return async (input: { post: string }): Promise<RelevanceResult> => {
-    const formattedPrompt = await prompt.format({ ...input });
+    // console.log("Retrieving relevant documents for input...");
+    // const relevantDocs = await retriever.invoke(input.post); // Retrieve documents based on semantic similarity
+    // const context = relevantDocs.map((doc) => doc.pageContent).join("\n\n");
+    // console.log("context:", context);
+
+    const formattedPrompt = await prompt.format({
+      ...input,
+      companyContext,
+      relevancePrompt,
+    });
     const result = await llm.invoke(formattedPrompt);
     const resultString: string = result.content as string;
 
