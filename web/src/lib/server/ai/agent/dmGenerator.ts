@@ -4,7 +4,7 @@ import {
   JsonOutputParser,
   StructuredOutputParser,
 } from "@langchain/core/output_parsers";
-import { companyContext, relevancePrompt } from "../prompts/relevancePrompt";
+import { companyContext } from "../prompts/companyContext";
 import type {
   Post,
   RelevanceResult,
@@ -36,7 +36,7 @@ export const generateDM = async (post: Post): Promise<string> => {
       `
     COMPANY CONTEXT:` +
       companyContext +
-    `Here is the post that the prospect posted:
+      `Here is the post that the prospect posted:
     {post}
     
     {format_instructions}
