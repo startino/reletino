@@ -126,6 +126,51 @@ export type Database = {
         };
         Relationships: [];
       };
+      analyze_submissions: {
+        Row: {
+          id: string;
+          created_at: string;
+          is_relevant: string;
+          reason: string;
+          cost: string;
+          qualifying_question: string;
+          reddit_id: string;
+          url: string;
+          title: string;
+          body: string;
+          human_answer: string;
+          human_reason: string;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          is_relevant: string;
+          reason?: string;
+          cost?: string;
+          qualifying_question?: string;
+          reddit_id: string;
+          url: string;
+          title?: string;
+          body: string;
+          human_answer?: string;
+          human_reason?: string;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          is_relevant?: string;
+          reason?: string;
+          cost?: string;
+          qualifying_question?: string;
+          reddit_id?: string;
+          url?: string;
+          title?: string;
+          body?: string;
+          human_answer?: string;
+          human_reason?: string;
+        };
+        Relationships: [];
+      };
       leads: {
         Row: {
           comment: string | null;
