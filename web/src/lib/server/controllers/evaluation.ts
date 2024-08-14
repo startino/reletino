@@ -1,7 +1,7 @@
 import { fetchSubredditPosts } from "$lib/server/redditClient/fetchSubredditPosts";
 import { evaluatePostRelevance } from "../ai/agent/relevanceChecker";
 import type { EvaluatedSubmission, Post } from "../../types/types";
-import type { TablesInsert } from "$lib/types/supabase";
+import type { TablesInsert } from "$lib/supabase/database.types";
 import { saveEvaluatedSubmissions, saveLeads } from "../db";
 
 export async function fetchPostAndEvaluate(): Promise<void> {
@@ -32,8 +32,8 @@ export async function fetchPostAndEvaluate(): Promise<void> {
   if (savedSubmissionData.length > 0) {
     console.log(`${savedSubmissionData.length} new submissions saved`);
 
-    const leads: TablesInsert<"leads">[] = savedSubmissionData.map(
-      (savedSubmission, index) => {
+    const leads: TablesInsert<"leads">[] = savedSubmissionData
+      .map((savedSubmission, index) => {
         const evaluatedPost = evaluatedPosts[index];
         if (!savedSubmission.is_relevant) {
           return null;
@@ -52,8 +52,8 @@ export async function fetchPostAndEvaluate(): Promise<void> {
           reddit_id: evaluatedPost.post.reddit_id,
           comment: null,
         };
-      }
-    ).filter((lead) => lead !== null);
+      })
+      .filter((lead) => lead !== null);
 
     await saveLeads(leads);
     console.log(`${leads.length} new leads saved`);

@@ -4,7 +4,7 @@ import {
   PUBLIC_SUPABASE_ANON_KEY,
 } from "$env/static/public";
 
-import type { Database } from "./types/supabase";
+import type { Database } from "$lib/supabase/database.types";
 
 export const supabase = createClient<Database>(
   PUBLIC_SUPABASE_URL,

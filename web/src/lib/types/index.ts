@@ -1,4 +1,4 @@
-import type { Tables } from "./supabase";
+import type { Tables } from "$lib/supabase/database.types";
 
 export type UUID =
   `${string}-${string}-4${string}-${"89ab"}${string}-${string}`;

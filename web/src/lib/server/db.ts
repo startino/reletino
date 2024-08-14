@@ -1,5 +1,5 @@
 import { supabase } from "$lib/supabase";
-import { type TablesInsert } from "$lib/types/supabase";
+import { type TablesInsert } from "$lib/supabase/database.types";
 
 // Function to save evaluated submissions
 export async function saveEvaluatedSubmissions(
