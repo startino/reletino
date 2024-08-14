@@ -126,11 +126,11 @@ export type Database = {
         };
         Relationships: [];
       };
-      analyze_submissions: {
+      labeled_dataset: {
         Row: {
           id: string;
           created_at: string;
-          is_relevant: string;
+          is_relevant: boolean;
           reason: string;
           cost: string;
           qualifying_question: string;
@@ -138,7 +138,7 @@ export type Database = {
           url: string;
           title: string;
           body: string;
-          human_answer: string;
+          human_answer: boolean;
           human_reason: string;
         };
         Insert: {

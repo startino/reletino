@@ -14,7 +14,6 @@ export type Post = {
 export type RelevanceResult = {
   is_relevant: boolean;
   reason: string;
-  alignment_score: number;
 };
 
 export type EvaluatedSubmission = {
@@ -22,5 +21,15 @@ export type EvaluatedSubmission = {
   post: Post;
   is_relevant: boolean;
   reason: string;
-  alignment_score: number;
+};
+
+// Labelled dataset and evaluated post
+export type LabelledDataset = {
+  body: string;
+};
+
+export type evaluatedPostType = {
+  body: string;
+  human_answer: boolean;
+  agent_answer: string;
 };
