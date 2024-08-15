@@ -8,8 +8,7 @@ import { relevancePrompt } from "../prompts/relevancePrompt";
 import { companyContext } from "../prompts/companyContext";
 
 const updatePrompt = async (
-  incorrectEvaluations: evaluatedPostType[],
-  miscalculations: any
+  miscalculations: evaluatedPostType[]
 ): Promise<string> => {
   const llm = new ChatOpenAI({
     model: "gpt-4o",
@@ -19,16 +18,26 @@ const updatePrompt = async (
 
   const prompt = ChatPromptTemplate.fromTemplate(
     `
+    You are an AI prompt engineering expert. Your task is to improve a prompt used for classifying posts as relevant or not relevant to a specific company context.
+
     Current prompt:
-    ${relevancePrompt}
+    "${relevancePrompt}"
 
     Company context:
-    ${companyContext}
+    "${companyContext}"
 
     The current prompt is resulting in these misclassifications:
     ${miscalculations}
-    ` +
-      `Please provide an updated prompt that would help correctly classify these posts and similar ones in the future.`
+
+    Based on these misclassifications, please generate a completely new prompt that addresses the following:
+    1. Incorporate specific elements from the company context that are crucial for determining relevance.
+    2. Add clear instructions on how to handle edge cases or ambiguous posts.
+    3. Include examples of relevant and irrelevant posts based on the misclassifications.
+    4. Provide a step-by-step approach for evaluating post relevance.
+
+    Your new prompt should be significantly different from the current one and should aim to correctly classify the misclassified posts as well as similar cases in the future.
+
+    New prompt:`
   );
 
   const result = await llm.invoke(await prompt.formatMessages({}));
@@ -47,14 +56,15 @@ export const promptImprover = async (): Promise<void> => {
   }
 
   // Evaluate posts and identify incorrect classifications
-  const incorrectEvaluations: evaluatedPostType[] = [];
+  const miscalculations: evaluatedPostType[] = [];
+
   for (const post of data) {
     const agentAnswer = await evaluateDataSetRelevance(
       { body: post.body },
       "gpt-4o"
     );
     if (post.human_answer.toString() !== agentAnswer) {
-      incorrectEvaluations.push({
+      miscalculations.push({
         body: post.body,
         human_answer: post.human_answer,
         agent_answer: agentAnswer,
@@ -64,18 +74,11 @@ export const promptImprover = async (): Promise<void> => {
 
   // Log results
   console.log(
-    `Evaluated ${data.length} posts. ${incorrectEvaluations.length} were misclassified.`
+    `Evaluated ${data.length} posts. ${miscalculations.length} were misclassified.`
   );
 
-  // Update prompt if there were misclassifications
-  if (incorrectEvaluations.length > 0) {
-    const miscalculations = incorrectEvaluations.map(
-      (evaluated) =>
-        `Post: ${evaluated.body}
-       Human classification: ${evaluated.human_answer}
-       Agent classification: ${evaluated.agent_answer}`
-    );
-    const newPrompt = await updatePrompt(incorrectEvaluations, miscalculations);
+  if (miscalculations.length > 0) {
+    const newPrompt = await updatePrompt(miscalculations);
     console.log("Updated prompt:");
     console.log(newPrompt);
   } else {
