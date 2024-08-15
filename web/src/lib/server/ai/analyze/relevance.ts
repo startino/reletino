@@ -1,15 +1,29 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
-import { companyContext } from "../prompts/companyContext";
-import { relevancePrompt } from "../prompts/relevancePrompt";
 import { z } from "zod";
 import type { LabelledDataset } from "$lib/types/types";
 import { OPENAI_API_KEY } from "$env/static/private";
+import { supabase } from "$lib/supabase";
 
 const dataSchema = z.object({
   message: z.string().describe("Post to be evaluated."),
 });
+
+async function getPromptFromSupabase(): Promise<string | null> {
+  console.log("Attempting to fetch prompt from Supabase...");
+
+  const { data } = await supabase.from("prompt").select("prompt").single();
+
+  if (!data) {
+    console.error("NO data");
+    return null;
+  }
+
+  return data.prompt;
+}
+export const supabasePrompt = await getPromptFromSupabase();
+console.log(supabasePrompt);
 
 export async function evaluateDataSetRelevance(
   post: LabelledDataset,
@@ -22,14 +36,9 @@ export async function evaluateDataSetRelevance(
   });
 
   const parser = StructuredOutputParser.fromZodSchema(dataSchema);
-
   const prompt = new PromptTemplate({
     template:
-      { relevancePrompt } +
-      `
-    Here is the context for the company: 
- ` +
-      { companyContext } +
+      { supabasePrompt } +
       `
     Now, evaluate the following post for alignment with the above context:
     {post}

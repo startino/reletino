@@ -2,10 +2,21 @@ import { supabase } from "$lib/supabase";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { OPENAI_API_KEY } from "$env/static/private";
-import { evaluateDataSetRelevance } from "./relevance";
+import { evaluateDataSetRelevance, supabasePrompt } from "./relevance";
 import type { evaluatedPostType } from "$lib/types/types";
-import { relevancePrompt } from "../prompts/relevancePrompt";
-import { companyContext } from "../prompts/companyContext";
+
+const updatePromptInDatabase = async (prompt: string): Promise<void> => {
+  const { error } = await supabase
+    .from("prompt")
+    .update({ prompt })
+    .eq("id", 1);
+
+  if (error) {
+    console.error("Error updating prompt in Supabase:", error);
+  } else {
+    console.log("Prompt successfully updated in the database.");
+  }
+};
 
 const updatePrompt = async (
   miscalculations: evaluatedPostType[]
@@ -18,26 +29,20 @@ const updatePrompt = async (
 
   const prompt = ChatPromptTemplate.fromTemplate(
     `
-    You are an AI prompt engineering expert. Your task is to improve a prompt used for classifying posts as relevant or not relevant to a specific company context.
-
-    Current prompt:
-    "${relevancePrompt}"
-
-    Company context:
-    "${companyContext}"
-
-    The current prompt is resulting in these misclassifications:
+    You are an AI prompt engineering expert. Your task is to improve a prompt used for classifying posts as relevant or not relevant to a specific company context.` +
+      `Here's the prompt that is being used:` +
+      { supabasePrompt } +
+      `The current prompt is resulting in these misclassifications:
     ${miscalculations}
 
-    Based on these misclassifications, please generate a completely new prompt that addresses the following:
+    Based on these misclassifications, please generate a update the existing prompt that addresses the following:
     1. Incorporate specific elements from the company context that are crucial for determining relevance.
     2. Add clear instructions on how to handle edge cases or ambiguous posts.
     3. Include examples of relevant and irrelevant posts based on the misclassifications.
     4. Provide a step-by-step approach for evaluating post relevance.
 
-    Your new prompt should be significantly different from the current one and should aim to correctly classify the misclassified posts as well as similar cases in the future.
-
-    New prompt:`
+    Your new prompt should be significantly different from the current one and should aim to correctly classify the misclassified posts as well as similar cases in the future. You should provide only prompt nothing more.
+`
   );
 
   const result = await llm.invoke(await prompt.formatMessages({}));
@@ -49,7 +54,7 @@ export const promptImprover = async (): Promise<void> => {
   const { data, error } = await supabase
     .from("labeled_dataset")
     .select("*")
-    .limit(10);
+    .limit(2);
   if (error || !data) {
     console.error("Error fetching labeled dataset:", error);
     return;
@@ -81,6 +86,9 @@ export const promptImprover = async (): Promise<void> => {
     const newPrompt = await updatePrompt(miscalculations);
     console.log("Updated prompt:");
     console.log(newPrompt);
+
+    // Update the new prompt in the database
+    await updatePromptInDatabase(newPrompt);
   } else {
     console.log("No misclassifications. Current prompt is performing well.");
   }
