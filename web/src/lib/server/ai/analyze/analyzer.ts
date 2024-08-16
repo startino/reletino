@@ -1,9 +1,11 @@
 import { supabase } from "$lib/supabase";
 import { ChatOpenAI } from "@langchain/openai";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { PromptTemplate } from "@langchain/core/prompts";
 import { OPENAI_API_KEY } from "$env/static/private";
-import { evaluateDataSetRelevance, supabasePrompt } from "./relevance";
+import { evaluateDataSetRelevance, getPromptFromSupabase } from "./relevance";
 import type { evaluatedPostType } from "$lib/types/types";
+import { z } from "zod";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
 
 const updatePromptInDatabase = async (prompt: string): Promise<void> => {
   const { error } = await supabase
@@ -19,7 +21,8 @@ const updatePromptInDatabase = async (prompt: string): Promise<void> => {
 };
 
 const updatePrompt = async (
-  miscalculations: evaluatedPostType[]
+  miscalculations: evaluatedPostType[],
+  currentPrompt: string
 ): Promise<string> => {
   const llm = new ChatOpenAI({
     model: "gpt-4o",
@@ -27,69 +30,100 @@ const updatePrompt = async (
     apiKey: OPENAI_API_KEY,
   });
 
-  const prompt = ChatPromptTemplate.fromTemplate(
-    `
-    You are an AI prompt engineering expert. Your task is to improve a prompt used for classifying posts as relevant or not relevant to a specific company context.` +
-      `Here's the prompt that is being used:` +
-      { supabasePrompt } +
-      `The current prompt is resulting in these misclassifications:
-    ${miscalculations}
+  const zodSchema = z.object({
+    updatedPrompt: z
+      .string()
+      .describe("The updated prompt based on analysis of misclassifications"),
+  });
 
-    Based on these misclassifications, please generate a update the existing prompt that addresses the following:
-    1. Incorporate specific elements from the company context that are crucial for determining relevance.
-    2. Add clear instructions on how to handle edge cases or ambiguous posts.
-    3. Include examples of relevant and irrelevant posts based on the misclassifications.
-    4. Provide a step-by-step approach for evaluating post relevance.
+  const parser = StructuredOutputParser.fromZodSchema(zodSchema);
 
-    Your new prompt should be significantly different from the current one and should aim to correctly classify the misclassified posts as well as similar cases in the future. You should provide only prompt nothing more.
-`
-  );
+  const prompt = new PromptTemplate({
+    template:
+      `You are a prompt engineer at startino. You need to improve the accuracy of the agent that checks either the user that posted it is potential client for startino or not by evaluating the post. Right now its giving some misculcations that leads to potential client being missed. Now being a prompt engineer you need to update the existing prompt of the evaluator so that it evaluates the post more accurately based on the startino's context. Here's the current prompt being used:\n\n` +
+      `Current Prompt:\n{current_prompt}\n\n` +
+      `And here's the miscalculations it did:\n{miscalculations}\n\n` +
+      `\n\n` +
+      `{format_instructions}`,
+    inputVariables: ["current_prompt", "miscalculations"],
+    partialVariables: { format_instructions: parser.getFormatInstructions() },
+  });
 
-  const result = await llm.invoke(await prompt.formatMessages({}));
-  return result.content as string;
+  const chain = prompt.pipe(llm).pipe(parser);
+
+  const result = await chain.invoke({
+    current_prompt: currentPrompt,
+    miscalculations,
+  });
+  console.log("New prompt generated.....");
+  return result.updatedPrompt;
 };
 
 export const promptImprover = async (): Promise<void> => {
-  // Fetch data
-  const { data, error } = await supabase
-    .from("labeled_dataset")
-    .select("*")
-    .limit(2);
-  if (error || !data) {
-    console.error("Error fetching labeled dataset:", error);
+  const sampleSize = 15;
+  const requiredAccuracy = 0.9;
+  let accuracy = 0;
+  let currentPrompt = await getPromptFromSupabase();
+
+  if (!currentPrompt) {
+    console.error("Failed to fetch initial prompt from Supabase");
     return;
   }
 
-  // Evaluate posts and identify incorrect classifications
-  const miscalculations: evaluatedPostType[] = [];
+  while (accuracy < requiredAccuracy) {
+    const { data, error } = await supabase
+      .from("labeled_dataset")
+      .select("*")
+      .limit(sampleSize);
 
-  for (const post of data) {
-    const agentAnswer = await evaluateDataSetRelevance(
-      { body: post.body },
-      "gpt-4o"
+    if (error || !data) {
+      console.error("Error fetching labeled dataset:", error);
+      return;
+    }
+
+    const miscalculations: evaluatedPostType[] = [];
+    let correctClassifications = 0;
+
+    for (const post of data) {
+      const agentAnswer = await evaluateDataSetRelevance(
+        { body: post.body },
+        "gpt-4o",
+        currentPrompt
+      );
+      if (post.human_answer.toString() === agentAnswer) {
+        correctClassifications++;
+      } else {
+        miscalculations.push({
+          body: post.body,
+          human_answer: post.human_answer,
+          agent_answer: agentAnswer,
+        });
+      }
+    }
+
+    accuracy = correctClassifications / sampleSize;
+    console.log(`Accuracy: ${accuracy * 100}%`);
+
+    if (accuracy >= requiredAccuracy) {
+      console.log(
+        "Achieved required accuracy. Stopping the improvement process."
+      );
+      break;
+    }
+
+    console.log(
+      `Evaluated ${sampleSize} posts. ${miscalculations.length} were misclassified.`
     );
-    if (post.human_answer.toString() !== agentAnswer) {
-      miscalculations.push({
-        body: post.body,
-        human_answer: post.human_answer,
-        agent_answer: agentAnswer,
-      });
+
+    if (miscalculations.length > 0) {
+      const newPrompt = await updatePrompt(miscalculations, currentPrompt);
+      console.log("Updated prompt:");
+      console.log(newPrompt.substring(0, 100) + "...");
+      await updatePromptInDatabase(newPrompt);
+      currentPrompt = newPrompt;
     }
   }
-
-  // Log results
   console.log(
-    `Evaluated ${data.length} posts. ${miscalculations.length} were misclassified.`
+    `Prompt improvement completed. Final accuracy: ${accuracy * 100}%`
   );
-
-  if (miscalculations.length > 0) {
-    const newPrompt = await updatePrompt(miscalculations);
-    console.log("Updated prompt:");
-    console.log(newPrompt);
-
-    // Update the new prompt in the database
-    await updatePromptInDatabase(newPrompt);
-  } else {
-    console.log("No misclassifications. Current prompt is performing well.");
-  }
 };
