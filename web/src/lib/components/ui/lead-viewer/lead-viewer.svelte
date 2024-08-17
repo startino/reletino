@@ -96,11 +96,9 @@
   }
 
   async function markAsDone() {
-    const res = await fetch("?/done", {
+    console.log("Marking as done for id: ", lead.id);
+    const res = await fetch("?/markAsDone", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ id: lead.id }),
     });
     console.log(res);
@@ -145,12 +143,20 @@
         <h3><b class="pr-2">Username:</b> {lead.prospect_username}</h3>
         <h3><b class="pr-2">Subreddit:</b>{subreddit}</h3>
         <a href={url} class="text-accent underline">Got to post</a>
-        <Button
-          class="w-fit"
-          on:click={() => {
-            copyToClipboard(lead);
-          }}>Copy Lead</Button
-        >
+        <div class="flex flex-row items-center gap-4">
+          <Button
+            class="w-fit"
+            on:click={() => {
+              copyToClipboard(lead);
+            }}>Copy Lead</Button
+          >
+          <Button
+            class="w-fit"
+            on:click={() => {
+              markAsDone();
+            }}>Mark as {lead.done ? "Pending" : "Done"}</Button
+          >
+        </div>
       </div>
       <Separator />
       <div

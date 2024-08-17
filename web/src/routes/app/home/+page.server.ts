@@ -24,5 +24,19 @@ export const actions: Actions = {
 		const { post } = params.post;
 		const message = await generateDM(post);
 		return { message };
-	}
+	},
+	markAsDone: async ({ params, locals, url }) => {
+		const id: string | null = params.id;
+		console.log("Marking as done: " + JSON.stringify(params), JSON.stringify(locals), JSON.stringify(url));
+		if (!id) {
+			return 'No id provided';
+		}
+		
+
+		const { data, error } = supabase.from('leads').update({ done: true }).eq('id', id);
+		if (error || !data) {
+			return "Error: " + error;
+		}
+		return "Success";
+	},
 };
