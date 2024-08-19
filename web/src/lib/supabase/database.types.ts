@@ -171,6 +171,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      prompt: {
+        Row: {
+          id: string;
+          created_at: string;
+          prompt: string;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          prompt: string;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          prompt?: string;
+        };
+        Relationships: [];
+      };
       leads: {
         Row: {
           comment: string | null;
