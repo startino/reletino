@@ -24,12 +24,19 @@ export type EvaluatedSubmission = {
 };
 
 // Labelled dataset and evaluated post
+// Updated types
 export type LabelledDataset = {
+  title: string;
   body: string;
 };
 
-export type evaluatedPostType = {
-  body: string;
-  human_answer: boolean;
-  agent_answer: string;
+export type DatasetRelevanceResult = {
+  is_relevant: boolean;
+  reason: string;
+};
+
+export type EvaluatedDataset = {
+  dataset: LabelledDataset;
+  is_relevant: boolean;
+  reason: string;
 };

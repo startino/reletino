@@ -2,10 +2,11 @@ import { supabase } from "$lib/supabase";
 import { ChatOpenAI } from "@langchain/openai";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { OPENAI_API_KEY } from "$env/static/private";
-import { evaluateDataSetRelevance, getPromptFromSupabase } from "./relevance";
-import type { evaluatedPostType } from "$lib/types/types";
-import { z } from "zod";
+import { evaluateDataSetRelevance } from "./relevance";
+import type { LabelledDataset, EvaluatedDataset } from "$lib/types/types";
+
 import { StructuredOutputParser } from "@langchain/core/output_parsers";
+import { z } from "zod";
 
 const updatePromptInDatabase = async (prompt: string): Promise<void> => {
   const { error } = await supabase
@@ -20,9 +21,28 @@ const updatePromptInDatabase = async (prompt: string): Promise<void> => {
   }
 };
 
+const promptSchema = z.object({
+  updatedPrompt: z
+    .string()
+    .describe("The updated prompt for evaluating posts more accurately."),
+});
+
+async function getPromptFromSupabase(): Promise<string | null> {
+  console.log("Attempting to fetch prompt from Supabase...");
+
+  const { data } = await supabase.from("prompt").select("prompt").single();
+
+  if (!data || null) {
+    console.error("No data");
+    return null;
+  }
+  console.log("Fetched prompt from Supabase..");
+  return data.prompt;
+}
+
 const updatePrompt = async (
-  miscalculations: evaluatedPostType[],
-  currentPrompt: string
+  miscalculations: EvaluatedDataset[],
+  currentPrompt: string | null
 ): Promise<string> => {
   const llm = new ChatOpenAI({
     model: "gpt-4o",
@@ -30,21 +50,19 @@ const updatePrompt = async (
     apiKey: OPENAI_API_KEY,
   });
 
-  const zodSchema = z.object({
-    updatedPrompt: z
-      .string()
-      .describe("The updated prompt based on analysis of misclassifications"),
-  });
-
-  const parser = StructuredOutputParser.fromZodSchema(zodSchema);
+  const parser = StructuredOutputParser.fromZodSchema(promptSchema);
 
   const prompt = new PromptTemplate({
     template:
-      `You are a prompt engineer at startino. You need to improve the accuracy of the agent that checks either the user that posted it is potential client for startino or not by evaluating the post. Right now its giving some misculcations that leads to potential client being missed. Now being a prompt engineer you need to update the existing prompt of the evaluator so that it evaluates the post more accurately based on the startino's context. Here's the current prompt being used:\n\n` +
+      `You are a prompt engineer at startino. You need to improve the accuracy of the agent that checks whether the user who posted is a potential client for startino or not by evaluating the post. \n
+      Right now its giving some miscalculations that is leading to potential clients being missed.  Here's the current prompt being used:\n\n` +
       `Current Prompt:\n{current_prompt}\n\n` +
-      `And here's the miscalculations it did:\n{miscalculations}\n\n` +
-      `\n\n` +
-      `{format_instructions}`,
+      `And here are the miscalculations it made:\n{miscalculations}\n\n` +
+      `Guidelines for the new prompt:
+      1. Analyze the reasons of miscalculations and compare it with the company's context and modify the prompt.
+      2. Make the prompt more detailed based on the company's context than the current one.` +
+      `{format_instructions}\n\n` +
+      `IMPORTANT: Provide only the updated prompt as a string in the JSON response. Do not include any other text or explanations.`,
     inputVariables: ["current_prompt", "miscalculations"],
     partialVariables: { format_instructions: parser.getFormatInstructions() },
   });
@@ -53,22 +71,17 @@ const updatePrompt = async (
 
   const result = await chain.invoke({
     current_prompt: currentPrompt,
-    miscalculations,
+    miscalculations: JSON.stringify(miscalculations),
   });
-  console.log("New prompt generated.....");
   return result.updatedPrompt;
 };
 
-export const promptImprover = async (): Promise<void> => {
-  const sampleSize = 15;
-  const requiredAccuracy = 0.9;
-  let accuracy = 0;
-  let currentPrompt = await getPromptFromSupabase();
+let currentPrompt = await getPromptFromSupabase();
 
-  if (!currentPrompt) {
-    console.error("Failed to fetch initial prompt from Supabase");
-    return;
-  }
+export const promptImprover = async (): Promise<void> => {
+  const sampleSize = 20;
+  const requiredAccuracy = 0.8;
+  let accuracy = 0;
 
   while (accuracy < requiredAccuracy) {
     const { data, error } = await supabase
@@ -81,23 +94,22 @@ export const promptImprover = async (): Promise<void> => {
       return;
     }
 
-    const miscalculations: evaluatedPostType[] = [];
+    const miscalculations: EvaluatedDataset[] = [];
     let correctClassifications = 0;
 
     for (const post of data) {
-      const agentAnswer = await evaluateDataSetRelevance(
-        { body: post.body },
-        "gpt-4o",
-        currentPrompt
+      const dataset: LabelledDataset = { title: post.title, body: post.body };
+
+      const evaluationResult = await evaluateDataSetRelevance(
+        currentPrompt,
+        dataset,
+        "gpt-4o"
       );
-      if (post.human_answer.toString() === agentAnswer) {
+
+      if (post.human_answer === evaluationResult.is_relevant) {
         correctClassifications++;
       } else {
-        miscalculations.push({
-          body: post.body,
-          human_answer: post.human_answer,
-          agent_answer: agentAnswer,
-        });
+        miscalculations.push(evaluationResult);
       }
     }
 
@@ -117,10 +129,8 @@ export const promptImprover = async (): Promise<void> => {
 
     if (miscalculations.length > 0) {
       const newPrompt = await updatePrompt(miscalculations, currentPrompt);
-      console.log("Updated prompt:");
-      console.log(newPrompt.substring(0, 100) + "...");
       await updatePromptInDatabase(newPrompt);
-      currentPrompt = newPrompt;
+      currentPrompt = await getPromptFromSupabase();
     }
   }
   console.log(
