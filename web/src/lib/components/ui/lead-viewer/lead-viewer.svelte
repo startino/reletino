@@ -28,6 +28,7 @@
   import * as api from "$lib/api";
   import type { UUID } from "$lib/types";
   import { toast } from "svelte-sonner";
+  import { enhance } from "$app/forms";
 
   export let lead: Lead;
 
@@ -97,7 +98,7 @@
 
   async function markAsDone() {
     console.log("Marking as done for id: ", lead.id);
-    const res = await fetch("?/markAsDone", {
+    const res = await fetch(`?/markAsDone`, {
       method: "POST",
       body: JSON.stringify({ id: lead.id }),
     });
@@ -109,7 +110,7 @@
   async function copyToClipboard(lead: Lead) {
     try {
       const currentDate = new Date();
-      const formattedDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
+      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}`;
       const cells = [lead.prospect_username, lead.data?.url, "", formattedDate];
       // "	" is the special key that Google sheets uses to separate cells.
       // Select the text to actually see the character since my theme can't see
@@ -142,7 +143,9 @@
       <div class="flex flex-col gap-3 p-4">
         <h3><b class="pr-2">Username:</b> {lead.prospect_username}</h3>
         <h3><b class="pr-2">Subreddit:</b>{subreddit}</h3>
-        <a href={url} class="text-accent underline">Got to post</a>
+        <a href={url} target="_blank" class="text-accent underline"
+          >Got to post</a
+        >
         <div class="flex flex-row items-center gap-4">
           <Button
             class="w-fit"
@@ -150,19 +153,20 @@
               copyToClipboard(lead);
             }}>Copy Lead</Button
           >
-          <Button
-            class="w-fit"
-            on:click={() => {
-              markAsDone();
-            }}>Mark as {lead.done ? "Pending" : "Done"}</Button
-          >
+          <!-- @nazif how do i bind the "done" value to the datatable upon succesful? todo in pp session-->
+          <form method="POST" action="?/markAsDone" use:enhance>
+            <Input class="hidden" type="text" name="id" bind:value={lead.id} />
+            <Button type="submit" class="w-fit"
+              >Mark as {lead.done ? "Pending" : "Done"}</Button
+            >
+          </form>
         </div>
       </div>
       <Separator />
       <div
         class="flex-1 overflow-y-auto whitespace-pre-wrap p-4 text-left text-sm"
       >
-        <p class="text-md tracking-widest">{lead.data.body}</p>
+        <p class="text-md tracking-widest">{lead.data?.body}</p>
       </div>
       <Separator class="mt-auto" />
       <div class="p-4">
