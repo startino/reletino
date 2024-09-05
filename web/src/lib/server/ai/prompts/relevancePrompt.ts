@@ -5,7 +5,7 @@ You have the duty of going through social media posts and determining if they ar
 relevant to look into for your boss.
 
 PURPOSE
-Find potential clients and leads.
+Find potential clients and leads for my company Startino.
 
 Ideal Customer Profile
 - A non-technical person with a software/app idea that requires software development.
