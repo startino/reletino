@@ -97,12 +97,15 @@
   }
 
   async function markAsDone() {
-    console.log("Marking as done for id: ", lead.id);
-    const res = await fetch(`?/markAsDone`, {
-      method: "POST",
-      body: JSON.stringify({ id: lead.id }),
-    });
-    console.log(res);
+    if (lead.id) {
+      const res = await fetch(`?/markAsDone`, {
+        method: "POST",
+        body: JSON.stringify({ id: lead.id }),
+      });
+      console.log(res);
+    } else {
+      console.log("No lead selected");
+    }
   }
 
   // Function to copy to clipboard so I can easily copy this lead to my sales
@@ -152,6 +155,10 @@
             on:click={() => {
               copyToClipboard(lead);
             }}>Copy Lead</Button
+          >
+
+          <Button class="w-fit" on:click={() => markAsDoneURLParam()}
+            >using api function Mark as {lead.done ? "Pending" : "Done"}</Button
           >
           <!-- @nazif how do i bind the "done" value to the datatable upon succesful? todo in pp session-->
           <form method="POST" action="?/markAsDone" use:enhance>

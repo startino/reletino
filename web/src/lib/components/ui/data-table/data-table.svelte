@@ -28,14 +28,10 @@
   import DoneCell from "./done-cell.svelte";
 
   export let activeLead: Lead | null = null;
+  export let markAsDone: (id: string) => void;
   export let data: Lead[] = [];
 
-  // @nazif how can i filter thse values iwthin the table itself?
-  // i just want a toggle to show/hide the rows that are done
   data = data.filter((row) => !row.done);
-
-  // @nazif i want to add an indicator to show which lead the lead-viewer is currently showings
-  // like highlighting the row
 
   const table = createTable(readable(data), {
     sort: addSortBy({
@@ -97,7 +93,7 @@
     flatColumns,
     pluginStates,
     rows,
-  } = table.createViewModel(columns);
+  } = table.createViewModel(columns, { rowDataId: (item) => item.id });
 
   const { sortKeys } = pluginStates.sort;
 
@@ -195,6 +191,15 @@
                           : 'text-foreground'}"
                       >
                         <Render of={cell.render()} />
+                      </div>
+                    {:else if cell.id === "done"}
+                      <div class="flex flex-col">
+                        <Button
+                          on:click={() => markAsDone(row.dataId)}
+                          variant="ghost"
+                        >
+                          <Render of={cell.render()} />
+                        </Button>
                       </div>
                     {:else}
                       <Render of={cell.render()} />

@@ -9,12 +9,8 @@
 
 {#key done}
   {#if done}
-    <div class="flex items-center space-x-2">
-      <Check size="24" class="text-green-500" />
-    </div>
+    <Check size="24" class="text-green-500" />
   {:else}
-    <div class="flex items-center space-x-2">
-      <CircleDashed size="24" class="text-orange-500" />
-    </div>
+    <CircleDashed size="24" class="text-orange-500" />
   {/if}
 {/key}
