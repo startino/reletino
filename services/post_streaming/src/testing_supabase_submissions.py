@@ -1,6 +1,6 @@
 import json
-from praw import Submission
-from src.models import Evaluation
+from praw.models import Submission
+from models import Evaluation
 from supabase import create_client
 import os
 from dotenv import load_dotenv
@@ -12,14 +12,7 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-test_submission = Submission(
-    id="1",
-    title="test",
-    selftext="test",
-    subreddit="test",
-    author="test",
-    created_utc=0,
-)
+test_submission = Submission()
 
 existing_submission = supabase.table("submissions").select("*").eq("praw_submission_object", json.loads(json.dumps(test_submission, default=str))).execute()
 

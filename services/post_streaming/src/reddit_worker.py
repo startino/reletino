@@ -61,7 +61,7 @@ class RedditStreamWorker:
                 evaluation: Evaluation = evaluate_submission(submission=submission)
                 
                 # Check if submission already exists
-                existing_submission = supabase.table("submissions").select("*").eq("praw_submission_object", json.loads(json.dumps(submission, default=str))).execute()
+                existing_submission = supabase.table("submissions").select("*").eq("praw_submission_object", json.dumps(submission, default=str)).execute()
 
                 if len(existing_submission.data) > 0:
                     return
