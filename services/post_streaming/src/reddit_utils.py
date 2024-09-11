@@ -6,25 +6,29 @@ import os
 load_dotenv()
 
 REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
+REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD")
 REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
 
 
 def get_reddit_instance(username, password):
     return Reddit(
-        client_id="xCs8EA8-_cIY6ZsPod5EIw",
-        client_secret=REDDIT_CLIENT_ID,
-        password=password,
-        user_agent="testscript by u/antopia_hk",
-        username=username,
+        client_id=REDDIT_CLIENT_ID,
+        client_secret=REDDIT_CLIENT_SECRET,
+        password=REDDIT_PASSWORD,
+        user_agent="relevantino bot by u/antopia_hk",
+        username=REDDIT_USERNAME,
     )
 
 
-def get_subreddits(subreddit_names: str, username: str, password: str):
+def get_subreddits(subreddits: list[str], username: str, password: str):
+    
+    subreddits_formatted: str = "+".join(subreddits)
+    
     reddit = get_reddit_instance(username, password)
 
     print("Reddit sign in success! Username: ", reddit.user.me())
 
-    subreddits: Subreddits = reddit.subreddit(subreddit_names)
+    subreddits: Subreddits = reddit.subreddit(subreddits_formatted)
 
     return subreddits
