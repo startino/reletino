@@ -10,26 +10,18 @@
   } from "$lib/svelte-headless-table/plugins";
   import { readable } from "svelte/store";
   import * as Table from "$lib/components/ui/table";
-  import * as Sheet from "$lib/components/ui/sheet";
-  import { Label } from "$lib/components/ui/label";
   import Actions from "$lib/components/ui/data-table/data-table-actions.svelte";
   import { Button } from "$lib/components/ui/button";
-  // TODO: Replace radix with lucide icons, radix hasn't had an update in 2 years
-  import { CaretSort, ChevronDown } from "radix-icons-svelte";
   import { ArrowUpDown } from "lucide-svelte";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import { cn } from "$lib/utils";
   import { Input } from "$lib/components/ui/input";
-  import DataTableCheckbox from "$lib/components/ui/data-table/data-table-checkbox.svelte";
-  import type { building } from "$app/environment";
-  import type { Lead } from "$lib/types";
-  import StatusCell from "./status-cell.svelte";
+  import type { Tables } from '$lib/supabase/database.types';
   import RelativeDateCell from "./relative-date-cell.svelte";
   import DoneCell from "./done-cell.svelte";
 
-  export let activeLead: Lead | null = null;
+  export let activesubmission: Tables<'submissions'> | null = null;
   export let markAsDone: (id: string) => void;
-  export let data: Lead[] = [];
+  export let data: Tables<'submissions'>[] = [];
 
   data = data.filter((row) => !row.done);
 
@@ -174,7 +166,7 @@
               {...rowAttrs}
               data-state={$selectedDataIds[row.id] && "selected"}
               on:click={() => {
-                activeLead = data.find((d) => d.id === row.original.id) ?? null;
+                activesubmission = data.find((d) => d.id === row.original.id) ?? null;
               }}
             >
               {#each row.cells as cell (cell.id)}
