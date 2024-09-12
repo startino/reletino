@@ -3,6 +3,8 @@ from datetime import datetime, UTC
 from typing import Optional
 from uuid import uuid4, UUID
 
+from src.models.evaluated_submission import Evaluation
+
 
 class SavedSubmission(BaseModel):
     """
@@ -10,14 +12,10 @@ class SavedSubmission(BaseModel):
     It's a variation of the EvaluatedSubmission but with the submission
     expanded to include the title and body.
     """
-
-    id: UUID = Field(default_factory=lambda: uuid4())
-    created_at: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
+    author: str
+    submission_created_utc: int
     reddit_id: str
+    subreddit: str
     title: str
-    body: str
+    selftext: str
     url: str
-    is_relevant: bool
-    reason: Optional[str]
-    cost: float
-    qualifying_question: Optional[str]

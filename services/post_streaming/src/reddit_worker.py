@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 from praw import Reddit
 from praw.models import Subreddits, Submission
 import os
@@ -11,6 +12,7 @@ from pathlib import Path
 
 from supabase import Client, create_client
 
+from src.models import SavedSubmission
 from src.evaluate_relevance import evaluate_submission
 from src.models import Evaluation
 from src.reddit_utils import get_subreddits, get_reddit_instance
@@ -60,16 +62,29 @@ class RedditStreamWorker:
                 
                 evaluation: Evaluation = evaluate_submission(submission=submission)
                 
+                saved_submission = SavedSubmission(
+                    author=submission.author.name,
+                    submission_created_utc=submission.created_utc,
+                    reddit_id=submission.id,
+                    subreddit=submission.subreddit.display_name,
+                    title=submission.title,
+                    selftext=submission.selftext,
+                    url=submission.url,
+                )
+                                              
                 # Check if submission already exists
-                existing_submission = supabase.table("submissions").select("*").eq("praw_submission_object", json.dumps(submission, default=str)).execute()
+                existing_submission = supabase.table("submissions").select("*").eq("url", saved_submission.url).execute()
 
                 if len(existing_submission.data) > 0:
                     return
 
                 supabase.table("submissions").insert(
                     {
-                        "praw_submission_object": submission.model_dump(),
-                        "evaluation": evaluation.model_dump(),
+                        # please don't ask me why only one is using model_dump
+                        # somehow evaluation is a dict already??
+                        # anyone better with Python typing pls help :pray:
+                        **json.loads(json.dumps(saved_submission.model_dump(), default=str)),
+                        **json.loads(json.dumps(evaluation, default=str)),
                     }
                 ).execute()
                 
