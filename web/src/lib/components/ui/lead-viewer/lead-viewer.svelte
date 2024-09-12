@@ -1,39 +1,20 @@
 <script lang="ts">
-  import { fullFormatter, relativeFormatter } from "$lib/utils";
   import { format, formatDistanceToNowStrict } from "date-fns";
   import { Button, buttonVariants } from "$lib/components/ui/button";
-  import * as Tooltip from "$lib/components/ui/tooltip";
   import { Separator } from "$lib/components/ui/separator";
-  import * as Popover from "$lib/components/ui/popover";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-  import * as Avatar from "$lib/components/ui/avatar";
-  import { Switch } from "$lib/components/ui/switch";
-  import { Label } from "$lib/components/ui/label";
   import { Textarea } from "$lib/components/ui/textarea";
-  import { Input } from "$lib/components/ui/input";
-  import { Calendar } from "$lib/components/ui/calendar";
   import * as Dialog from "$lib/components/ui/dialog";
 
-  import {
-    Archive,
-    ArchiveX,
-    Trash2,
-    Clock,
-    Reply,
-    ReplyAll,
-    Forward,
-    EllipsisVertical,
-  } from "lucide-svelte";
-  import type { Lead } from "$lib/types";
-  import * as api from "$lib/api";
-  import type { UUID } from "$lib/types";
+  import type { Tables } from "$lib/supabase/database.types";
+
   import { toast } from "svelte-sonner";
+
   import { enhance } from "$app/forms";
 
-  export let lead: Lead;
+  export let submission: Tables<'submissions'>;
 
   let url: string;
-  $: url = lead.data?.url ?? "";
+  $: url = submission.url ?? "";
   let subreddit: string;
   $: subreddit = extractSubreddit(url);
 
@@ -52,74 +33,20 @@
   }
 
   let reasonTextValue = "Post is irrelevant because";
-  let commentTextValue = lead.comment ?? "";
+  let commentTextValue = "";
 
-  async function handlePublishComment() {
-    console.log("Trying to publish");
-    const res: boolean = await api.publishComment(lead.id, lead.comment);
-    if (res) {
-      console.log("Comment published");
-    } else {
-      console.log("Comment not published");
-    }
-  }
-
-  async function handleIrrelevant() {
-    console.log("Trying to mark as irrelevant");
-    const res: boolean = await api.markAsIrrelevant(
-      lead.id,
-      lead.submission_id,
-      reasonTextValue
-    );
-    if (res) {
-      console.log("Marked as irrelevant");
-      // Reactive UI management to show lead was removed
-      lead.data!.body = "";
-
-      reasonTextValue = "Post is irrelevant because";
-    } else {
-      console.log("Not marked as irrelevant");
-    }
-  }
-
-  async function handleGenerateComment() {
-    console.log("Trying to generate comment");
-    const comment: string = await api.generateComment(
-      lead.data?.title,
-      lead.data?.body
-    );
-    if (comment != "") {
-      console.log("Comment generated");
-      commentTextValue = comment;
-    } else {
-      console.log("Comment not generated");
-    }
-  }
-
-  async function markAsDone() {
-    if (lead.id) {
-      const res = await fetch(`?/markAsDone`, {
-        method: "POST",
-        body: JSON.stringify({ id: lead.id }),
-      });
-      console.log(res);
-    } else {
-      console.log("No lead selected");
-    }
-  }
-
-  // Function to copy to clipboard so I can easily copy this lead to my sales
+  // Function to copy to clipboard so I can easily copy this to my sales
   // management Google Sheet :P
-  async function copyToClipboard(lead: Lead) {
+  async function copyToClipboard(submission: Tables<'submissions'>) {
     try {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}`;
-      const cells = [lead.prospect_username, lead.data?.url, "", formattedDate];
+      const cells = [submission.author, submission.url, "", formattedDate];
       // "	" is the special key that Google sheets uses to separate cells.
       // Select the text to actually see the character since my theme can't see
       // it by default lol
       await navigator.clipboard.writeText(cells.join("	"));
-      toast.success("Lead Copied", {
+      toast.success("submission Copied", {
         description: "",
       });
     } catch (err) {
@@ -129,22 +56,20 @@
 </script>
 
 <div class="flex h-full flex-col">
-  {#if lead}
+  {#if submission}
     <div class="flex h-full flex-1 flex-col overflow-hidden text-left">
       <div class="flex items-start p-4">
-        <h1 class="bold text-2xl">{lead.data?.title}</h1>
-        {#if lead.discovered_at}
+        <h1 class="bold text-2xl">{submission.title}</h1>
           <div class="ml-auto text-sm text-muted-foreground">
-            Posted {formatDistanceToNowStrict(lead.discovered_at, {
+            Posted {formatDistanceToNowStrict(submission.submission_created_utc, {
               addSuffix: true,
             })}
             <br />
-            {format(lead.discovered_at, "dd/MM")}
+            {format(submission.submission_created_utc, "dd/MM")}
           </div>
-        {/if}
       </div>
       <div class="flex flex-col gap-3 p-4">
-        <h3><b class="pr-2">Username:</b> {lead.prospect_username}</h3>
+        <h3><b class="pr-2">Username:</b> {submission.author}</h3>
         <h3><b class="pr-2">Subreddit:</b>{subreddit}</h3>
         <a href={url} target="_blank" class="text-accent underline"
           >Got to post</a
@@ -153,27 +78,16 @@
           <Button
             class="w-fit"
             on:click={() => {
-              copyToClipboard(lead);
-            }}>Copy Lead</Button
+              copyToClipboard(submission);
+            }}>Copy submission</Button
           >
-
-          <Button class="w-fit" on:click={() => markAsDoneURLParam()}
-            >using api function Mark as {lead.done ? "Pending" : "Done"}</Button
-          >
-          <!-- @nazif how do i bind the "done" value to the datatable upon succesful? todo in pp session-->
-          <form method="POST" action="?/markAsDone" use:enhance>
-            <Input class="hidden" type="text" name="id" bind:value={lead.id} />
-            <Button type="submit" class="w-fit"
-              >Mark as {lead.done ? "Pending" : "Done"}</Button
-            >
-          </form>
         </div>
       </div>
       <Separator />
       <div
         class="flex-1 overflow-y-auto whitespace-pre-wrap p-4 text-left text-sm"
       >
-        <p class="text-md tracking-widest">{lead.data?.body}</p>
+        <p class="text-md tracking-widest">{submission.selftext}</p>
       </div>
       <Separator class="mt-auto" />
       <div class="p-4">
@@ -181,58 +95,13 @@
           <div class="grid gap-4">
             <Textarea
               class="h-64 p-4"
-              placeholder={`Reply ${lead.id}...`}
-              bind:value={lead.comment}
+              placeholder={`Reply ${submission.id}...`}
             />
-            <div class="flex items-center">
-              {#if lead.status == "under_review"}
-                <Dialog.Root>
-                  <Dialog.Trigger
-                    class={buttonVariants({ variant: "destructive" })}
-                    >Irrelevant</Dialog.Trigger
-                  >
-                  <Dialog.Content class="sm:max-w-[425px]">
-                    <Dialog.Header>
-                      <Dialog.Title>Mark as irrelevant</Dialog.Title>
-                      <Dialog.Description>
-                        You think this post is a false positive and irrelevant.
-                        Please provide a reason.
-                      </Dialog.Description>
-                    </Dialog.Header>
-                    <Textarea
-                      class="w-full"
-                      placeholder="Post is irrelevant because ..."
-                      bind:value={reasonTextValue}
-                    />
-                    <Dialog.Footer>
-                      <Button
-                        type="submit"
-                        on:click={() => {
-                          handleIrrelevant();
-                        }}>Submit</Button
-                      >
-                    </Dialog.Footer>
-                  </Dialog.Content>
-                </Dialog.Root>
-                <div class="ml-auto flex flex-row gap-4">
-                  <Button
-                    on:click={() => handleGenerateComment()}
-                    variant="secondary">Generate new comment</Button
-                  >
-                  <Button
-                    class=""
-                    on:click={() => {
-                      handlePublishComment();
-                    }}>Publish</Button
-                  >
-                </div>
-              {/if}
-            </div>
           </div>
         </form>
       </div>
     </div>
   {:else}
-    <div class="p-8 text-center text-muted-foreground">No lead selected</div>
+    <div class="p-8 text-center text-muted-foreground">No submission selected</div>
   {/if}
 </div>

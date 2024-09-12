@@ -17,6 +17,12 @@ dependencies:
   '@supabase/supabase-js':
     specifier: ^2.33.0
     version: 2.45.2
+  '@tailwindcss/aspect-ratio':
+    specifier: ^0.4.2
+    version: 0.4.2(tailwindcss@3.4.10)
+  '@tailwindcss/forms':
+    specifier: ^0.5.9
+    version: 0.5.9(tailwindcss@3.4.10)
   bits-ui:
     specifier: ^0.21.13
     version: 0.21.13(svelte@5.0.0-next.244)
@@ -35,6 +41,9 @@ dependencies:
   lucide-svelte:
     specifier: ^0.436.0
     version: 0.436.0(svelte@5.0.0-next.244)
+  mode-watcher:
+    specifier: ^0.4.1
+    version: 0.4.1(svelte@5.0.0-next.244)
   paneforge:
     specifier: ^0.0.5
     version: 0.0.5(svelte@5.0.0-next.244)
@@ -50,6 +59,9 @@ dependencies:
   svelte-keyed:
     specifier: ^2.0.0
     version: 2.0.0(svelte@5.0.0-next.244)
+  svelte-sonner:
+    specifier: ^0.3.27
+    version: 0.3.27(svelte@5.0.0-next.244)
   svelte-subscribe:
     specifier: ^2.0.1
     version: 2.0.1(svelte@5.0.0-next.244)
@@ -71,7 +83,7 @@ devDependencies:
     specifier: ^4.0.0-next.6
     version: 4.0.0-next.7(svelte@5.0.0-next.244)(vite@5.4.2)
   '@tailwindcss/typography':
-    specifier: ^0.5.13
+    specifier: ^0.5.14
     version: 0.5.14(tailwindcss@3.4.10)
   '@types/glob':
     specifier: ^8.1.0
@@ -889,6 +901,23 @@ packages:
     resolution: {integrity: sha512-KMZNXiGibsW9kvZAO1Pam2JPTDBm+KSHMMHWdsyI/1DbIZjT2A6Gy3hblVXUMEDvUAKq+e0vL0X0o54owWji7g==}
     dependencies:
       tslib: 2.7.0
+    dev: false
+
+  /@tailwindcss/aspect-ratio@0.4.2(tailwindcss@3.4.10):
+    resolution: {integrity: sha512-8QPrypskfBa7QIMuKHg2TA7BqES6vhBrDLOv8Unb6FcFyd3TjKbc6lcmb9UPQHxfl24sXoJ41ux/H7qQQvfaSQ==}
+    peerDependencies:
+      tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
+    dependencies:
+      tailwindcss: 3.4.10
+    dev: false
+
+  /@tailwindcss/forms@0.5.9(tailwindcss@3.4.10):
+    resolution: {integrity: sha512-tM4XVr2+UVTxXJzey9Twx48c1gcxFStqn1pQz0tRsX8o3DvxhN5oY5pvyAbUx7VTaZxpej4Zzvc6h+1RJBzpIg==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1 || >= 4.0.0-alpha.20'
+    dependencies:
+      mini-svg-data-uri: 1.4.4
+      tailwindcss: 3.4.10
     dev: false
 
   /@tailwindcss/typography@0.5.14(tailwindcss@3.4.10):
@@ -2515,6 +2544,11 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
+  /mini-svg-data-uri@1.4.4:
+    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
+    hasBin: true
+    dev: false
+
   /minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
     dependencies:
@@ -2565,6 +2599,14 @@ packages:
       pkg-types: 1.2.0
       ufo: 1.5.4
     dev: true
+
+  /mode-watcher@0.4.1(svelte@5.0.0-next.244):
+    resolution: {integrity: sha512-bNC+1NXmwEFZtziCdZSgP7HFQTpqJPcQn9GwwJQGSf6SBF3neEPYV1uRwkYuAQwbsvsXIYtzaqgedDzJ7D1mhg==}
+    peerDependencies:
+      svelte: ^4.0.0 || ^5.0.0-next.1
+    dependencies:
+      svelte: 5.0.0-next.244
+    dev: false
 
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
@@ -3324,6 +3366,14 @@ packages:
     resolution: {integrity: sha512-7TeEn+QbJC2OJrHiuM0T8vMBkms3DNpTE+Ir+NtnVBnBMA78aL4f1ft9t0Hn/pBbD/TnIXi4YfjFRAgtN+DZ5g==}
     peerDependencies:
       svelte: ^4.0.0
+    dependencies:
+      svelte: 5.0.0-next.244
+    dev: false
+
+  /svelte-sonner@0.3.27(svelte@5.0.0-next.244):
+    resolution: {integrity: sha512-+PvbuePNTyTNCepCWqKcFeu+Lo27yYuwfSc7zJvrWjCRMJrWAmccPg3j7jO1W13QoN3TySXU5Trb956VBQiM5Q==}
+    peerDependencies:
+      svelte: ^3.0.0 || ^4.0.0 || ^5.0.0-next.1
     dependencies:
       svelte: 5.0.0-next.244
     dev: false

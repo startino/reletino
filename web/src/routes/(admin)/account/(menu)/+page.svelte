@@ -2,7 +2,6 @@
   import * as Resizable from "$lib/components/ui/resizable";
   import DataTable from "$lib/components/ui/data-table/data-table.svelte";
   import * as Select from "$lib/components/ui/select";
-  
   import { LeadViewer } from "$lib/components/ui/lead-viewer";
   import type { Tables } from "$lib/supabase/database.types"
 
@@ -34,7 +33,7 @@
   }
 </script>
 
-<Resizable.PaneGroup direction="horizontal" class="rounded-lg border">
+<Resizable.PaneGroup direction="horizontal" class="rounded-lg border bg-background">
   <Resizable.Pane defaultSize={50}>
     <div class="flex items-center justify-center p-6">
       <Select.Root portal={null}>
@@ -54,12 +53,18 @@
         <Select.Input name="favoriteFruit" />
       </Select.Root>
       {#key relevantSubmissions}
-        <DataTable bind:activeLead={activeSubmission} data={relevantSubmissions} {markAsDone} />
+        <DataTable bind:activesubmission={activeSubmission} data={relevantSubmissions} {markAsDone} />
       {/key}
     </div>
   </Resizable.Pane>
   <Resizable.Handle withHandle />
   <Resizable.Pane defaultSize={50}>
-    <LeadViewer bind:lead={activeSubmission} />
+    {#if activeSubmission}
+      <LeadViewer bind:submission={activeSubmission} />
+    {:else}
+      <div class="flex items-center justify-center p-6">
+        <p class="text-muted-foreground">No submission selected</p>
+      </div>
+    {/if}
   </Resizable.Pane>
 </Resizable.PaneGroup>

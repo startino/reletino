@@ -104,15 +104,6 @@
 
   const hideableCols = ["status", "amount"];
 
-  const fetchPostAndEvaluate = async () => {
-    const res = await fetch("?/fetchPostAndEvaluate", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-
-    const data = await res.json();
-    console.log(data);
-  };
 </script>
 
 <div class="w-full">
@@ -123,9 +114,6 @@
       type="text"
       bind:value={$filterValue}
     />
-    <Button on:click={() => fetchPostAndEvaluate()}>
-      Fetch Posts (Don't spam!!)
-    </Button>
   </div>
   <div class="rounded-md border">
     <Table.Root {...$tableAttrs}>
