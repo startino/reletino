@@ -37,7 +37,7 @@ cache = dc.Cache(cache_filepath)
 
 
 class RedditStreamWorker:
-    def __init__(self, subreddits: list[str], username: str, password: str):
+    def __init__(self, project_id: str, prompt: str, subreddits: list[str], username: str, password: str):
         self._running = False
         self.subreddits = get_subreddits(subreddits, username, password)
 

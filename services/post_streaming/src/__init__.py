@@ -50,6 +50,7 @@ def redirect_to_docts():
 
 class StartStreamRequest(BaseModel):
     project_id: str
+    prompt: str
     subreddits: list[str] = ["SaaS", "SaaSy", "startups", "YoungEntrepreneurs", "NoCodeSaas", "nocode", "cofounder", "Entrepreneur", "futino"]
     
     
@@ -62,17 +63,21 @@ def start_project_stream(start_request: StartStreamRequest):
     return {"worker_id": start_request.project_id}
 
 
-@app.post("/stop/{worker_id}")
-def stop_project_stream(project_id: str):
-    worker, thread = workers.get(project_id, (None, None))
+class StopStreamRequest(BaseModel):
+    project_id: str
+
+
+@app.post("/stop")
+def stop_project_stream(stop_request: StopStreamRequest):
+    worker, thread = workers.get(stop_request.project_id, (None, None))
     if worker is None:
         raise HTTPException(status_code=404, detail="Worker not found")
     worker.stop()
-    thread.join(timeout=10)  # Waits 10 seconds for the thread to finish
+    thread.join(timeout=2)  # Waits 10 seconds for the thread to finish
 
     if thread.is_alive():
-        logging.error(f"Thread for Reddit worker didn't stop in time. Projct: {project_id}")
+        logging.error(f"Thread for Reddit worker didn't stop in time. Projct: {stop_request.project_id}")
 
-    del workers[project_id]  # Cleanup
+    del workers[stop_request.project_id]  # Cleanup
 
     return {"message": "Stream stopped"}
