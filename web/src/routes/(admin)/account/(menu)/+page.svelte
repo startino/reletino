@@ -5,17 +5,17 @@
   import { LeadViewer } from "$lib/components/ui/lead-viewer";
   import type { Tables } from "$lib/supabase/database.types"
 
-  export let data: { relevantSubmissions: Tables<'submissions'>[] };
+  export let data: { relevantSubmissions: Tables<'submissions'>[], projects: Tables<'projects'>[] };
 
-  let { relevantSubmissions } = data;
+  let { relevantSubmissions, projects } = data;
 
+  let selectedProject = {"value": projects[0].id, "label": projects[0].title};
+
+  // Arbituarilly select the first submission
   let activeSubmission = relevantSubmissions[0];
 
-  let projects = [
-    { value: "uuid-here-special", label: "Project One" },
-    { value: "a-unique-uuid", label: "Project Two" },
-    { value: "very-special-uuid", label: "Project Three" },
-  ];
+  // Filter by project
+  $: relevantSubmissions = relevantSubmissions.filter((row) => row.project_id === selectedProject.value);
 
   async function markAsDone(id: string) {
     relevantSubmissions = relevantSubmissions.map((row) => {
@@ -33,19 +33,25 @@
   }
 </script>
 
+
+
 <Resizable.PaneGroup direction="horizontal" class="rounded-lg border bg-background">
   <Resizable.Pane defaultSize={50}>
-    <div class="flex items-center justify-center p-6">
-      <Select.Root portal={null}>
-        <Select.Trigger class="w-[180px]">
-          <Select.Value placeholder="Select a fruit" />
+    <div class="flex flex-col p-6">
+      <Select.Root portal={null}
+
+      bind:selected={selectedProject}
+>
+        <Select.Label class="text-left text-xl pl-0">Selected Project</Select.Label>
+        <Select.Trigger class="max-w-xl mb-8">
+          <Select.Value placeholder="Select a project"  />
         </Select.Trigger>
         <Select.Content>
           <Select.Group>
-            <Select.Label>Fruits</Select.Label>
+           
             {#each projects as project}
-              <Select.Item value={project.value} label={project.label}
-                >{project.label}</Select.Item
+              <Select.Item value={project.id} label={project.title} class="text-primary"
+                >{project.title}</Select.Item
               >
             {/each}
           </Select.Group>

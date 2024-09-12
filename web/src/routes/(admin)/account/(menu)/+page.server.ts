@@ -1,8 +1,5 @@
 import { supabase } from '$lib/supabase';
 
-
-import type { Tables } from '$lib/supabase/database.types';
-
 import { redirect } from '@sveltejs/kit';
 
 export const load = async ({
@@ -13,14 +10,20 @@ export const load = async ({
   if (!session) {
     redirect(303, "/login")
   }
-	const { data, error } = await supabase.from('submissions').select('*').eq("is_relevant", true).order('created_at', { ascending: false });
+	const { data: relevantSubmissions, error: eRelevantSubmissions } = await supabase.from('submissions').select('*').eq("is_relevant", true).order('created_at', { ascending: false });
 
-  if (error || !data) {
-    console.error("Error loading submissions:", error);
+  if (eRelevantSubmissions || !relevantSubmissions) {
+    console.error("Error loading submissions:", eRelevantSubmissions);
+    return { status: 500, error: new Error('Failed to load leads') };
+  }
+  
+  console.log("profile_id", session.user.id);
+  const { data: projects ,  error: eProjects } = await supabase.from('projects').select('*').eq("profile_id", session.user.id);
+
+  if (eProjects || !projects) {
+    console.error("Error loading submissions:", eProjects);
     return { status: 500, error: new Error('Failed to load leads') };
   }
 
-	const relevantSubmissions = data as Tables<'submissions'>[];
-
-	return { relevantSubmissions };
+	return { projects, relevantSubmissions };
 };
