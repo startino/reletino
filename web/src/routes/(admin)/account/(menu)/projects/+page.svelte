@@ -23,6 +23,8 @@
 
   let projects: Tables<"projects">[] = $state(dataProjects || [])
   let selectedProject: string = $state("")
+
+  $inspect(projects, selectedProject)
 </script>
 
 <div class="flex flex-col gap-8">
@@ -54,6 +56,7 @@
         onclick={() => {
           const newProject = {
             id: crypto.randomUUID(),
+            profile_id: session!.user.id,
             created_at: new Date().toISOString(),
             title: "Untitled Project",
             profile_id: session!.user.id,

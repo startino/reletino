@@ -1,7 +1,7 @@
 import { projectSchema } from "$lib/schemas"
 import { supabase, type Tables } from "$lib/supabase"
-import { redirect } from "@sveltejs/kit"
-import { superValidate } from "sveltekit-superforms"
+import { fail, redirect } from "@sveltejs/kit"
+import { message, superValidate } from "sveltekit-superforms"
 import { zod } from "sveltekit-superforms/adapters"
 
 export const load = async ({ locals: { safeGetSession } }) => {
@@ -30,4 +30,27 @@ export const load = async ({ locals: { safeGetSession } }) => {
   }
 }
 
-export const actions = {}
+export const actions = {
+  updateProject: async ({ request }) => {
+
+    const form = await superValidate(request, zod(projectSchema))
+
+    if (!form.valid) {
+      return fail(400, { form })
+    }
+
+    console.log("form", form)
+
+    const { error } = await supabase
+      .from("projects")
+      .upsert({
+      ...form.data
+      })
+
+    if (error) {
+      return fail(400, { form })
+    }
+
+    return { form }
+  }
+}
