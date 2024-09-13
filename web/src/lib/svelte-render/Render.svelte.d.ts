@@ -1,26 +1,28 @@
-import { SvelteComponent } from 'svelte';
-import type { RenderConfig } from './createRender.js';
+import { SvelteComponent } from "svelte"
+import type { RenderConfig } from "./createRender.js"
 declare class __sveltets_Render<TComponent extends SvelteComponent> {
-	props(): {
-		of: RenderConfig<TComponent>;
-	};
-	events(): {} & {
-		[evt: string]: CustomEvent<any>;
-	};
-	slots(): {};
+  props(): {
+    of: RenderConfig<TComponent>
+  }
+  events(): {} & {
+    [evt: string]: CustomEvent<any>
+  }
+  slots(): {}
 }
 export type RenderProps<TComponent extends SvelteComponent> = ReturnType<
-	__sveltets_Render<TComponent>['props']
->;
+  __sveltets_Render<TComponent>["props"]
+>
 export type RenderEvents<TComponent extends SvelteComponent> = ReturnType<
-	__sveltets_Render<TComponent>['events']
->;
+  __sveltets_Render<TComponent>["events"]
+>
 export type RenderSlots<TComponent extends SvelteComponent> = ReturnType<
-	__sveltets_Render<TComponent>['slots']
->;
-export default class Render<TComponent extends SvelteComponent> extends SvelteComponent<
-	RenderProps<TComponent>,
-	RenderEvents<TComponent>,
-	RenderSlots<TComponent>
+  __sveltets_Render<TComponent>["slots"]
+>
+export default class Render<
+  TComponent extends SvelteComponent,
+> extends SvelteComponent<
+  RenderProps<TComponent>,
+  RenderEvents<TComponent>,
+  RenderSlots<TComponent>
 > {}
-export {};
+export {}

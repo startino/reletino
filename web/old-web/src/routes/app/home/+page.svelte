@@ -1,27 +1,27 @@
 <script lang="ts">
-  import * as Resizable from "$lib/components/ui/resizable";
-  import DataTable from "$lib/components/ui/data-table/data-table.svelte";
-  import { LeadViewer } from "$lib/components/ui/lead-viewer";
-  import type { Lead } from "$lib/types";
+  import * as Resizable from "$lib/components/ui/resizable"
+  import DataTable from "$lib/components/ui/data-table/data-table.svelte"
+  import { LeadViewer } from "$lib/components/ui/lead-viewer"
+  import type { Lead } from "$lib/types"
 
-  export let data: { leads: Lead[] };
-  let { leads } = data;
+  export let data: { leads: Lead[] }
+  let { leads } = data
 
-  let activeLead: Lead = leads[0];
+  let activeLead: Lead = leads[0]
 
   async function markAsDone(id: string) {
     leads = leads.map((row) => {
       if (row.id === id) {
-        row.done = true;
+        row.done = true
       }
-      return row;
-    });
+      return row
+    })
 
     const res = await fetch(`?/markAsDone`, {
       method: "POST",
       body: JSON.stringify({ id }),
-    });
-    const { success } = await res.json();
+    })
+    const { success } = await res.json()
   }
 </script>
 

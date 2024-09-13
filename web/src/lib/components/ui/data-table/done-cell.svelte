@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Check, CircleDashed } from "lucide-svelte";
-  import { Button } from "$lib/components/ui/button";
-  import { Input } from "$lib/components/ui/input";
-  import { enhance } from "$app/forms";
+  import { Check, CircleDashed } from "lucide-svelte"
+  import { Button } from "$lib/components/ui/button"
+  import { Input } from "$lib/components/ui/input"
+  import { enhance } from "$app/forms"
 
-  export let done: boolean;
+  export let done: boolean
 </script>
 
 {#key done}

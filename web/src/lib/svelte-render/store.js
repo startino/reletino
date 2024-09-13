@@ -1,6 +1,6 @@
-import { readable } from 'svelte/store';
+import { readable } from "svelte/store"
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isReadable = (value) => {
-	return value?.subscribe instanceof Function;
-};
-export const Undefined = readable(undefined);
+  return value?.subscribe instanceof Function
+}
+export const Undefined = readable(undefined)

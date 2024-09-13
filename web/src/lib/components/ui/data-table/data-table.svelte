@@ -1,29 +1,29 @@
 <script lang="ts">
-  import { Render, createRender } from "$lib/svelte-render";
-  import { createTable, Subscribe } from "$lib/svelte-headless-table";
+  import { Render, createRender } from "$lib/svelte-render"
+  import { createTable, Subscribe } from "$lib/svelte-headless-table"
   import {
     addSortBy,
     addPagination,
     addTableFilter,
     addSelectedRows,
     addHiddenColumns,
-  } from "$lib/svelte-headless-table/plugins";
-  import { readable } from "svelte/store";
-  import * as Table from "$lib/components/ui/table";
-  import Actions from "$lib/components/ui/data-table/data-table-actions.svelte";
-  import { Button } from "$lib/components/ui/button";
-  import { ArrowUpDown } from "lucide-svelte";
-  import { cn } from "$lib/utils";
-  import { Input } from "$lib/components/ui/input";
-  import type { Tables } from '$lib/supabase/database.types';
-  import RelativeDateCell from "./relative-date-cell.svelte";
-  import DoneCell from "./done-cell.svelte";
+  } from "$lib/svelte-headless-table/plugins"
+  import { readable } from "svelte/store"
+  import * as Table from "$lib/components/ui/table"
+  import Actions from "$lib/components/ui/data-table/data-table-actions.svelte"
+  import { Button } from "$lib/components/ui/button"
+  import { ArrowUpDown } from "lucide-svelte"
+  import { cn } from "$lib/utils"
+  import { Input } from "$lib/components/ui/input"
+  import type { Tables } from "$lib/supabase/database.types"
+  import RelativeDateCell from "./relative-date-cell.svelte"
+  import DoneCell from "./done-cell.svelte"
 
-  export let activesubmission: Tables<'submissions'> | null = null;
-  export let markAsDone: (id: string) => void;
-  export let data: Tables<'submissions'>[] = [];
+  export let activesubmission: Tables<"submissions"> | null = null
+  export let markAsDone: (id: string) => void
+  export let data: Tables<"submissions">[] = []
 
-  data = data.filter((row) => !row.done);
+  data = data.filter((row) => !row.done)
 
   const table = createTable(readable(data), {
     sort: addSortBy({
@@ -36,7 +36,7 @@
     }),
     select: addSelectedRows(),
     hide: addHiddenColumns(),
-  });
+  })
 
   const columns = table.createColumns([
     table.column({
@@ -50,7 +50,7 @@
       cell: (item) => {
         return createRender(DoneCell, {
           done: item.value,
-        });
+        })
       },
     }),
     table.column({
@@ -59,7 +59,7 @@
       cell: (item) => {
         return createRender(RelativeDateCell, {
           date: item.value ?? "",
-        });
+        })
       },
       plugins: {},
     }),
@@ -67,7 +67,7 @@
       header: "",
       accessor: ({ id }) => id,
       cell: (item) => {
-        return createRender(Actions, { id: item.value });
+        return createRender(Actions, { id: item.value })
       },
       plugins: {
         sort: {
@@ -75,7 +75,7 @@
         },
       },
     }),
-  ]);
+  ])
 
   const {
     headerRows,
@@ -85,25 +85,24 @@
     flatColumns,
     pluginStates,
     rows,
-  } = table.createViewModel(columns, { rowDataId: (item) => item.id });
+  } = table.createViewModel(columns, { rowDataId: (item) => item.id })
 
-  const { sortKeys } = pluginStates.sort;
+  const { sortKeys } = pluginStates.sort
 
-  const { hiddenColumnIds } = pluginStates.hide;
-  const ids = flatColumns.map((c) => c.id);
-  let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
+  const { hiddenColumnIds } = pluginStates.hide
+  const ids = flatColumns.map((c) => c.id)
+  let hideForId = Object.fromEntries(ids.map((id) => [id, true]))
 
   $: $hiddenColumnIds = Object.entries(hideForId)
     .filter(([, hide]) => !hide)
-    .map(([id]) => id);
+    .map(([id]) => id)
 
-  const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page;
-  const { filterValue } = pluginStates.filter;
+  const { hasNextPage, hasPreviousPage, pageIndex } = pluginStates.page
+  const { filterValue } = pluginStates.filter
 
-  const { selectedDataIds } = pluginStates.select;
+  const { selectedDataIds } = pluginStates.select
 
-  const hideableCols = ["status", "amount"];
-
+  const hideableCols = ["status", "amount"]
 </script>
 
 <div class="w-full">
@@ -154,7 +153,8 @@
               {...rowAttrs}
               data-state={$selectedDataIds[row.id] && "selected"}
               on:click={() => {
-                activesubmission = data.find((d) => d.id === row.original.id) ?? null;
+                activesubmission =
+                  data.find((d) => d.id === row.original.id) ?? null
               }}
             >
               {#each row.cells as cell (cell.id)}

@@ -1,3 +1,3 @@
-import LeadViewer from './lead-viewer.svelte';
+import LeadViewer from "./lead-viewer.svelte"
 
-export { LeadViewer };
+export { LeadViewer }

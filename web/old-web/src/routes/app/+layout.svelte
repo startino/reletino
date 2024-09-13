@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
+  import { writable } from "svelte/store"
 
-  import { Shell } from "$lib/components/layout/shell";
-  import { SideNav } from "$lib/components/ui/side-nav";
+  import { Shell } from "$lib/components/layout/shell"
+  import { SideNav } from "$lib/components/ui/side-nav"
 
   import {
     CircleUserRound,
@@ -11,24 +11,24 @@
     MessagesSquare,
     UsersRound,
     Zap,
-  } from "lucide-svelte";
-  import type { ComponentType } from "svelte";
-  import { UserCheck, type Icon } from "lucide-svelte";
-  import { LocalAuth } from "$lib/components/ui/local-auth";
+  } from "lucide-svelte"
+  import type { ComponentType } from "svelte"
+  import { UserCheck, type Icon } from "lucide-svelte"
+  import { LocalAuth } from "$lib/components/ui/local-auth"
 
-  import { Toaster } from "$lib/components/ui/sonner";
+  import { Toaster } from "$lib/components/ui/sonner"
 
-  export let data;
+  export let data
 
   let navigations: {
-    name: string;
+    name: string
     items: {
-      name: string;
-      href: string;
-      icon: ComponentType<Icon>;
-      current: boolean;
-      pendingCount?: number;
-    }[];
+      name: string
+      href: string
+      icon: ComponentType<Icon>
+      current: boolean
+      pendingCount?: number
+    }[]
   }[] = [
     {
       name: "",
@@ -47,10 +47,10 @@
         },
       ],
     },
-  ];
+  ]
   let bottomNavigation = [
     { name: "Logout", href: "logout", icon: LogOut, current: false },
-  ];
+  ]
 </script>
 
 <LocalAuth>

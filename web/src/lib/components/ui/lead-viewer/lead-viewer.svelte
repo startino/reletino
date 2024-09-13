@@ -1,56 +1,56 @@
 <script lang="ts">
-  import { format, formatDistanceToNowStrict } from "date-fns";
-  import { Button, buttonVariants } from "$lib/components/ui/button";
-  import { Separator } from "$lib/components/ui/separator";
-  import { Textarea } from "$lib/components/ui/textarea";
-  import * as Dialog from "$lib/components/ui/dialog";
+  import { format, formatDistanceToNowStrict } from "date-fns"
+  import { Button, buttonVariants } from "$lib/components/ui/button"
+  import { Separator } from "$lib/components/ui/separator"
+  import { Textarea } from "$lib/components/ui/textarea"
+  import * as Dialog from "$lib/components/ui/dialog"
 
-  import type { Tables } from "$lib/supabase/database.types";
+  import type { Tables } from "$lib/supabase/database.types"
 
-  import { toast } from "svelte-sonner";
+  import { toast } from "svelte-sonner"
 
-  import { enhance } from "$app/forms";
+  import { enhance } from "$app/forms"
 
-  export let submission: Tables<'submissions'>;
+  export let submission: Tables<"submissions">
 
-  let url: string;
-  $: url = submission.url ?? "";
-  let subreddit: string;
-  $: subreddit = extractSubreddit(url);
+  let url: string
+  $: url = submission.url ?? ""
+  let subreddit: string
+  $: subreddit = extractSubreddit(url)
 
   function extractSubreddit(url: string): string {
     // Parse the URL
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(url)
 
     // Extract the pathname
-    const pathname = parsedUrl.pathname;
+    const pathname = parsedUrl.pathname
 
     // Extract the subreddit name
-    const parts = pathname.split("/");
-    const subreddit = "r/" + parts[2]; // Assuming the subreddit name is always the second component
+    const parts = pathname.split("/")
+    const subreddit = "r/" + parts[2] // Assuming the subreddit name is always the second component
 
-    return subreddit;
+    return subreddit
   }
 
-  let reasonTextValue = "Post is irrelevant because";
-  let commentTextValue = "";
+  let reasonTextValue = "Post is irrelevant because"
+  let commentTextValue = ""
 
   // Function to copy to clipboard so I can easily copy this to my sales
   // management Google Sheet :P
-  async function copyToClipboard(submission: Tables<'submissions'>) {
+  async function copyToClipboard(submission: Tables<"submissions">) {
     try {
-      const currentDate = new Date();
-      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}`;
-      const cells = [submission.author, submission.url, "", formattedDate];
+      const currentDate = new Date()
+      const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}`
+      const cells = [submission.author, submission.url, "", formattedDate]
       // "	" is the special key that Google sheets uses to separate cells.
       // Select the text to actually see the character since my theme can't see
       // it by default lol
-      await navigator.clipboard.writeText(cells.join("	"));
+      await navigator.clipboard.writeText(cells.join("	"))
       toast.success("submission Copied", {
         description: "",
-      });
+      })
     } catch (err) {
-      console.error("Failed to copy: ", err);
+      console.error("Failed to copy: ", err)
     }
   }
 </script>
@@ -60,13 +60,13 @@
     <div class="flex h-full flex-1 flex-col overflow-hidden text-left">
       <div class="flex items-start p-4">
         <h1 class="bold text-2xl">{submission.title}</h1>
-          <div class="ml-auto text-sm text-muted-foreground">
-            Posted {formatDistanceToNowStrict(submission.submission_created_utc, {
-              addSuffix: true,
-            })}
-            <br />
-            {format(submission.submission_created_utc, "dd/MM")}
-          </div>
+        <div class="ml-auto text-sm text-muted-foreground">
+          Posted {formatDistanceToNowStrict(submission.submission_created_utc, {
+            addSuffix: true,
+          })}
+          <br />
+          {format(submission.submission_created_utc, "dd/MM")}
+        </div>
       </div>
       <div class="flex flex-col gap-3 p-4">
         <h3><b class="pr-2">Username:</b> {submission.author}</h3>
@@ -78,7 +78,7 @@
           <Button
             class="w-fit"
             on:click={() => {
-              copyToClipboard(submission);
+              copyToClipboard(submission)
             }}>Copy submission</Button
           >
         </div>
@@ -102,6 +102,8 @@
       </div>
     </div>
   {:else}
-    <div class="p-8 text-center text-muted-foreground">No submission selected</div>
+    <div class="p-8 text-center text-muted-foreground">
+      No submission selected
+    </div>
   {/if}
 </div>

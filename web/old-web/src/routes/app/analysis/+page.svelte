@@ -8,9 +8,6 @@
         console.log(data)
     };
   </script> -->
-  
-  <h1>Accuracy Analysis</h1>
-  <button>
-   Analyze
-  </button>
- 
+
+<h1>Accuracy Analysis</h1>
+<button> Analyze </button>

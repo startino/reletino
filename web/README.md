@@ -3,9 +3,9 @@
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/startino/saas-starter)](https://github.com/startino/saas-starter)
 
+<a href="https://saasstarter.work"><strong>Demo & Homepage (CMSaasStarter's for now)</strong></a> •
+<a href="https://github.com/startino/saas-starter#quick-start"><strong>Quick Start Guide</strong></a> •
 
-  <a href="https://saasstarter.work"><strong>Demo & Homepage (CMSaasStarter's for now)</strong></a> •
-  <a href="https://github.com/startino/saas-starter#quick-start"><strong>Quick Start Guide</strong></a> • 
 </div>
 
 <br/>
