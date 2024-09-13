@@ -12,6 +12,7 @@ from pathlib import Path
 
 from supabase import Client, create_client
 
+from src.models.project import Project
 from src.models import SavedSubmission
 from src.evaluate_relevance import evaluate_submission
 from src.models import Evaluation
@@ -37,13 +38,16 @@ cache = dc.Cache(cache_filepath)
 
 
 class RedditStreamWorker:
-    def __init__(self, project_id: str, prompt: str, subreddits: list[str], username: str, password: str):
+    def __init__(self, profile_id: str, project: Project):
         self._running = False
-        self.subreddits = get_subreddits(subreddits, username, password)
+        self.profile_id = profile_id
+        self.project = project
+        self.subreddits = get_subreddits(project.subreddits)
+        self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
     def start(self):
         self._running = True
-        supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
         while self._running:
     
             if not REDDIT_USERNAME or not REDDIT_PASSWORD:
@@ -73,13 +77,15 @@ class RedditStreamWorker:
                 )
                                               
                 # Check if submission already exists
-                existing_submission = supabase.table("submissions").select("*").eq("url", saved_submission.url).execute()
+                existing_submission = self.supabase.table("submissions").select("*").eq("url", saved_submission.url).execute()
 
                 if len(existing_submission.data) > 0:
                     return
 
-                supabase.table("submissions").insert(
+                self.supabase.table("submissions").insert(
                     {
+                        "profile_id": self.profile_id,
+                        "project_id": self.project.project_id,
                         # please don't ask me why only one is using model_dump
                         # somehow evaluation is a dict already??
                         # anyone better with Python typing pls help :pray:

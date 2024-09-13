@@ -13,6 +13,7 @@ from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette import EventSourceResponse
 
+from src.models.project import Project
 from src.models import PublishCommentRequest, GenerateCommentRequest, FalseLead, Lead
 from src.reddit_worker import RedditStreamWorker
 
@@ -49,18 +50,17 @@ def redirect_to_docts():
 
 
 class StartStreamRequest(BaseModel):
-    project_id: str
-    prompt: str
-    subreddits: list[str] = ["SaaS", "SaaSy", "startups", "YoungEntrepreneurs", "NoCodeSaas", "nocode", "cofounder", "Entrepreneur", "futino"]
+    profile_id: str
+    project: Project
     
     
 @app.post("/start")
 def start_project_stream(start_request: StartStreamRequest):
-    worker = RedditStreamWorker(start_request.subreddits, REDDIT_USERNAME, REDDIT_PASSWORD)
+    worker = RedditStreamWorker(profile_id=start_request.profile_id, project=start_request.project)
     thread = threading.Thread(target=worker.start)
     workers[start_request.project_id] = (worker, thread)
     thread.start()
-    return {"worker_id": start_request.project_id}
+    return {"project_id": start_request.project_id}
 
 
 class StopStreamRequest(BaseModel):
