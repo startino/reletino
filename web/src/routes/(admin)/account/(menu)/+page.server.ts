@@ -17,7 +17,6 @@ export const load = async ({
     return { status: 500, error: new Error('Failed to load leads') };
   }
   
-  console.log("profile_id", session.user.id);
   const { data: projects ,  error: eProjects } = await supabase.from('projects').select('*').eq("profile_id", session.user.id);
 
   if (eProjects || !projects) {

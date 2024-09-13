@@ -66,6 +66,7 @@
     "svelte-sonner": "^0.3.27",
     "svelte-subscribe": "^2.0.1",
     "tailwind-merge": "^2.5.2",
-    "tailwind-variants": "^0.2.1"
+    "tailwind-variants": "^0.2.1",
+    "tiptap": "^1.32.2"
   }
 }

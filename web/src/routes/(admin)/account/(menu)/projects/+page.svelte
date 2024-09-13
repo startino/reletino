@@ -1,58 +1,57 @@
 <script lang="ts">
-  import type { Tables } from "$lib/supabase/database.types"
-  import * as Sheet from "$lib/components/ui/sheet/index.js";
-  import { Button } from "$lib/components/ui/button/index.js";
-  import { Input } from "$lib/components/ui/input/index.js";
-  import { Label } from "$lib/components/ui/label/index.js";
-  
-  import { Textarea } from "$lib/components/ui/textarea/index.js";
-  import { enhance } from "$app/forms"
+  import Button from '$lib/components/ui/button/button.svelte'
+  import * as Dialog from '$lib/components/ui/dialog';
+  import Typography from '$lib/components/ui/typography/typography.svelte';
 
-  export let data: { projects: Tables<'projects'>[] };
-    
-  let { projects } = data;
+  import type { Tables } from '$lib/supabase';
+
+  let { data } = $props();
+
+  let {supabase, session, projects: dataProjects} = data;
+
+  let projects: Tables<'projects'>[] = $state(dataProjects || []);
+  let selectedProject: string = $state(projects![0].id || "");
+
 
 </script>
 
-{#each projects as project}
-  <div class="flex items-center justify-center p-6">
-    <Sheet.Root>
-        <Sheet.Trigger asChild let:builder>
-          <Button builders={[builder]} variant="outline">
-            {#if project.running}
-            <div class="h-3 w-3 rounded-full bg-primary animate-pulse mr-3"></div>
-            {:else}
-            <div class="h-3 w-3 rounded-full bg-orange-500 animate-pulse mr-3"></div>
-            {/if}
-            {project.title}</Button>
-        </Sheet.Trigger>
-        <Sheet.Content side="right">
-          <Sheet.Header>
-            <Sheet.Title>{project.title}</Sheet.Title>
-            <Sheet.Description>
-              Make changes to your profile here. Click save when you're done.
-            </Sheet.Description>
-          </Sheet.Header>
-          <form id="project_{project.id}" class="grid gap-4 py-4" >
-            <div class="flex flex-col items-start gap-4">
-              <Label for="title" class="">Title</Label>
-              <Input id="title" value={project.title} class="w-full" />
-            </div>
-            <div class="flex flex-col items-start gap-4">
-              <Label for="description" class="">Subreddits</Label>
-              <Input id="description" value={project.subreddits} placeholder="SaaS+futino+startup" class="w-full" />
-            </div>
-            <div class="flex flex-col items-start gap-4">
-              <Label for="prompt" class="">Prompt</Label>
-              <Textarea id="prompt" value={project.prompt} placeholder="Type your prompt here." />
-            </div>
-        </form>
-          <Sheet.Footer>
-            <Sheet.Close asChild let:builder>
-              <Button builders={[builder]} form="project_{project.id}">Save changes</Button>
-            </Sheet.Close>
-          </Sheet.Footer>
-        </Sheet.Content>
-      </Sheet.Root>
-  </div>
-{/each}
+<div class="flex flex-col gap-8">
+  <Typography variant="display-lg">Projects</Typography>
+  <Dialog.Root open={selectedProject != ""}>
+
+  </Dialog.Root>
+  <ul class="grid grid-cols-3 gap-4">
+    <li class="col-span-3">
+      <Button class="w-full" onclick={()=>{
+        const newProject = {
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          title: "Untitled Project",
+          profile_id: session!.user.id,
+          prompt: "Empty Prompt",
+          running: false,
+          subreddits: ["saas", "startups"],
+        };
+        projects.push(newProject);
+        selectedProject = newProject.id;
+      }}
+      >
+        Create New Project
+      </Button>
+    </li>
+      {#each projects as project}
+        <li class="bg-card border rounded-md">
+         
+            <Button class="w-full h-full flex flex-col p-6" variant="ghost" onclick={()=>{
+              selectedProject = project.id;
+            }}
+            >
+            <Typography variant="body-sm">Click to edit</Typography>
+            <Typography variant="headline-md">{project.title}</Typography>
+            </Button>
+        </li>
+      {/each}
+  </ul>
+</div>
+
+

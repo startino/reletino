@@ -9,7 +9,7 @@
 
   let { relevantSubmissions, projects } = data;
 
-  let selectedProject = {"value": projects[0].id, "label": projects[0].title};
+  let selectedProject = projects[0] ? {"value": projects[0].id, "label": projects[0].title} : {"value": "", "label": "No projects"};
 
   // Arbituarilly select the first submission
   let activeSubmission = relevantSubmissions[0];
@@ -32,8 +32,6 @@
     const { success } = await res.json();
   }
 </script>
-
-
 
 <Resizable.PaneGroup direction="horizontal" class="rounded-lg border bg-background">
   <Resizable.Pane defaultSize={50}>
