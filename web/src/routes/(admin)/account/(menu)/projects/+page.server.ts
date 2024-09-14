@@ -42,15 +42,50 @@ export const actions = {
       })
     }
 
-    const { data, error, status, statusText } = await supabase
-      .from("projects")
-      .upsert({
-        ...form.data,
-      })
-      .select()
+    // Used for telling the user if the server was able to start/stop the project
+    let responseStatus: "success" | "error" = "error";
+    
+    if (form.data.running) {
+      // Start the project
+      await fetch("http://127.0.0.1:8000/start", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...form.data
+        }),
+      }).then((res) => res.json()).then((data) => responseStatus = data.status)
+    } else {
+      // Stop the project
+      await fetch("http://127.0.0.1:8000/stop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "project_id": form.data.id
+        }),
+      }).then((res) => res.json()).then((data) => responseStatus = data.status)
+    }
 
-    console.log("Status:", status);
-    console.log("Status Text:", statusText);
+    if (responseStatus == "error") {
+      return message(form, { type: "error", text: "Our server couldn't fulfill your request. Try again or contact me: jorge.lewis@starti.no" })
+    }
+
+    const { data, error, status } = await supabase
+    .from("projects")
+    .upsert({
+      ...form.data,
+    })
+    .select()
+
+    if (status == 201) {
+      return message(form, { type: "success", text: "Project Created!" })
+    }
+    else if (status == 200) {
+      return message(form, { type: "success", text: "Project Updated!" })
+    }
 
     if (error || !data) {
       return message(form, {
