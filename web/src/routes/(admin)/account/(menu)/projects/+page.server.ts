@@ -43,7 +43,7 @@ export const actions = {
       .from("projects")
       .upsert({
       ...form.data
-      })
+      }).select()
 
     if (error) {
       return message(form, {type: "error", text:"Error occured when saving project."})

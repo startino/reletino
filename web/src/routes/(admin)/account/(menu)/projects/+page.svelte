@@ -7,11 +7,12 @@
   import type { SuperValidated, Infer } from "sveltekit-superforms"
   import type { ProjectSchema } from "$lib/schemas"
   import ProjectForm from "./project-form.svelte"
+  import type { Session, SupabaseClient } from "@supabase/supabase-js"
 
   interface Props {
     data: {
-      supabase: any
-      session: any
+      supabase: SupabaseClient<any, "public", any>
+      session: Session
       projects: Tables<"projects">[]
       projectForm: SuperValidated<Infer<ProjectSchema>>
     }
@@ -22,22 +23,22 @@
   let { supabase, session, projects: dataProjects } = data
 
   let projects: Tables<"projects">[] = $state(dataProjects || [])
-  let selectedProject: string = $state("")
+  let selectedProjectId: string = $state("")
 
 
-  let newProject: Tables<"projects"> | undefined = $state()
+  let newProject: Tables<"projects"> | null = $state(null)
 
-  $inspect(session)
+  $inspect(projects)
 
 </script>
 
 <div class="flex flex-col gap-8">
   <Typography variant="display-lg">Projects</Typography>
   <Dialog.Root
-    open={selectedProject != ""}
+    open={selectedProjectId != ""}
     onOpenChange={(open) => {
       if (!open) {
-        selectedProject = ""
+        selectedProjectId = ""
       }
     }}
   >
@@ -45,10 +46,14 @@
       <Dialog.Header>
         <Dialog.Title>Project</Dialog.Title>
       </Dialog.Header>
-      {#if selectedProject != ""}
+      {#if selectedProjectId != ""}
         <ProjectForm
+          {session}
+          {supabase}
           projectForm={data.projectForm}
-          project={projects.find((project) => project.id === selectedProject) || newProject}
+          bind:projects
+          bind:selectedProjectId
+          bind:newProject
         />
       {/if}
     </Dialog.Content>
@@ -62,26 +67,34 @@
             id: crypto.randomUUID(),
             profile_id: session.user.id,
             created_at: new Date().toISOString(),
-            title: "new",
+            title: "Untitled Project",
             prompt: "",
             running: false,
             subreddits: [],
           }
-          selectedProject = newProject.id
+          selectedProjectId = newProject.id
         }}
       >
         Create New Project
       </Button>
     </li>
     {#each projects as project}
-      <li class="bg-card border rounded-md">
+      <li class="bg-card border rounded-md {project.running ? 'border-emerald-500' : 'border-orange-500'}">
         <Button
-          class="w-full h-full flex flex-col p-6"
+          class="w-full h-full flex flex-col p-6 pt-3 border"
           variant="ghost"
           onclick={() => {
-            selectedProject = project.id
+            selectedProjectId = project.id
           }}
         >
+        <div class="flex flex-row gap-x-2 place-items-center ml-auto mb-4">
+          <div class="w-3 h-3 rounded-full {project.running ? 'bg-emerald-500 animate-pulse' : 'bg-orange-500'}" />
+          {#if project.running}
+            <Typography variant="body-sm">Running</Typography>
+          {:else}
+            <Typography variant="body-sm">Not Running</Typography>
+          {/if}
+        </div>
           <Typography variant="body-sm">Click to edit</Typography>
           <Typography variant="headline-md">{project.title}</Typography>
         </Button>
