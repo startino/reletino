@@ -8,15 +8,14 @@ export const load = async ({ locals: { safeGetSession } }) => {
   if (!session) {
     redirect(303, "/login")
   }
-  const { data: relevantSubmissions, error: eRelevantSubmissions } =
+  const { data: submissions, error: eSubmissions } =
     await supabase
       .from("submissions")
-      .select("*")
-      .eq("is_relevant", true)
+      .select("*").eq("profile_id", session.user.id)
       .order("created_at", { ascending: false })
 
-  if (eRelevantSubmissions || !relevantSubmissions) {
-    console.error("Error loading submissions:", eRelevantSubmissions)
+  if (eSubmissions || !submissions) {
+    console.error("Error loading submissions:", eSubmissions)
     return { status: 500, error: new Error("Failed to load leads") }
   }
 
@@ -30,5 +29,5 @@ export const load = async ({ locals: { safeGetSession } }) => {
     return { status: 500, error: new Error("Failed to load leads") }
   }
 
-  return { projects, relevantSubmissions }
+  return { projects, submissions }
 }
