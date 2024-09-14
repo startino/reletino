@@ -13,7 +13,7 @@ class SavedSubmission(BaseModel):
     expanded to include the title and body.
     """
     author: str
-    submission_created_utc: int
+    submission_created_utc: datetime
     reddit_id: str
     subreddit: str
     title: str

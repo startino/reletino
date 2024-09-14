@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 from pprint import pprint
 from praw import Reddit
@@ -68,7 +69,7 @@ class RedditStreamWorker:
                     
                     saved_submission = SavedSubmission(
                         author=submission.author.name,
-                        submission_created_utc=submission.created_utc,
+                        submission_created_utc= datetime.fromtimestamp(submission.created_utc),
                         reddit_id=submission.id,
                         subreddit=submission.subreddit.display_name,
                         title=submission.title,
@@ -96,12 +97,13 @@ class RedditStreamWorker:
                     
             except Exception as e:
                 logging.error(f"Error in RedditStreamWorker: {e}")
-                stopped_project = self.supabase.table("projects").update({"is_running": False}).eq("id", self.project.id).execute()
-                if stopped_project.error:
-                    logging.error(f"Error stopping project: {stopped_project.error}")
-                    
+                
                 self.stop()
                 
     def stop(self):
         self._running = False
+        stopped_project = self.supabase.table("projects").update({"running": False}).eq("id", self.project.id).execute()
+        if stopped_project.error:
+            logging.error(f"Error stopping project: {stopped_project.error}")
+    
         logging.info(f"Stopping RedditStreamWorker for project: {self.project.id}")
