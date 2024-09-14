@@ -25,7 +25,7 @@ def get_subreddits(subreddits: list[str]):
     
     subreddits_formatted: str = "+".join(subreddits)
     
-    reddit = get_reddit_instance(REDDIT_USERNAME, REDDIT_PASSWORD)
+    reddit = get_reddit_instance()
 
     print("Reddit sign in success! Username: ", reddit.user.me())
 

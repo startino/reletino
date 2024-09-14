@@ -24,7 +24,11 @@
   let projects: Tables<"projects">[] = $state(dataProjects || [])
   let selectedProject: string = $state("")
 
-  $inspect(projects, selectedProject)
+
+  let newProject: Tables<"projects"> | undefined = $state()
+
+  $inspect(session)
+
 </script>
 
 <div class="flex flex-col gap-8">
@@ -44,7 +48,7 @@
       {#if selectedProject != ""}
         <ProjectForm
           projectForm={data.projectForm}
-          project={projects.find((project) => project.id === selectedProject)}
+          project={projects.find((project) => project.id === selectedProject) || newProject}
         />
       {/if}
     </Dialog.Content>
@@ -54,17 +58,15 @@
       <Button
         class="w-full"
         onclick={() => {
-          const newProject = {
+          newProject = {
             id: crypto.randomUUID(),
-            profile_id: session!.user.id,
+            profile_id: session.user.id,
             created_at: new Date().toISOString(),
-            title: "Untitled Project",
-            profile_id: session!.user.id,
-            prompt: "Empty Prompt",
+            title: "new",
+            prompt: "",
             running: false,
-            subreddits: ["saas", "startups"],
+            subreddits: [],
           }
-          projects.push(newProject)
           selectedProject = newProject.id
         }}
       >

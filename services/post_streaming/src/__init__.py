@@ -58,9 +58,9 @@ class StartStreamRequest(BaseModel):
 def start_project_stream(start_request: StartStreamRequest):
     worker = RedditStreamWorker(profile_id=start_request.profile_id, project=start_request.project)
     thread = threading.Thread(target=worker.start)
-    workers[start_request.project_id] = (worker, thread)
+    workers[start_request.project.project_id] = (worker, thread)
     thread.start()
-    return {"project_id": start_request.project_id}
+    return {"project_id": start_request.project.project_id}
 
 
 class StopStreamRequest(BaseModel):

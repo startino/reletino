@@ -36,21 +36,23 @@ export const actions = {
     const form = await superValidate(request, zod(projectSchema))
 
     if (!form.valid) {
-      return fail(400, { form })
+      return message(form, {type: "error", text:"Error occured when saving project."})
     }
 
-    console.log("form", form)
-
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("projects")
       .upsert({
       ...form.data
       })
 
     if (error) {
-      return fail(400, { form })
+      return message(form, {type: "error", text:"Error occured when saving project."})
     }
 
-    return { form }
+    if (!data) {
+      return message(form, {type: "success", text:"Project Created!"})
+    }
+
+    return message(form, {type: "success","text":'Project Updated!'});
   }
 }

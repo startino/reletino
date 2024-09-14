@@ -14,6 +14,7 @@
     import { zodClient } from "sveltekit-superforms/adapters"
     import { X } from "lucide-svelte"
     import { Typography } from "$lib/components/ui/typography"
+    import { toast } from "svelte-sonner";
 
     interface Props {
         projectForm: SuperValidated<Infer<ProjectSchema>>
@@ -27,12 +28,21 @@
         },
         validators: zodClient(projectSchema),
         resetForm: false,
-        onUpdate: () => {
-            console.log("Form updated: ", $formData)
+        onResult: (result) => {
+            console.log("Form result: ", result)
         },
+        onUpdated({ form }) {
+          if (form.message) {
+            if (form.message.type == "error") {
+              toast.error(form.message.text);
+            } else if (form.message.type == "success") {
+            toast.success(form.message.text);
+          }
+       }
+    },
     })
-
-    const { form: formData, errors, enhance } = form
+    
+    const { form: formData, errors, enhance, message } = form
 
     $effect(() => {
         $formData = project
@@ -49,25 +59,11 @@
 
 </script>
 
-{#if $errors.name}
-    <div class="bg-destructive/20 p-4 rounded-md">
-        <Typography variant="body-md" class="text-destructive">
-            There are errors in the form. Please fix them before submitting.
-            {$errors.name}
-        </Typography>
-    </div>
-{/if}
 <form method="POST" action="?/updateProject" use:enhance>
-    <Form.Field {form} name="id" class="hidden">
-        <Form.Control let:attrs>
-          <Input {...attrs} bind:value={$formData.id} />
-        </Form.Control>
-      </Form.Field>
-    <Form.Field {form} name="profile_id" class="hidden">
-        <Form.Control let:attrs>
-            <Input {...attrs} bind:value={$formData.profile_id} />
-        </Form.Control>
-    </Form.Field>
+
+  <input type="hidden" name="id" bind:value={$formData.id} />
+  <input type="hidden" name="profile_id" bind:value={$formData.profile_id} />
+    
   <Form.Field {form} name="title">
     <Form.Control let:attrs>
       <Form.Label>Title</Form.Label>
@@ -86,11 +82,6 @@
         class="w-fit border-2 border-primary"
         placeholder="Type a subreddit here..."
         bind:value={newSubreddit}
-        on:focusin={() => {
-          if (newSubreddit == defaultNewSubredditText) {
-            newSubreddit = ""
-          }
-        }}
         on:keydown={(e) => {
           if (e.key == "Enter") {
             tryAddSubreddit()

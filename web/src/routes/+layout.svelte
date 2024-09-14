@@ -3,6 +3,7 @@
   import { navigating } from "$app/stores"
   import { expoOut } from "svelte/easing"
   import { slide } from "svelte/transition"
+  import { Toaster } from "$lib/components/ui/sonner"
 
   let { children } = $props()
 </script>
@@ -20,4 +21,7 @@
     in:slide={{ delay: 100, duration: 12000, axis: "x", easing: expoOut }}
   ></div>
 {/if}
+
+<Toaster position="top-right" richColors />
+
 {@render children()}

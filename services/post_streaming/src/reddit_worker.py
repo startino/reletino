@@ -75,7 +75,7 @@ class RedditStreamWorker:
                     selftext=submission.selftext,
                     url=submission.url,
                 )
-                                              
+                
                 # Check if submission already exists
                 existing_submission = self.supabase.table("submissions").select("*").eq("url", saved_submission.url).execute()
 

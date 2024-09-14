@@ -15,6 +15,11 @@ declare global {
     }
     // interface Error {}
     // interface Platform {}
+    namespace Superforms {
+      type Message = {
+        type: 'error' | 'success', text: string
+      }
+    }
   }
 }
 
