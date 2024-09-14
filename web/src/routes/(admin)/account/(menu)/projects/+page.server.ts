@@ -11,7 +11,6 @@ export const load = async ({ locals: { safeGetSession } }) => {
     redirect(303, "/login")
   }
 
-  console.log("profile_id", session.user.id)
   const { data, error } = await supabase
     .from("projects")
     .select("*")
@@ -32,27 +31,34 @@ export const load = async ({ locals: { safeGetSession } }) => {
 
 export const actions = {
   updateProject: async ({ request }) => {
-
     const form = await superValidate(request, zod(projectSchema))
 
+    console.log("Updating project:", form.data)
+
     if (!form.valid) {
-      return message(form, {type: "error", text:"Error occured when saving project."})
+      return message(form, {
+        type: "error",
+        text: "Error occured when saving project.",
+      })
     }
 
-    const { data, error } = await supabase
+    const { data, error, status, statusText } = await supabase
       .from("projects")
       .upsert({
-      ...form.data
-      }).select()
+        ...form.data,
+      })
+      .select()
 
-    if (error) {
-      return message(form, {type: "error", text:"Error occured when saving project."})
+    console.log("Status:", status);
+    console.log("Status Text:", statusText);
+
+    if (error || !data) {
+      return message(form, {
+        type: "error",
+        text: "Error occured when saving project.",
+      })
     }
 
-    if (!data) {
-      return message(form, {type: "success", text:"Project Created!"})
-    }
-
-    return message(form, {type: "success","text":'Project Updated!'});
-  }
+    return message(form, { type: "success", text: "Project Updated!" })
+  },
 }

@@ -25,11 +25,9 @@
   let projects: Tables<"projects">[] = $state(dataProjects || [])
   let selectedProjectId: string = $state("")
 
-
   let newProject: Tables<"projects"> | null = $state(null)
 
   $inspect(projects)
-
 </script>
 
 <div class="flex flex-col gap-8">
@@ -42,7 +40,7 @@
       }
     }}
   >
-    <Dialog.Content class="">
+    <Dialog.Content class="w-full max-w-xl">
       <Dialog.Header>
         <Dialog.Title>Project</Dialog.Title>
       </Dialog.Header>
@@ -79,7 +77,11 @@
       </Button>
     </li>
     {#each projects as project}
-      <li class="bg-card border rounded-md {project.running ? 'border-emerald-500' : 'border-orange-500'}">
+      <li
+        class="bg-card border rounded-md {project.running
+          ? 'border-emerald-500'
+          : 'border-orange-500'}"
+      >
         <Button
           class="w-full h-full flex flex-col p-6 pt-3 border"
           variant="ghost"
@@ -87,15 +89,18 @@
             selectedProjectId = project.id
           }}
         >
-        <div class="flex flex-row gap-x-2 place-items-center ml-auto mb-4">
-          <div class="w-3 h-3 rounded-full {project.running ? 'bg-emerald-500 animate-pulse' : 'bg-orange-500'}" />
-          {#if project.running}
-            <Typography variant="body-sm">Running</Typography>
-          {:else}
-            <Typography variant="body-sm">Not Running</Typography>
-          {/if}
-        </div>
-          <Typography variant="body-sm">Click to edit</Typography>
+          <div class="flex flex-row gap-x-2 place-items-center ml-auto mb-4">
+            <div
+              class="w-3 h-3 rounded-full {project.running
+                ? 'bg-emerald-500 animate-pulse'
+                : 'bg-orange-500'}"
+            > </div>
+            {#if project.running}
+              <Typography variant="body-sm">Running</Typography>
+            {:else}
+              <Typography variant="body-sm">Not Running</Typography>
+            {/if}
+          </div>
           <Typography variant="headline-md">{project.title}</Typography>
         </Button>
       </li>
