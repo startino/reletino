@@ -3,7 +3,7 @@
   import DataTable from "$lib/components/ui/data-table/data-table.svelte"
   import * as ToggleGroup from "$lib/components/ui/toggle-group"
   import * as Select from "$lib/components/ui/select"
-  import { LeadViewer } from "$lib/components/ui/lead-viewer"
+  import { SubmissionViewer } from "$lib/components/ui/submission-viewer"
   import type { Tables } from "$lib/supabase/database.types"
   import type { SupabaseClient } from "@supabase/supabase-js"
   import { Toggle } from "$lib/components/ui/toggle"
@@ -67,8 +67,6 @@
     
   })
 
-  $inspect(displaySubmissions)
-  $inspect(data)
 </script>
 
 <Resizable.PaneGroup
@@ -122,7 +120,7 @@
   <Resizable.Handle withHandle />
   <Resizable.Pane defaultSize={50}>
     {#if selectedSubmission}
-      <LeadViewer bind:submission={selectedSubmission} />
+      <SubmissionViewer {supabase} bind:submission={selectedSubmission} />
     {:else}
       <div class="flex items-center justify-center p-6">
         <p class="text-muted-foreground">No submission selected</p>

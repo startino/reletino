@@ -202,7 +202,7 @@
   {#if !newProject}
     <Dialog.Root>
       <Dialog.Trigger>
-        <Button variant="destructive" class="w-full mt-6">Delete</Button>
+        <Button variant="destructive" class="w-full">Delete</Button>
       </Dialog.Trigger>
       <Dialog.Content class="place-items-center">
         <Dialog.Header>
