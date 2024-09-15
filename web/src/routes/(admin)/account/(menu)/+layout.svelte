@@ -50,7 +50,7 @@
   class="grid grid-rows-[auto_1fr] lg:grid-rows-1 lg:grid-cols-[auto_1fr] overflow-hidden top-0 bottom-0 right-0 left-0 absolute bg-background"
 >
   <nav
-    class="w-full h-20 flex items-center justify-between lg:block lg:w-44 lg:h-dvh p-4 bg-card border text-card-foreground"
+    class="w-full h-20 flex items-center justify-between lg:block lg:w-44 lg:h-dvh p-4 bg-card  text-card-foreground"
   >
     <a href="/" class="text-xl font-bold inline lg:hidden">Relevantino</a>
     <Dialog.Root bind:open>

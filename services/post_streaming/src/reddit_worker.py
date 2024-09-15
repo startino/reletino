@@ -75,6 +75,8 @@ class RedditStreamWorker:
                         title=submission.title,
                         selftext=submission.selftext,
                         url=submission.url,
+                        is_relevant=evaluation.is_relevant,
+                        reasoning=evaluation.reasoning,
                     )
                     
                     # Check if submission already exists

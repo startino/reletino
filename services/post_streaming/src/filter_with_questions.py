@@ -88,15 +88,15 @@ def filter_with_questions(
                 print(f"An error occurred while filtering using questions: {e}")
                 time.sleep(1)  # Wait for 10 seconds before trying again
                 if i == 10:
-                    return Evaluation(is_relevant=False, reason="Error occurred while filtering with questions")
+                    return Evaluation(is_relevant=False, reasoning="Error occurred while filtering with questions")
 
         filter_output = FilterOutput.parse_obj(result)
 
         if question.reject_on == filter_output.answer:
             # Submission is irrelevant
-              return Evaluation(is_relevant=False, reason=f"Filtered with question: {filter_output.source}")
+              return Evaluation(is_relevant=False, reasoning=f"Filtered with question: {filter_output.source}")
         else:
             # Submission is relevant
-            return Evaluation(is_relevant=True, reason=f"Filtered with question: {filter_output.source}")
+            return Evaluation(is_relevant=True, reasoning=f"Filtered with question: {filter_output.source}")
 
   

@@ -7,7 +7,7 @@
   import type { Tables } from "$lib/supabase/database.types"
   import type { SupabaseClient } from "@supabase/supabase-js"
   import { Toggle } from "$lib/components/ui/toggle"
-  import { BookCheck, Trash } from "lucide-svelte"
+  import { BookCheck, Trash, LocateOff, CheckCheck} from "lucide-svelte"
   import { Button } from "$lib/components/ui/button"
 
   interface Props {
@@ -96,21 +96,20 @@
             </Select.Group>
           </Select.Content>
           </div>
-          
         </Select.Root>
         <div class="flex flex-row gap-2">
           <Toggle bind:pressed={includeRead} class="gap-2 bg-card">
-            <BookCheck /> Include Read 
+            <CheckCheck /> Include Read 
           </Toggle>
           <Toggle bind:pressed={includeIrrelevant} class="gap-2 bg-card">
-            <Trash /> Include Irrelevant
+            <LocateOff /> Include Irrelevant
           </Toggle>
           </div>
           
       </div>
-      <div class="overflow-y-scroll max-h-96 mt-4 flex flex-col gap-y-4 w-full">
+      <div class="overflow-y-scroll max-h-[600px] mt-4 flex flex-col gap-y-6 w-full">
         {#each displaySubmissions as submission}
-          <Button class="text-wrap h-fit bg-card" variant="outline" on:click={() => selectedSubmission = submission}>
+          <Button class="text-wrap h-fit bg-card mx-2" variant="outline" on:click={() => selectedSubmission = submission}>
             {submission.title}
           </Button>
         {/each}

@@ -4,8 +4,36 @@
   import { expoOut } from "svelte/easing"
   import { slide } from "svelte/transition"
   import { Toaster } from "$lib/components/ui/sonner"
+	import { invalidate } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import * as schemes from '$lib/theme/schemes';
+	import { getMode } from '$lib/theme/index.js';
+  import type { SupabaseClient } from "@supabase/supabase-js"
+  import type { Database } from "$lib/supabase/database.types"
+  import type { Session } from "@supabase/supabase-js"
+  
+  type Props = {
+    children: any
+    data: {
+      supabase: SupabaseClient<Database>
+      session: Session 
+    }
+  }
 
-  let { children } = $props()
+  let { children, data }: Props = $props()
+
+  let {supabase, session} = data;
+
+  onMount(() => {
+
+		const { data } = supabase.auth.onAuthStateChange((_, newUser) => {
+			if (newUser?.expires_at !== session.expires_at) {
+				invalidate('supabase:auth');
+			}
+		});
+
+		return () => data.subscription.unsubscribe();
+	});
 </script>
 
 {#if $navigating}
@@ -24,4 +52,6 @@
 
 <Toaster position="top-right" richColors />
 
-{@render children()}
+<div class="bg-background text-foreground">
+  {@render children()}  
+</div>

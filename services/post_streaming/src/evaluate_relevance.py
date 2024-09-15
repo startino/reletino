@@ -3,7 +3,6 @@ from typing import List
 import os
 from dotenv import load_dotenv
 
-from gptrim import trim
 from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import PromptTemplate
@@ -37,8 +36,7 @@ def summarize_submission(submission: Submission) -> Submission:
         temperature=0,
     )
 
-    # Trim the submission content for cost savings
-    selftext = trim(submission.selftext)
+    selftext = submission.selftext
 
     # Short submissions are not summarized
     if llm.get_num_tokens(selftext) < 150:
@@ -88,45 +86,17 @@ def summarize_submission(submission: Submission) -> Submission:
     return submission
 
 
-def evaluate_submission(submission: Submission, filter_questions: list[FilterQuestion] | None = None ) -> Evaluation:
+def evaluate_submission(submission: Submission) -> Evaluation:
     """
-    Determines the relevance of a submission using GPT-3.5-turbo,
-    optionally escalating to GPT-4-turbo for higher accuracy.
+    Evaluates the relevance of a submission using LLMs.
 
     Parameters:
     - submission: The submission object to be evaluated.
 
     Returns:
-    - is_relevant (bool): Final relevance decision based on the used model(s).
-    - total_cost (float): The total cost incurred from relevance calculations.
+    - evaluation: The evaluation object containing the relevance score and the reasoning.
     """
-
-    if filter_questions != None:
-        questions = [
-            FilterQuestion(
-                question="Is the author himself an IT person? is/was he a programmer? is/was he a software developer?",
-                reject_on=True,
-            ),
-            FilterQuestion(
-                question="Is the author currently engaged in job searching activities and promoting their technical expertise?",
-                reject_on=True,
-            ),
-            FilterQuestion(
-                question="Is the author starting a non digital business? Like a bakery, garden business, salon, etc.",
-                reject_on=True,
-            ),
-        ]
-
-        evaluation: Evaluation = filter_with_questions(submission, questions)
-        
-        if not evaluation.is_relevant:
-            print("Filtered out submission")
-            print("Source: ", evaluation.source)
-            print("Title: ", submission.title)
-            print("Selftext: ", submission.selftext)
-            print("\n")
-            return evaluation
-        
+ 
     llm = AzureChatOpenAI(
         api_key=AZURE_API_KEY,
         deployment_name="gpt-4o",
@@ -136,7 +106,6 @@ def evaluate_submission(submission: Submission, filter_questions: list[FilterQue
         max_retries=20,
     )
 
-    # Set up a parser + inject instructions into the prompt template.
     parser = JsonOutputParser(pydantic_object=Evaluation)
 
     prompt = PromptTemplate(
@@ -145,17 +114,20 @@ def evaluate_submission(submission: Submission, filter_questions: list[FilterQue
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
     chain = prompt | llm | parser
+    
+    total_cost = 0
 
     for _ in range(3):
         try:
             with get_openai_callback() as cb:
                 evaluation: Evaluation = chain.invoke(
                     {
-                        "query": f"{calculate_relevance_prompt} \n\n #POST CONTENT:\n ```{submission.title}\n{submission.selftext}```"
+                        "query": f"{calculate_relevance_prompt} \n\n # POST CONTENT \n ```{submission.title}\n{submission.selftext}```"
                     }
                 )
+                total_cost += cb.total_cost
         except Exception as e:
             print(f"An error occurred while evaluating relevance: {e}")
             time.sleep(2)
-
+            
     return evaluation

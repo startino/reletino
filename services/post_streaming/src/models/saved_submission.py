@@ -19,3 +19,4 @@ class SavedSubmission(BaseModel):
     title: str
     selftext: str
     url: str
+    is_relevant: bool

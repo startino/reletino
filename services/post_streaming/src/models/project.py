@@ -6,3 +6,4 @@ class Project(BaseModel):
     profile_id: str
     prompt: str
     subreddits: list[str]
+    running: bool | None = None
