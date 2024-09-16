@@ -7,7 +7,7 @@ authors = [
     "Jorge Lewis <jorge.lewis@futi.no>",
 ]
 readme = "README.md"
-homepage = "https://relevanti.no"
+homepage = "https://releti.no"
 repository = "https://github.com/startino/relevantino"
 documentation = "https://api.rest.futi.no/docs"
 license = "BSL-1.1 (https://github.com/startino/relevantino/blob/alpha/LICENSE)"
