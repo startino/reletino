@@ -25,7 +25,7 @@ REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD")
 REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_SERVICE_ROLE = os.getenv("SUPABASE_SERVICE_ROLE")
 
 if REDDIT_PASSWORD is None:
     raise ValueError("REDDIT_PASSWORD is not set")
@@ -40,7 +40,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+    supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
 
     res = supabase.table("projects").select("*").execute()
     
@@ -109,31 +109,3 @@ def stop_project_stream(stop_request: StopStreamRequest):
     logging.info(f"Stopped project stream: {stop_request.project_id}")
 
     return {"status": "success", "message": "Stream stopped"}
-
-
-# supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-# sleep(10)
-
-# while True:
-#     logging.info("Fetching projects from the database.")
-#     res = supabase.table("projects").select("*").execute()
-    
-#     for project_data in res.data.projects:
-#         project = Project(**project_data)
-#         worker, _ = workers.get(project.id, (None, None))
-        
-#         logging.info(f"Processing project: {project.id}, running: {project.running}")
-        
-#         # Project wasn't properly started
-#         if project.running and worker is None:
-#             logging.info(f"Starting project stream for project: {project.id}")
-#             start_project_stream(project)
-        
-#         # Project was stopped but the worker is still running
-#         if not project.running and worker is not None:
-#             logging.info(f"Stopping project stream for project: {project.id}")
-#             stop_project_stream(StopStreamRequest(project_id=project.id))
-            
-#     logging.info("Sleeping for 60 seconds before the next check.")
-#     sleep(60)

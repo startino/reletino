@@ -22,7 +22,7 @@ from src.reddit_utils import get_subreddits, get_reddit_instance
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_SERVICE_ROLE = os.getenv("SUPABASE_SERVICE_ROLE")
 
 current_directory = Path(__file__).resolve().parent
 
@@ -41,7 +41,7 @@ class RedditStreamWorker:
         self.profile_id = project.profile_id
         self.project = project
         self.subreddits = get_subreddits(project.subreddits)
-        self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+        self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
         logging.info(f"Initialized RedditStreamWorker for project: {self.project.id}")
 
     def start(self):
@@ -64,6 +64,21 @@ class RedditStreamWorker:
                         logging.debug(f"Skipping cached submission: {submission.id}")
                         continue
                     
+                    # Check if the user has credits and consume if available
+                    profile_credits = self.supabase.table("credits").select("credits").eq("profile_id", self.profile_id).execute()
+                    if profile_credits.data is None:
+                        logging.error("Error getting credits from table.")
+                        continue
+                    
+                    if profile_credits.data[0].credits >= 1:
+                        self.supabase.table("credits").update({
+                            "credits": credits.data.credits - 1
+                            }).eq("profile_id", self.profile_id).execute()
+                    else:
+                        logging.debug(f"No credits available for user: {self.profile_id}.")
+                        self.stop()
+                        break
+    
                     evaluation: Evaluation = evaluate_submission(submission=submission, project_prompt=self.project.prompt)
                     logging.debug(f"Evaluation result: {evaluation}")
                     
@@ -99,13 +114,13 @@ class RedditStreamWorker:
                     
             except Exception as e:
                 logging.error(f"Error in RedditStreamWorker: {e}")
-                
                 self.stop()
+                
                 
     def stop(self):
         self._running = False
         stopped_project = self.supabase.table("projects").update({"running": False}).eq("id", self.project.id).execute()
-        if stopped_project.error:
+        if stopped_project.data is None:
             logging.error(f"Error stopping project: {stopped_project.error}")
     
         logging.info(f"Stopping RedditStreamWorker for project: {self.project.id}")
