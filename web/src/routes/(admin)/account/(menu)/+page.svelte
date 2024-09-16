@@ -113,7 +113,7 @@
       <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-6 w-full">
         <Typography variant="headline-md" class="text-left">Submissions ({displaySubmissions.length})</Typography>
         {#each displaySubmissions as submission}
-          <Button class="text-wrap text-left h-fit mx-2 grid grid-cols-7 {selectedSubmission == submission ? "bg-popover" : ""}" variant="outline"  on:click={() => selectedSubmission = submission}>
+          <Button class="text-wrap text-left h-fit mx-2 grid grid-cols-7 {selectedSubmission == submission ? "bg-accent" : ""}" variant="outline"  on:click={() => selectedSubmission = submission}>
             <div class="col-span-6">
               {submission.title} 
             </div>

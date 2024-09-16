@@ -24,16 +24,6 @@
 
   let {supabase, session} = data;
 
-  onMount(() => {
-
-		const { data } = supabase.auth.onAuthStateChange((_, newUser) => {
-			if (newUser?.expires_at !== session.expires_at) {
-				invalidate('supabase:auth');
-			}
-		});
-
-		return () => data.subscription.unsubscribe();
-	});
 </script>
 
 {#if $navigating}
