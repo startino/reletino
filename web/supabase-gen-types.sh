@@ -1,1 +1,0 @@
- pnpm dlx supabase gen types typescript --project-id kqfdfhfmozromgktmgml > src/lib/supabase/database.types.ts --debug
