@@ -6,7 +6,7 @@ authors = [
     "Jonas Lindberg <jonas.lindberg@futi.no>",
     "Jorge Lewis <jorge.lewis@futi.no>",
 ]
-readme = "./README.md"
+readme = "README.md"
 homepage = "https://relevanti.no"
 repository = "https://github.com/startino/relevantino"
 documentation = "https://api.rest.futi.no/docs"
@@ -29,3 +29,7 @@ pandas = "^2.2.1"
 python-dotenv = "^1.0.1"
 diskcache = "^5.6.3"
 pydantic = "^2.6.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
