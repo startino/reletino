@@ -83,7 +83,7 @@
             </Typography>
             </Select.Label
           >
-          <Select.Trigger class="max-w-xl mb-4">
+          <Select.Trigger class="mb-4 bg-card border-none">
             <Select.Value placeholder="Select a project" />
           </Select.Trigger>
           <Select.Content>
@@ -100,10 +100,10 @@
           </div>
         </Select.Root>
         <div class="flex flex-row gap-2">
-          <Toggle bind:pressed={includeRead} class="gap-2 bg-card">
+          <Toggle variant="outline" bind:pressed={includeRead} class="gap-2">
             <CheckCheck /> Include Read 
           </Toggle>
-          <Toggle bind:pressed={includeIrrelevant} class="gap-2 bg-card">
+          <Toggle variant="outline" bind:pressed={includeIrrelevant} class="gap-2">
             <LocateOff /> Include Irrelevant
           </Toggle>
           </div>
@@ -113,7 +113,7 @@
       <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-6 w-full">
         <Typography variant="headline-md" class="text-left">Submissions ({displaySubmissions.length})</Typography>
         {#each displaySubmissions as submission}
-          <Button class="text-wrap text-left h-fit bg-card mx-2 grid grid-cols-7" variant="outline" on:click={() => selectedSubmission = submission}>
+          <Button class="text-wrap text-left h-fit mx-2 grid grid-cols-7 {selectedSubmission == submission ? "bg-popover" : ""}" variant="outline"  on:click={() => selectedSubmission = submission}>
             <div class="col-span-6">
               {submission.title} 
             </div>

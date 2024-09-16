@@ -78,12 +78,10 @@
     </li>
     {#each projects as project}
       <li
-        class="bg-card border rounded-md {project.running
-          ? 'border-emerald-500'
-          : 'border-orange-500'}"
+        class="rounded-md bg-card"
       >
         <Button
-          class="w-full h-full flex flex-col p-6 pt-3 border"
+          class="w-full h-full flex flex-col p-8 py-12 pt-3"
           variant="ghost"
           onclick={() => {
             selectedProjectId = project.id
@@ -98,7 +96,7 @@
             {#if project.running}
               <Typography variant="body-sm">Running</Typography>
             {:else}
-              <Typography variant="body-sm">Not Running</Typography>
+              <Typography variant="body-sm">Paused</Typography>
             {/if}
           </div>
           <Typography variant="headline-md">{project.title}</Typography>

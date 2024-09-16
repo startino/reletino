@@ -114,21 +114,21 @@
     <Form.Control let:attrs>
       <Form.Label>Title</Form.Label>
       <Form.Description>This is the project's title.</Form.Description>
-      <Input {...attrs} bind:value={$formData.title} />
+      <Input {...attrs} class="max-w-sm"  bind:value={$formData.title} />
     </Form.Control>
 
     <Form.FieldErrors />
   </Form.Field>
 
-  <Form.Field {form} name="subreddits" class="flex flex-col rounded-lg border p-4 pb-0">
+  <Form.Field {form} name="subreddits" class="flex flex-col pb-0">
     <Form.Control let:attrs>
-      <div class="flex flex-row items-center justify-between">
       <div class="space-y-0.5">
         <Form.Label>Subreddits</Form.Label>
         <Form.Description>Subreddits will be shown below.</Form.Description>
       </div>
-      <Input
-        class="w-fit border-2 border-primary"
+      <div class="grid grid-cols-4 gap-3 pt-4 items-center">
+        <Input
+        class="max-w-xs"
         placeholder="Type a subreddit here..."
         bind:value={newSubreddit}
         on:keydown={(e) => {
@@ -139,10 +139,8 @@
         }}
         on:focusout={addSubreddit}
       />
-      </div>
-      <div class="grid grid-cols-4 gap-3 pt-4">
         {#if $formData.subreddits.length == 0}
-          <Typography variant="body-md" class="col-span-4 text-center">
+          <Typography variant="body-md" class="col-span-3s text-center">
             No subreddits yet.
           </Typography>
         {:else}
@@ -155,17 +153,18 @@
           <input name={attrs.name} hidden value={subreddits} />
         {/each}
 			  </Select.Root>
+       
           {#each $formData.subreddits as _, i}
             <Button
               variant="outline"
-              class="w-full h-fit rounded-md flex flex-row justify-between hover:bg-destructive/20 px-2 py-1"
+              class="rounded-md flex flex-row w-full justify-between bg-card hover:bg-destructive/20 px-2 py-1"
               on:click={() => {
                 $formData.subreddits = $formData.subreddits.filter(
                   (subreddit) => subreddit != $formData.subreddits[i],
                 )
               }}
             >
-              <Typography variant="body-md" class="">
+              <Typography variant="body-md" class="font-semibold">
                 {$formData.subreddits[i]}
               </Typography>
               <X class="text-destructive" />
@@ -181,7 +180,7 @@
     <Form.Control let:attrs>
       <Form.Label>Prompt</Form.Label>
       <Form.Description>This is the project's title.</Form.Description>
-      <Textarea {...attrs} bind:value={$formData.prompt} />
+      <Textarea {...attrs} rows={8} bind:value={$formData.prompt} />
     </Form.Control>
     <Form.FieldErrors />
   </Form.Field>
