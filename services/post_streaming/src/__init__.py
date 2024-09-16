@@ -80,9 +80,9 @@ def redirect_to_docs():
 @app.post("/start")
 def start_project_stream(project: Project):
     if project.id in workers:
-        logging.warning(f"Worker already running for project: {project.id}")
-        return {"status": "success", "message": "Stream already running"}
-    
+        logging.info(f"Restarting project stream for project: {project.id}")
+        stop_project_stream(StopStreamRequest(project_id=project.id))
+
     worker = RedditStreamWorker(project=project)
     thread = threading.Thread(target=worker.start)
     workers[project.id] = (worker, thread)

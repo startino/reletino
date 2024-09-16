@@ -24,6 +24,7 @@
 
   let {supabase, session} = data;
 
+
 </script>
 
 {#if $navigating}

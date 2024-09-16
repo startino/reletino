@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field
-from datetime import datetime, UTC
+from datetime import datetime
 from typing import Optional
 from uuid import uuid4, UUID
 
 
 class SavedSubmission(BaseModel):
     author: str
-    submission_created_utc: datetime
+    submission_created_utc: str
     reddit_id: str
     subreddit: str
     title: str

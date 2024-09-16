@@ -5,12 +5,16 @@
   import { buttonVariants } from "$lib/components/ui/button"
   import * as Dialog from "$lib/components/ui/dialog"
   import { page } from "$app/stores"
+  import { Typography } from "$lib/components/ui/typography"
+  import { Separator } from "$lib/components/ui/separator"
 
   let { data, children } = $props()
 
-  let { session } = data
+  let { session, supabase } = data
 
   let open = $state(false)
+
+  let credits = $state(0)
 
   class NavItem {
     href: string
@@ -44,6 +48,16 @@
       ),
     ]
   })
+
+  supabase.channel('credits')
+  .on(
+    'postgres_changes',
+    { event: 'UPDATE', schema: 'public', table: 'credits' },
+    (payload) => {
+      credits = payload.new.credits
+    }
+  )
+  .subscribe()
 </script>
 
 <div
@@ -106,12 +120,25 @@
         </li>
       {/each}
       <span class="flex-grow"></span>
+      <li class="my-7">
+        <a href="/account/credits" class="{buttonVariants({ variant: 'ghost' })} w-full flex flex-col place-items-center">
+          <Typography variant="body-sm" class="font-light">
+            {credits}
+          </Typography>
+          <Typography variant="body-sm" class="font-light">
+            Submissions remaining
+          </Typography>
+        </a>
+      </li>
       <li>
         <a
           href="/account/sign_out"
-          class="{buttonVariants({ variant: 'ghost' })} w-full"
+          class="{buttonVariants({ variant: 'ghost' })} w-full flex flex-col place-items-center"
         >
           Sign Out
+          <Typography variant="body-sm" class="font-light"> 
+            ({session?.user.user_metadata.full_name})
+          </Typography>
         </a>
       </li>
     </ul>

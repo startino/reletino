@@ -90,7 +90,7 @@ class RedditStreamWorker:
                 
                 saved_submission = SavedSubmission(
                     author=submission.author.name,
-                    submission_created_utc= datetime.fromtimestamp(submission.created_utc),
+                    submission_created_utc= datetime.fromtimestamp(submission.created_utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     reddit_id=submission.id,
                     subreddit=submission.subreddit.display_name,
                     title=submission.title,
@@ -99,12 +99,6 @@ class RedditStreamWorker:
                     is_relevant=evaluation.is_relevant,
                     reasoning=evaluation.reasoning,
                 )
-                
-                print(type(evaluation))
-                print(type(evaluation.dict()))
-                
-                print(type(saved_submission))
-                print(type(saved_submission.dict()))
                 
                 # Check if submission already exists
                 existing_submission = self.supabase.table("submissions").select("*").eq("url", saved_submission.url).execute()
