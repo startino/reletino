@@ -3,7 +3,6 @@ from typing import List
 import os
 from dotenv import load_dotenv
 
-from gptrim import trim
 from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import PromptTemplate

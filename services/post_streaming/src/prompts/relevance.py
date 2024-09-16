@@ -1,4 +1,3 @@
-from gptrim import trim
 import os
 
 # Get the directory of the current script file
@@ -70,7 +69,7 @@ You have the duty of going through social media posts and determining if they ar
 relevant to look into for your boss.
 """
 
-calculate_relevance_prompt = trim(f"""
+calculate_relevance_prompt = f"""
                                   # INSTRUCTIONS
                                   {roleplay}
                                   # PURPOSE
@@ -85,5 +84,4 @@ calculate_relevance_prompt = trim(f"""
                                   {examples}
 
                                                                 
-""")
-
+"""

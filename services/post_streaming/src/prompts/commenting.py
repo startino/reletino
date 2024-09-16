@@ -1,4 +1,3 @@
-from gptrim import trim
 import os
 
 # Get the directory of the current script file
@@ -61,8 +60,7 @@ You have the duty of going through Reddit posts and
 writing comments that fulfill the purpose.
 """
 
-generate_comment_prompt = trim(
-    f"""
+generate_comment_prompt = f"""
                                   # INSTRUCTIONS
                                   {roleplay}
                                   # PURPOSE
@@ -74,4 +72,4 @@ generate_comment_prompt = trim(
                                   # EXAMPLES
                                   {examples}                                                                
 """
-)
+

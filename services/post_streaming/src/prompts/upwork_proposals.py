@@ -1,4 +1,3 @@
-from gptrim import trim
 import os
 
 # Get the directory of the current script file
@@ -81,8 +80,7 @@ Imagine you are an experienced virtual assistant who is helping the company find
 clients on upwork by writing compelling proposals for the job listings.
 """
 
-generate_proposal_prompt = trim(
-    f"""
+generate_proposal_prompt = f"""
         # INSTRUCTIONS
         {roleplay}
         # PURPOSE
@@ -94,4 +92,3 @@ generate_proposal_prompt = trim(
         # EXAMPLES
         {examples}                                                                
 """
-)
