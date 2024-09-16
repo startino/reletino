@@ -86,12 +86,13 @@ def summarize_submission(submission: Submission) -> Submission:
     return submission
 
 
-def evaluate_submission(submission: Submission) -> Evaluation:
+def evaluate_submission(submission: Submission, project_prompt: str) -> Evaluation:
     """
     Evaluates the relevance of a submission using LLMs.
 
     Parameters:
     - submission: The submission object to be evaluated.
+    - project_prompt: The project's prompt to be used for the evaluation. It's the full context of the task.
 
     Returns:
     - evaluation: The evaluation object containing the relevance score and the reasoning.
@@ -109,7 +110,7 @@ def evaluate_submission(submission: Submission) -> Evaluation:
     parser = JsonOutputParser(pydantic_object=Evaluation)
 
     prompt = PromptTemplate(
-        template="Answer the user query.\n{format_instructions}\n{query}\n",
+        template="{format_instructions}\n{query}\n",
         input_variables=["query"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
@@ -122,7 +123,7 @@ def evaluate_submission(submission: Submission) -> Evaluation:
             with get_openai_callback() as cb:
                 evaluation: Evaluation = chain.invoke(
                     {
-                        "query": f"{calculate_relevance_prompt} \n\n # POST CONTENT \n ```{submission.title}\n{submission.selftext}```"
+                        "query": f"{project_prompt} \n\n # POST CONTENT \n ```{submission.title}\n{submission.selftext}```"
                     }
                 )
                 total_cost += cb.total_cost

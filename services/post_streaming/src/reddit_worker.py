@@ -64,7 +64,7 @@ class RedditStreamWorker:
                         logging.debug(f"Skipping cached submission: {submission.id}")
                         continue
                     
-                    evaluation: Evaluation = evaluate_submission(submission=submission)
+                    evaluation: Evaluation = evaluate_submission(submission=submission, project_prompt=self.project.prompt)
                     logging.debug(f"Evaluation result: {evaluation}")
                     
                     saved_submission = SavedSubmission(
