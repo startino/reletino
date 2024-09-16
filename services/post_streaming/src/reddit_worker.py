@@ -67,7 +67,7 @@ class RedditStreamWorker:
                 
                 profile_credits = self.supabase.table("credits").select("credits").eq("profile_id", self.profile_id).execute()
                 
-                if profile_credits.data is None:
+                if len(profile_credits.data) == 0:
                     logging.error("Error getting credits from table.")
                     continue
                 
@@ -87,7 +87,6 @@ class RedditStreamWorker:
                 if evaluation is None:
                     logging.error(f"Error evaluating submission: {submission.id}")
                     continue
-                    
                 
                 saved_submission = SavedSubmission(
                     author=submission.author.name,
@@ -101,8 +100,15 @@ class RedditStreamWorker:
                     reasoning=evaluation.reasoning,
                 )
                 
+                print(type(evaluation))
+                print(type(evaluation.dict()))
+                
+                print(type(saved_submission))
+                print(type(saved_submission.dict()))
+                
                 # Check if submission already exists
                 existing_submission = self.supabase.table("submissions").select("*").eq("url", saved_submission.url).execute()
+                
                 if len(existing_submission.data) > 0:
                     logging.info(f"Submission already exists: {saved_submission.url}")
                     continue
@@ -111,8 +117,8 @@ class RedditStreamWorker:
                     {
                         "profile_id": self.profile_id,
                         "project_id": self.project.id,
-                        **json.loads(json.dumps(saved_submission.model_dump(), default=str)),
-                        **json.loads(json.dumps(evaluation, default=str)),
+                        **saved_submission.dict(),
+                        **evaluation.dict(),
                     }
                 ).execute()
                 logging.info(f"Inserted new submission: {submission.id}")
