@@ -59,7 +59,7 @@ async def lifespan(_: FastAPI):
             stop_project_stream(StopStreamRequest(project_id=project.id))
             
     yield
-    await FastAPILimiter.close()
+
 
 app = FastAPI(lifespan=lifespan)
 

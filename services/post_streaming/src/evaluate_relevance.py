@@ -9,7 +9,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser, PydanticOutputParser
 from langchain_community.callbacks import get_openai_callback
 
-from src.models import Evaluation, Evaluation, FilterOutput, FilterQuestion
+from src.models import Evaluation
 from src.prompts import calculate_relevance_prompt, context as company_context, purpose
 from src.filter_with_questions import filter_with_questions
 
@@ -86,7 +86,7 @@ def summarize_submission(submission: Submission) -> Submission:
     return submission
 
 
-def evaluate_submission(submission: Submission, project_prompt: str) -> Evaluation:
+def evaluate_submission(submission: Submission, project_prompt: str) -> Evaluation | None:
     """
     Evaluates the relevance of a submission using LLMs.
 
@@ -107,21 +107,24 @@ def evaluate_submission(submission: Submission, project_prompt: str) -> Evaluati
         max_retries=20,
     )
 
-    parser = JsonOutputParser(pydantic_object=Evaluation)
+    parser = PydanticOutputParser(pydantic_object=Evaluation)
 
     prompt = PromptTemplate(
         template="{format_instructions}\n{query}\n",
         input_variables=["query"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
+    
     chain = prompt | llm | parser
     
     total_cost = 0
+    
+    evaluation: Evaluation | None = None
 
     for _ in range(3):
         try:
             with get_openai_callback() as cb:
-                evaluation: Evaluation = chain.invoke(
+                evaluation = chain.invoke(
                     {
                         "query": f"{project_prompt} \n\n # POST CONTENT \n ```{submission.title}\n{submission.selftext}```"
                     }
