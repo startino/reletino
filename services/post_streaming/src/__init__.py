@@ -7,11 +7,13 @@ from time import sleep
 
 from dotenv import load_dotenv
 from fastapi.concurrency import asynccontextmanager
+from fastapi_limiter import FastAPILimiter
 from pydantic import BaseModel
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+import redis
 from supabase import create_client
 
 from src.models.project import Project
@@ -36,7 +38,30 @@ workers = {}
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    supabase = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    res = supabase.table("projects").select("*").execute()
+    
+    for project_data in res.data:
+        project = Project(**project_data)
+        worker, _ = workers.get(project.id, (None, None))
+                
+        # Project wasn't properly started
+        if project.running and worker is None:
+            logging.info(f"Starting project stream for project: {project.id}")
+            start_project_stream(project)
+        
+        # Project was stopped but the worker is still running
+        if not project.running and worker is not None:
+            logging.info(f"Stopping project stream for project: {project.id}")
+            stop_project_stream(StopStreamRequest(project_id=project.id))
+            
+    yield
+    await FastAPILimiter.close()
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -50,6 +75,7 @@ app.add_middleware(
 def redirect_to_docs():
     logging.info("Redirecting to /docs")
     return RedirectResponse(url="/docs")
+
 
 @app.post("/start")
 def start_project_stream(project: Project):

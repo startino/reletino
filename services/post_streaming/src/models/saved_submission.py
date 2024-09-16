@@ -20,3 +20,4 @@ class SavedSubmission(BaseModel):
     selftext: str
     url: str
     is_relevant: bool
+    reasoning: str
