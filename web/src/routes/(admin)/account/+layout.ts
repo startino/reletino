@@ -1,37 +1,46 @@
-import {
-  PUBLIC_SUPABASE_ANON_KEY,
-  PUBLIC_SUPABASE_URL,
-} from "$env/static/public"
-import { createBrowserClient } from "@supabase/ssr"
-import type { Tables } from "$lib/DatabaseDefinitions"
-import { redirect } from "@sveltejs/kit"
+import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr'
+import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
+import type { LayoutLoad } from './$types'
+import type { Tables } from '$lib/supabase'
 
-export const load = async ({ data, depends, url }) => {
-  depends("supabase:auth")
+export const load: LayoutLoad = async ({ data, depends, fetch }) => {
+  /**
+   * Declare a dependency so the layout can be invalidated, for example, on
+   * session refresh.
+   */
+  depends('supabase:auth')
 
-  const supabase = createBrowserClient(
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY,
-  )
+  const supabase = isBrowser()
+    ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+        global: {
+          fetch,
+        },
+      })
+    : createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+        global: {
+          fetch,
+        },
+        cookies: {
+          getAll() {
+            return data.cookies
+          },
+        },
+      })
 
+  /**
+   * It's fine to use `getSession` here, because on the client, `getSession` is
+   * safe, and on the server, it reads `session` from the `LayoutData`, which
+   * safely checked the session using `safeGetSession`.
+   */
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const profile: Tables<"profiles"> | null = data.profile
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const createProfilePath = "/account/create_profile"
-  const signOutPath = "/account/sign_out"
-  if (
-    profile &&
-    !_hasFullProfile(profile) &&
-    url.pathname !== createProfilePath &&
-    url.pathname !== signOutPath
-  ) {
-    redirect(303, createProfilePath)
-  }
-
-  return { supabase, session, profile }
+  return { ...data, session, supabase, user }
 }
 
 export const _hasFullProfile = (profile: Tables<"profiles"> | null) => {
