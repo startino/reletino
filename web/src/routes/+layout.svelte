@@ -12,15 +12,7 @@
   import type { Database } from "$lib/supabase/database.types"
   import type { Session } from "@supabase/supabase-js"
   
-  type Props = {
-    children: any
-    data: {
-      supabase: SupabaseClient<Database>
-      session: Session 
-    }
-  }
-
-  let { children, data }: Props = $props()
+  let { children, data } = $props()
 
 </script>
 
