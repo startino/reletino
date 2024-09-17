@@ -22,9 +22,6 @@
 
   let { children, data }: Props = $props()
 
-  let {supabase, session} = data;
-
-
 </script>
 
 {#if $navigating}

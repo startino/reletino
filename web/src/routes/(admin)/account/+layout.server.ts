@@ -4,6 +4,7 @@ export const load = async ({ locals: { supabase, safeGetSession } }) => {
   const { session, user } = await safeGetSession()
 
   if (!session) {
+    console.log("No session found in /account server layout")
     redirect(303, "/login")
   }
 

@@ -6,6 +6,7 @@ export const load = async ({ locals: { safeGetSession } }) => {
   const { session } = await safeGetSession()
 
   if (!session) {
+    console.log("No session found in /(menu)/account")
     redirect(303, "/login")
   }
   const { data: submissions, error: eSubmissions } =

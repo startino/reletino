@@ -69,8 +69,10 @@ const authGuard: Handle = async ({ event, resolve }) => {
       session?.user?.is_anonymous &&
       event.url.pathname === "/login/sign_up"
     ) {
+      console.log("User is anonymous, redirecting to /login/sign_up")
       return resolve(event)
     } else if (session) {
+      console.log("Session exists. redirecting to /account")
       return redirect(303, "/account")
     }
   }
