@@ -21,9 +21,9 @@
 
   let { data }: Props = $props()
 
-  const supabase = data.supabase;
+  const { supabase } = data;
 
-  let selectedProject: {label: string, value: string} | undefined = $state({label: data.projects[0].title, value: data.projects[0].id})
+  let selectedProject: {label: string, value: string} | undefined = $state(data.projects.length > 0 ? {label: data.projects[0].title, value: data.projects[0].id} : undefined)
 
   let submissions: Tables<'submissions'>[] = $state(data.submissions || [])
 
@@ -70,74 +70,83 @@
 
 </script>
 
-<div class="grid grid-cols-5 grid-rows-5 gap-6 h-full"
->
-    <div class="flex flex-col p-2 col-span-2 row-span-5">
-      <div class="flex flex-col place-items-start w-full justify-between mb-4">
-        <Select.Root portal={null} bind:selected={selectedProject}>
-          <div class="flex flex-col gap-y-0.5">
-            <Select.Label class="text-left pl-0"
-            >
-            <Typography variant="headline-md">
-              Project:
-            </Typography>
-            </Select.Label
-          >
-          <Select.Trigger class="mb-4 bg-card border-none">
-            <Select.Value placeholder="Select a project" />
-          </Select.Trigger>
-          <Select.Content>
-            <Select.Group>
-              {#each data.projects as project}
-                <Select.Item
-                  value={project.id}
-                  label={project.title}
-                  class="text-primary">{project.title}</Select.Item
-                >
-              {/each}
-            </Select.Group>
-          </Select.Content>
-          </div>
-        </Select.Root>
-        <div class="flex flex-row gap-2">
-          <Toggle variant="outline" bind:pressed={includeRead} class="gap-2">
-            <CheckCheck /> Include Read 
-          </Toggle>
-          <Toggle variant="outline" bind:pressed={includeIrrelevant} class="gap-2">
-            <LocateOff /> Include Irrelevant
-          </Toggle>
-          </div>
-          
-      </div>
-
-      <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-6 w-full">
-        <Typography variant="headline-md" class="text-left">Submissions ({displaySubmissions.length})</Typography>
-        {#each displaySubmissions as submission}
-          <Button class="text-wrap text-left h-fit mx-2 grid grid-cols-7 {selectedSubmission == submission ? "bg-accent" : ""}" variant="outline"  on:click={() => selectedSubmission = submission}>
-            <div class="col-span-6">
-              {submission.title} 
-            </div>
-            <div class="ml-auto col-span-1">
-              {#if submission.done}
-              <CheckCheck class="w-5" />
-            {/if}
-            {#if !submission.is_relevant}
-              <LocateOff class="w-5 " />
-            {/if}
-            </div>
-          </Button>
-        {/each}
-  
-      </div>
-    </div>
-
-    <div class="col-span-3 row-span-5">
-    {#if selectedSubmission}
-      <SubmissionViewer {supabase} bind:submission={selectedSubmission} />
-    {:else}
-      <div class="flex items-center justify-center p-6">
-        <p class="text-muted-foreground">No submission selected</p>
-      </div>
-    {/if}
-    </div>
+{#if data.projects.length == 0 }
+<div class="flex flex-col place-items-center gap-6">
+  <Typography variant="headline-lg" class="text-center">
+    No projects found
+  </Typography>
+  <Button class="w-fit" href="/account/projects">Create a new project</Button>
 </div>
+{:else}
+  <div class="grid grid-cols-5 grid-rows-5 gap-6 h-full"
+  >
+      <div class="flex flex-col p-2 col-span-2 row-span-5">
+        <div class="flex flex-col place-items-start w-full justify-between mb-4">
+          <Select.Root portal={null} bind:selected={selectedProject}>
+            <div class="flex flex-col gap-y-0.5">
+              <Select.Label class="text-left pl-0"
+              >
+              <Typography variant="headline-md">
+                Project:
+              </Typography>
+              </Select.Label
+            >
+            <Select.Trigger class="mb-4 bg-card border-none">
+              <Select.Value placeholder="Select a project" />
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Group>
+                {#each data.projects as project}
+                  <Select.Item
+                    value={project.id}
+                    label={project.title}
+                    class="text-primary">{project.title}</Select.Item
+                  >
+                {/each}
+              </Select.Group>
+            </Select.Content>
+            </div>
+          </Select.Root>
+          <div class="flex flex-row gap-2">
+            <Toggle variant="outline" bind:pressed={includeRead} class="gap-2">
+              <CheckCheck /> Include Read 
+            </Toggle>
+            <Toggle variant="outline" bind:pressed={includeIrrelevant} class="gap-2">
+              <LocateOff /> Include Irrelevant
+            </Toggle>
+            </div>
+            
+        </div>
+
+        <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-6 w-full">
+          <Typography variant="headline-md" class="text-left">Submissions ({displaySubmissions.length})</Typography>
+          {#each displaySubmissions as submission}
+            <Button class="text-wrap text-left h-fit mx-2 grid grid-cols-7 {selectedSubmission == submission ? "bg-accent" : ""}" variant="outline"  on:click={() => selectedSubmission = submission}>
+              <div class="col-span-6">
+                {submission.title} 
+              </div>
+              <div class="ml-auto col-span-1">
+                {#if submission.done}
+                <CheckCheck class="w-5" />
+              {/if}
+              {#if !submission.is_relevant}
+                <LocateOff class="w-5 " />
+              {/if}
+              </div>
+            </Button>
+          {/each}
+    
+        </div>
+      </div>
+
+      <div class="col-span-3 row-span-5">
+      {#if selectedSubmission}
+        <SubmissionViewer {supabase} bind:submission={selectedSubmission} />
+      {:else}
+        <div class="flex items-center justify-center p-6">
+          <p class="text-muted-foreground">No submission selected</p>
+        </div>
+      {/if}
+      </div>
+  </div>
+{/if}

@@ -57,9 +57,9 @@
     </Dialog.Content>
   </Dialog.Root>
   <ul class="grid grid-cols-3 gap-4">
-    <li class="col-span-3">
+    <li class="col-span-3 mx-auto">
       <Button
-        class="w-full"
+        class=""
         onclick={() => {
           newProject = {
             id: crypto.randomUUID(),

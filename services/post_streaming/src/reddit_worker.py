@@ -65,7 +65,7 @@ class RedditStreamWorker:
                 
                 # Check if the user has credits and consume if available
                 
-                profile_credits = self.supabase.table("credits").select("credits").eq("profile_id", self.profile_id).execute()
+                profile_credits = self.supabase.table("usage").select("credits").eq("profile_id", self.profile_id).execute()
                 
                 if len(profile_credits.data) == 0:
                     logging.error("Error getting credits from table.")
@@ -74,7 +74,7 @@ class RedditStreamWorker:
                 no_of_credits = profile_credits.data[0]["credits"]
                 
                 if no_of_credits >= 1:
-                    self.supabase.table("credits").update({
+                    self.supabase.table("usage").update({
                         "credits": no_of_credits - 1
                         }).eq("profile_id", self.profile_id).execute()
                 else:

@@ -7,14 +7,17 @@
   import { page } from "$app/stores"
   import { Typography } from "$lib/components/ui/typography"
   import { Separator } from "$lib/components/ui/separator"
+  import * as Tooltip from "$lib/components/ui/tooltip"
+  import { Info } from "lucide-svelte"
+  import { sub } from "date-fns"
 
   let { data, children } = $props()
 
-  let { session, supabase } = data
+  let { session, supabase, usage } = data
 
   let open = $state(false)
 
-  let credits = $state(0)
+  let credits = $state(usage ? usage.credits : 69)
 
   class NavItem {
     href: string
@@ -40,19 +43,16 @@
       new NavItem("/account/projects", "Projects", (href) =>
         $page.url.pathname.startsWith(href),
       ),
-      new NavItem("/account/billing", "Billing", (href) =>
-        $page.url.pathname.startsWith(href),
-      ),
       new NavItem("/account/settings", "Account", (href) =>
         $page.url.pathname.startsWith(href),
       ),
     ]
   })
 
-  supabase.channel('credits')
+  supabase.channel('usage')
   .on(
     'postgres_changes',
-    { event: 'UPDATE', schema: 'public', table: 'credits' },
+    { event: 'UPDATE', schema: 'public', table: 'usage' },
     (payload) => {
       credits = payload.new.credits
     }
@@ -102,7 +102,7 @@
         </ul>
       </Dialog.Content>
     </Dialog.Root>
-    <ul class="hidden flex-col h-full lg:flex">
+    <ul class="hidden flex-col h-full lg:flex items-center">
       <li class="mb-6">
         <a href="/" class="text-xl font-bold">Relevantino</a>
       </li>
@@ -120,15 +120,26 @@
         </li>
       {/each}
       <span class="flex-grow"></span>
-      <li class="my-7">
-        <a href="/account/credits" class="{buttonVariants({ variant: 'ghost' })} w-full flex flex-col place-items-center">
-          <Typography variant="body-sm" class="font-light">
-            {credits}
-          </Typography>
-          <Typography variant="body-sm" class="font-light">
-            Submissions remaining
-          </Typography>
-        </a>
+      <li class="my-7 w-full">
+        <Tooltip.Root>
+          <Tooltip.Trigger class="w-full">
+            <div class="flex flex-col border rounded-md p-2 w-full relative">
+              <Info class="right-2 w-5 absolute" />
+              <Typography variant="body-sm" class="font-light pt-2">
+                {credits}
+              </Typography>
+              <Typography variant="body-sm" class="font-light">
+                Credits remaining
+              </Typography>
+            </div>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            <Typography variant="body-sm" class="font-light">
+              1 submission = 1 credit. <br/>
+              Contact me if you run out of credits: jorge.lewis@starti.no
+            </Typography>
+          </Tooltip.Content>
+        </Tooltip.Root>
       </li>
       <li>
         <a
