@@ -32,7 +32,7 @@
       const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}`
       const cells = [submission.author, submission.url, "", formattedDate]
       // "	" is the special key that Google sheets uses to separate cells.
-      // Select the text to actually see the character since my theme can't see
+      // Select the text to actually see the character s`in`ce my theme can't see
       // it by default lol
       await navigator.clipboard.writeText(cells.join("	"))
       toast.success("submission Copied", {
@@ -68,11 +68,11 @@
           Title: {submission.title}
           </Typography>
           <Typography variant="title-md" class="text-left">
-          Posted {formatDistanceToNowStrict(submission.submission_created_utc, {
-            addSuffix: true,
-          })},
+          Posted: {formatDistanceToNowStrict(submission.submission_created_utc, {
+            addSuffix: false,
+          })} ago,
 
-          {format(submission.submission_created_utc, "dd/MM")}
+          on  {format(submission.submission_created_utc, "dd/MM")}
         </Typography>
         <Typography variant="title-md" class="text-left">Author: {submission.author}</Typography>
         <Typography variant="title-md" class="text-left">Subredit: {submission.subreddit}</Typography>

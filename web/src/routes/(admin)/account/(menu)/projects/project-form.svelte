@@ -46,8 +46,6 @@
     delayMs: 400,
     timeoutMs: 3000,
     onSubmit: async () => {
-      console.log("subreddits", $formData.subreddits)
-      newProject = null
     },
     validators: zodClient(projectSchema),
     resetForm: false,
@@ -55,10 +53,15 @@
       if (result.type == "success") {
         if (!projects.some(project => project.id === $formData.id)) {
           projects.push($formData as Tables<"projects">);
+        } else {
+          projects = projects.map(project => 
+            project.id === $formData.id ? $formData as Tables<"projects"> : project
+          );
         }
       }
     },
     onUpdated({ form }) {
+      newProject = null
       if (form.message) {
         if (form.message.type == "error") {
           toast.error(form.message.text)
