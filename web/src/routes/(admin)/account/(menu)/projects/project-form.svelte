@@ -6,6 +6,7 @@
   import { Input } from "$lib/components/ui/input"
   import { Textarea } from "$lib/components/ui/textarea"
   import { projectSchema, type ProjectSchema } from "$lib/schemas"
+  import { LoaderCircle, Loader } from "lucide-svelte"
   import type { Tables } from "$lib/supabase"
   import {
     superForm,
@@ -42,6 +43,8 @@
     newProject ?? projects.find((project) => project.id == selectedProjectId)!
 
   const form = superForm(projectForm, {
+    delayMs: 400,
+    timeoutMs: 3000,
     onSubmit: async () => {
       console.log("subreddits", $formData.subreddits)
       newProject = null
@@ -66,7 +69,7 @@
     },
   })
 
-  const { form: formData, errors, enhance, message } = form
+  const { form: formData, errors, enhance, message, delayed, timeout} = form
 
   $effect(() => {
     $formData = selectedProject
@@ -197,7 +200,17 @@
         <Switch includeInput {...attrs} bind:checked={$formData.running} />
       </Form.Control>
     </Form.Field>
-  <Form.Button class="mt-2">Save</Form.Button>
+  <Form.Button class="mt-2">
+    {#if $timeout}
+      <LoaderCircle class="animate-spin"/>
+    {:else if $delayed}
+      <Loader class="animate-spin"/>
+    {:else}
+    Save
+    {/if}
+    
+   
+  </Form.Button>
   {#if !newProject}
     <Dialog.Root>
       <Dialog.Trigger>
