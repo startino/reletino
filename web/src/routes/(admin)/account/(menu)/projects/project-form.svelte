@@ -203,7 +203,7 @@
         <Switch includeInput {...attrs} bind:checked={$formData.running} />
       </Form.Control>
     </Form.Field>
-  <Form.Button class="mt-2">
+  <Form.Button class="mt-2 " disabled={($timeout || $delayed)}>
     {#if $timeout}
       <LoaderCircle class="animate-spin"/>
     {:else if $delayed}
@@ -211,13 +211,11 @@
     {:else}
     Save
     {/if}
-    
-   
   </Form.Button>
   {#if !newProject}
     <Dialog.Root>
       <Dialog.Trigger>
-        <Button variant="destructive" class="w-full">Delete</Button>
+        <Button variant="destructive" class="w-full"  disabled={($timeout || $delayed)}>Delete</Button>
       </Dialog.Trigger>
       <Dialog.Content class="place-items-center">
         <Dialog.Header>

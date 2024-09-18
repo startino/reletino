@@ -101,7 +101,7 @@ class RedditStreamWorker:
                 )
                 
                 # Check if submission already exists
-                existing_submission = self.supabase.table("submissions").select("*").eq("url", saved_submission.url).execute()
+                existing_submission = self.supabase.table("submissions").select("*").eq("url", saved_submission.url).eq("project_id", self.project.id).execute()
                 
                 if len(existing_submission.data) > 0:
                     logging.info(f"Submission already exists: {saved_submission.url}")
