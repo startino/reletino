@@ -3,6 +3,7 @@ import { supabase, type Tables } from "$lib/supabase"
 import { fail, redirect } from "@sveltejs/kit"
 import { message, superValidate } from "sveltekit-superforms"
 import { zod } from "sveltekit-superforms/adapters"
+import { PUBLIC_API_URL } from "$env/static/public"
 
 export const load = async ({ locals: { safeGetSession } }) => {
   const { session } = await safeGetSession()
@@ -47,7 +48,7 @@ export const actions = {
     
     if (form.data.running) {
       // Start the project
-      await fetch("http://127.0.0.1:8000/start", {
+      await fetch(`${PUBLIC_API_URL}/start`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export const actions = {
       }).then((res) => res.json()).then((data) => responseStatus = data.status)
     } else {
       // Stop the project
-      await fetch("http://127.0.0.1:8000/stop", {
+      await fetch(`${PUBLIC_API_URL}/stop`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
