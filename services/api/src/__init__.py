@@ -7,13 +7,12 @@ from time import sleep
 
 from dotenv import load_dotenv
 from fastapi.concurrency import asynccontextmanager
-from fastapi_limiter import FastAPILimiter
 from pydantic import BaseModel
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
-import redis
+
 from supabase import create_client
 
 from src.models.project import Project
