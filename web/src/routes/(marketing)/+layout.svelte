@@ -59,7 +59,6 @@
       <span class="font-bold text-2xl mb-2 block opacity-80">Explore</span>
       <a class="hover:underline" href="/">Overview</a>
       <a class="hover:underline" href="/pricing">Pricing</a>
-      <a class="hover:underline" href="/blog">Blog</a>
       <a class="hover:underline" href="/contact_us">Contact Us</a>
       <a class="hover:underline" href="https://github.com/startino/saas-starter"
         >Github</a
