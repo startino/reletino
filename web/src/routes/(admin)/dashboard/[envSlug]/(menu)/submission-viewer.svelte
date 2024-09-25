@@ -4,6 +4,7 @@
   import { Separator } from "$lib/components/ui/separator"
   import { Textarea } from "$lib/components/ui/textarea"
   import * as Dialog from "$lib/components/ui/dialog"
+  import critino from "$lib/apis/critino"
 
   import type { Tables } from "$lib/supabase/database.types"
 
@@ -52,6 +53,48 @@
       }
       submission.done = true
       toast.success("Marked as read")
+    }
+    
+    const handleCritique = async (submission: Tables<'submissions'>) => {
+      const context = "";
+      const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
+      const response = `{"reasoning": ${submission.reasoning}, "is_relevant": ${submission.is_relevant}}`;
+      const team_name = "startino";
+      const workflow_name = submission.project_id;
+      const project_name = "reletino";
+      const agent_name = "main";
+
+      const tags: string[] = [];
+
+      // will be set by the user in the critique editor
+      const optimal: string = '';
+
+      const body = {
+          id: submission.id,
+          context,
+          query,
+          optimal,
+          response,
+          team_name,
+          project_name,
+          workflow_name,
+          agent_name,
+      };
+      console.log('body:', JSON.stringify(body, null, 2));
+      const res = await critino.POST('/critiques', { body });
+      if (res.data) {
+          window.location = res.data;
+          return;
+      }
+
+      if (res.error) {
+          console.dir(res);
+          console.error(
+              `Error:\nMessage: ${res.error.detail.message}\n${res.error.detail.traceback}`
+          );
+          toast.error(`Error sending message: ${res.error.detail.message}`);
+          return;
+      }
     }
   
 </script>
@@ -108,10 +151,10 @@
     
       <Separator />
       <div class="grid grid-cols-2 gap-6 w-full p-4">
-        <Button href="https://criti.no/startino/relevantino/{submission.project_id}" target="_blank">
+        <Button onclick={() => handleCritique(submission)} target="_blank">
           Create Critino Review <ExternalLink class="ml-2 w-5" />
          </Button>
-        <Button on:click={()=>markAsRead()}>
+        <Button onclick={()=>markAsRead()}>
           Mark as Read <CheckCheck class="ml-2 w-5" />
         </Button>
       </div>

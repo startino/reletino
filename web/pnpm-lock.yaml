@@ -47,6 +47,9 @@ dependencies:
   mode-watcher:
     specifier: ^0.4.1
     version: 0.4.1(svelte@5.0.0-next.244)
+  openapi-fetch:
+    specifier: ^0.12.2
+    version: 0.12.2
   paneforge:
     specifier: ^0.0.5
     version: 0.0.5(svelte@5.0.0-next.244)
@@ -3121,6 +3124,16 @@ packages:
     dependencies:
       mimic-fn: 4.0.0
     dev: true
+
+  /openapi-fetch@0.12.2:
+    resolution: {integrity: sha512-ctMQ4LkkSWfIDUMuf1SYuPMsQ7ePcWAkYaMPW1lCDdk4WlV3Vulq1zoyGrwnFVvrBs5t7OOqNF+EKa8SAaovEA==}
+    dependencies:
+      openapi-typescript-helpers: 0.0.13
+    dev: false
+
+  /openapi-typescript-helpers@0.0.13:
+    resolution: {integrity: sha512-z44WK2e7ygW3aUtAtiurfEACohf/Qt9g6BsejmIYgEoY4REHeRzgFJmO3ium0libsuzPc145I+8lE9aiiZrQvQ==}
+    dev: false
 
   /optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}

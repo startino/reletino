@@ -6,7 +6,7 @@
   import { Input } from "$lib/components/ui/input"
   import { Textarea } from "$lib/components/ui/textarea"
   import { projectSchema, type ProjectSchema } from "$lib/schemas"
-  import { LoaderCircle, Loader } from "lucide-svelte"
+  import { LoaderCircle, Loader, ExternalLink } from "lucide-svelte"
   import type { Tables } from "$lib/supabase"
   import {
     superForm,
@@ -185,7 +185,7 @@
   <Form.Field {form} name="prompt">
     <Form.Control let:attrs>
       <Form.Label>Prompt</Form.Label>
-      <Form.Description>This is the project's title.</Form.Description>
+      <Form.Description>This is the prompt.</Form.Description>
       <Textarea {...attrs} rows={8} bind:value={$formData.prompt} />
     </Form.Control>
     <Form.FieldErrors />
@@ -212,6 +212,10 @@
     Save
     {/if}
   </Form.Button>
+  <Button variant="secondary" href="https://critino.starti.no/startino/relatino/{selectedProjectId}" target="_blank" class="w-full" disabled={($timeout || $delayed)}>
+    Manage Critiques
+    <ExternalLink  class="ml-2 w-5"/> 
+  </Button>
   {#if !newProject}
     <Dialog.Root>
       <Dialog.Trigger>
