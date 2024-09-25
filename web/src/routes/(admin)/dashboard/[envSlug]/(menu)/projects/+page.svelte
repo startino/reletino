@@ -99,7 +99,7 @@
               <Typography variant="body-sm">Paused</Typography>
             {/if}
           </div>
-          <Typography variant="headline-md">{project.title}</Typography>
+          <Typography variant="title-lg">{project.title}</Typography>
         </Button>
       </li>
     {/each}

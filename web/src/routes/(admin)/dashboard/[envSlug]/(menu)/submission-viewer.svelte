@@ -5,6 +5,7 @@
   import { Textarea } from "$lib/components/ui/textarea"
   import * as Dialog from "$lib/components/ui/dialog"
   import critino from "$lib/apis/critino"
+  import { goto } from "$app/navigation";
 
   import type { Tables } from "$lib/supabase/database.types"
 
@@ -13,7 +14,7 @@
   import { enhance } from "$app/forms"
   import { Typography } from "$lib/components/ui/typography"
   import type { SupabaseClient } from "@supabase/supabase-js"
-  import { CheckCheck, ExternalLink } from "lucide-svelte"
+  import { CheckCheck, ExternalLink, LoaderCircle, Undo } from "lucide-svelte"
 
   interface Props {
     supabase: SupabaseClient<any, "public", any>
@@ -24,6 +25,10 @@
 
   let url = submission.url
   let subreddit = submission.subreddit
+
+  // Reactive UI
+  let critinoLoading = $state(false);
+  let markingAsRead = $state(false);
 
   // Function to copy to clipboard so I can easily copy this to my sales
   // management Google Sheet :P
@@ -45,6 +50,7 @@
   }
 
   async function markAsRead() {
+      markingAsRead = true;
       const { data, error } = await supabase.from("submissions").update({
         done: true,
       }).eq("id", submission.id).select("*")
@@ -52,13 +58,16 @@
         toast.error("Failed to mark as read");
       }
       submission.done = true
+      markingAsRead = false;
       toast.success("Marked as read")
     }
     
     const handleCritique = async (submission: Tables<'submissions'>) => {
+      critinoLoading = true;
+
       const context = "";
       const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
-      const response = `{"reasoning": ${submission.reasoning}, "is_relevant": ${submission.is_relevant}}`;
+      const response = `{"reasoning": "${submission.reasoning}"", "is_relevant": "${submission.is_relevant}"}`;
       const team_name = "startino";
       const workflow_name = submission.project_id;
       const project_name = "reletino";
@@ -83,18 +92,19 @@
       console.log('body:', JSON.stringify(body, null, 2));
       const res = await critino.POST('/critiques', { body });
       if (res.data) {
-          window.location = res.data;
+          critinoLoading= false;
+          window.open(res.data, '_blank');
           return;
       }
-
       if (res.error) {
           console.dir(res);
           console.error(
-              `Error:\nMessage: ${res.error.detail.message}\n${res.error.detail.traceback}`
+              `Error:\nMessage: ${res.error.detail?.message}\n${res.error.detail?.traceback}`
           );
-          toast.error(`Error sending message: ${res.error.detail.message}`);
+          toast.error(`Error sending message: ${res.error.detail?.message}`);
           return;
       }
+      critinoLoading = false;
     }
   
 </script>
@@ -151,11 +161,29 @@
     
       <Separator />
       <div class="grid grid-cols-2 gap-6 w-full p-4">
-        <Button onclick={() => handleCritique(submission)} target="_blank">
-          Create Critino Review <ExternalLink class="ml-2 w-5" />
-         </Button>
+        <Button onclick={() => handleCritique(submission)} target="_blank" disabled={critinoLoading}>
+          Create Critino Review
+          {#if critinoLoading}
+            <LoaderCircle class="animate-spin ml-2 w-5" />
+          {:else}
+          <ExternalLink class="ml-2 w-5" />
+          {/if}
+        </Button>
         <Button onclick={()=>markAsRead()}>
-          Mark as Read <CheckCheck class="ml-2 w-5" />
+          {#if !submission.done}
+          Mark as Read
+          {:else}
+          Mark as Unread
+          {/if}
+          {#if markingAsRead}
+            <LoaderCircle class="animate-spin ml-2 w-5" />
+          {:else}
+            {#if !submission.done}
+            <CheckCheck class="ml-2 w-5" />
+            {:else}
+            <Undo class="ml-2 w-5" />
+            {/if}
+          {/if} 
         </Button>
       </div>
     </div>

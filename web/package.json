@@ -18,7 +18,7 @@
     "@sveltejs/adapter-auto": "^3.2.0",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0-next.6",
-    "@tailwindcss/typography": "^0.5.14",
+    "@tailwindcss/typography": "^0.5.15",
     "@types/glob": "^8.1.0",
     "@types/html-to-text": "^9.0.4",
     "@types/jsdom": "^21.1.7",

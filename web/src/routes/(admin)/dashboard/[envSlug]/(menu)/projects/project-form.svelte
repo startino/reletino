@@ -212,7 +212,7 @@
     Save
     {/if}
   </Form.Button>
-  <Button variant="secondary" href="https://critino.starti.no/startino/relatino/{selectedProjectId}" target="_blank" class="w-full" disabled={($timeout || $delayed)}>
+  <Button variant="secondary" href="https://critino.starti.no/startino/projects/reletino/workflows/{selectedProjectId}" target="_blank" class="w-full">
     Manage Critiques
     <ExternalLink  class="ml-2 w-5"/> 
   </Button>
