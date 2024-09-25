@@ -4,16 +4,16 @@
   import { expoOut } from "svelte/easing"
   import { slide } from "svelte/transition"
   import { Toaster } from "$lib/components/ui/sonner"
-	import { invalidate } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import * as schemes from '$lib/theme/schemes';
-	import { getMode } from '$lib/theme/index.js';
-  import type { SupabaseClient } from "@supabase/supabase-js"
-  import type { Database } from "$lib/supabase/database.types"
-  import type { Session } from "@supabase/supabase-js"
-  
+
+  import { setEnvironmentState } from "$lib/states"
+
   let { children, data } = $props()
 
+  setEnvironmentState(data.environment)
+
+  $effect(() => {
+    setEnvironmentState(data.environment)
+  })
 </script>
 
 {#if $navigating}
@@ -33,5 +33,5 @@
 <Toaster position="top-right" richColors />
 
 <div class="bg-background text-foreground">
-  {@render children()}  
+  {@render children()}
 </div>

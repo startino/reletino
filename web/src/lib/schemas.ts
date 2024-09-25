@@ -1,5 +1,38 @@
 import { z } from "zod"
 
+export const otpCodeSchema = z.object({
+  email: z.string().email(),
+  code: z
+    .string()
+    .length(6, "Must be a 6-digit code")
+    .regex(/^\d+$/, "Must be a 6-digit code"),
+})
+
+export const signUpSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .max(16, "Password must be at most 16 characters long")
+      .regex(
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$/,
+        "For security sake, please include lowercase, uppercase letters and digits.",
+      ),
+    confirmPassword: z.string(),
+  })
+  .refine(({ password, confirmPassword }) => password === confirmPassword, {
+    message: "The passwords did not match",
+  })
+
+export const environmentSchema = z.object({
+  name: z
+    .string()
+    .min(1, "The environment name is required")
+    .max(30, "The environment name can be at most 72 charaters long")
+    .regex(/^[a-z0-9+$]/i, "Environment name must be alphanumeric"),
+})
+
 export const emailSchema = z.object({
   email: z.string().email(),
 })
@@ -86,7 +119,10 @@ export const projectSchema = z.object({
   id: z.string(),
   profile_id: z.string(),
   title: z.string().min(1, "Title is required").max(30, "Title too long"),
-  subreddits: z.array(z.string()).min(1, "Must add at least one subreddit.").max(10, "Max 10 subreddits"),
+  subreddits: z
+    .array(z.string())
+    .min(1, "Must add at least one subreddit.")
+    .max(10, "Max 10 subreddits"),
   prompt: z.string().max(3000, "Prompt too long"),
   running: z.boolean(),
 })

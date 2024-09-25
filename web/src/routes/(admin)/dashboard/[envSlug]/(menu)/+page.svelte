@@ -10,6 +10,8 @@
   import { BookCheck, Trash, LocateOff, CheckCheck} from "lucide-svelte"
   import { Button } from "$lib/components/ui/button"
   import { Typography } from "$lib/components/ui/typography"
+  import { onMount } from "svelte"
+  import { invalidate } from "$app/navigation"
 
   interface Props {
     data: {
@@ -68,6 +70,9 @@
     
   })
 
+  onMount(async () => {
+    invalidate("data:init")
+  })
 </script>
 
 {#if data.projects.length == 0 }

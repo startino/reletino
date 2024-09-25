@@ -2,8 +2,12 @@
   import { Menu } from "lucide-svelte"
   import { Button, buttonVariants } from "$lib/components/ui/button"
   import * as DropDownMenu from "$lib/components/ui/dropdown-menu"
+  import { getEnvironmentState } from "$lib/states/environment.svelte"
 
   import { WebsiteName } from "$lib/config"
+
+  let { data, children } = $props()
+  const environment = getEnvironmentState()
 </script>
 
 <div class="flex py-4 bg-primary text-primary-foreground container mx-auto">
@@ -19,10 +23,33 @@
           >Pricing</a
         >
       </li>
+      {#if data.auth.user?.is_anonymous && !environment.value}
+        <li class="md:mx-2">
+          <a href="/login/sign_in" class={buttonVariants({ variant: "ghost" })}
+            >Sign In</a
+          >
+        </li>
+      {/if}
+      {#if !data.auth.user?.is_anonymous}
+        <li class="md:mx-2">
+          <a href="/sign_out" class={buttonVariants({ variant: "ghost" })}
+            >Sign Out</a
+          >
+        </li>
+      {/if}
       <li class="md:mx-2">
-        <a href="/account" class={buttonVariants({ variant: "ghost" })}
-          >Account</a
-        >
+        {#if !environment.value}
+          <a href="/onboarding" class={buttonVariants({ variant: "ghost" })}>
+            Get Started
+          </a>
+        {:else}
+          <a
+            href="/dashboard/{environment.value.slug}"
+            class={buttonVariants({ variant: "ghost" })}
+          >
+            {environment.value.name}
+          </a>
+        {/if}
       </li>
     </ul>
 
@@ -45,7 +72,7 @@
 </div>
 
 <div class="">
-  <slot />
+  {@render children()}
 </div>
 
 <!-- Spacer grows so the footer can be at bottom on short pages -->

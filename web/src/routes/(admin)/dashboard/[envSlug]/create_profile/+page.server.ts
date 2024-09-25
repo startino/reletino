@@ -2,7 +2,7 @@ import { redirect } from "@sveltejs/kit"
 import { superValidate } from "sveltekit-superforms"
 import { zod } from "sveltekit-superforms/adapters"
 
-import { _hasFullProfile } from "../+layout"
+import { _hasFullProfile } from "../../../+layout"
 
 import { profileSchema } from "$lib/schemas"
 

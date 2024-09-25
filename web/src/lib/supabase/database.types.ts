@@ -102,7 +102,6 @@ export type Database = {
           company_name: string | null
           full_name: string | null
           id: string
-          project_id: string | null
           unsubscribed: boolean
           updated_at: string | null
           website: string | null
@@ -112,7 +111,6 @@ export type Database = {
           company_name?: string | null
           full_name?: string | null
           id: string
-          project_id?: string | null
           unsubscribed?: boolean
           updated_at?: string | null
           website?: string | null
@@ -122,7 +120,6 @@ export type Database = {
           company_name?: string | null
           full_name?: string | null
           id?: string
-          project_id?: string | null
           unsubscribed?: boolean
           updated_at?: string | null
           website?: string | null
@@ -295,20 +292,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      consume_credits: {
-        Args: {
-          input_profile_id: string
-          quantity: number
-        }
-        Returns: undefined
-      }
-      has_credits: {
-        Args: {
-          profile_id: string
-          quantity: number
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

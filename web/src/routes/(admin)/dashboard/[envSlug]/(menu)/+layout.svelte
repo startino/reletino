@@ -10,12 +10,17 @@
   import * as Tooltip from "$lib/components/ui/tooltip"
   import { Info } from "lucide-svelte"
   import { sub } from "date-fns"
+  import { getEnvironmentState } from "$lib/states/environment.svelte"
 
   let { data, children } = $props()
 
   let { session, supabase, usage } = data
 
   let open = $state(false)
+
+  const basePath = "/dashboard/"
+
+  const environment = getEnvironmentState()
 
   let credits = $state(usage ? usage.credits : 69)
 
@@ -39,32 +44,41 @@
 
   $effect(() => {
     navItems = [
-      new NavItem("/account", "Home", (href) => $page.url.pathname === href),
-      new NavItem("/account/projects", "Projects", (href) =>
-        $page.url.pathname.startsWith(href),
+      new NavItem(
+        `${basePath}${environment.value?.slug}`,
+        "Home",
+        (href) => $page.url.pathname === href,
       ),
-      new NavItem("/account/settings", "Account", (href) =>
-        $page.url.pathname.startsWith(href),
+      new NavItem(
+        `${basePath}${environment.value?.slug}/projects`,
+        "Projects",
+        (href) => $page.url.pathname.startsWith(href),
+      ),
+      new NavItem(
+        `${basePath}${environment.value?.slug}/settings`,
+        "Setting",
+        (href) => $page.url.pathname.startsWith(href),
       ),
     ]
   })
 
-  supabase.channel('usage')
-  .on(
-    'postgres_changes',
-    { event: 'UPDATE', schema: 'public', table: 'usage' },
-    (payload) => {
-      credits = payload.new.credits
-    }
-  )
-  .subscribe()
+  supabase
+    .channel("usage")
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "usage" },
+      (payload) => {
+        credits = payload.new.credits
+      },
+    )
+    .subscribe()
 </script>
 
 <div
   class="grid grid-rows-[auto_1fr] lg:grid-rows-1 lg:grid-cols-[auto_1fr] overflow-hidden top-0 bottom-0 right-0 left-0 absolute bg-background"
 >
   <nav
-    class="w-full h-20 flex items-center justify-between lg:block lg:w-44 lg:h-dvh p-4 bg-card  text-card-foreground"
+    class="w-full h-20 flex items-center justify-between lg:block lg:w-44 lg:h-dvh p-4 bg-card text-card-foreground"
   >
     <a href="/" class="text-xl font-bold inline lg:hidden">Relevantino</a>
     <Dialog.Root bind:open>
@@ -92,7 +106,7 @@
           <span class="flex-grow"></span>
           <li>
             <a
-              href="/account/sign_out"
+              href="/sign_out"
               class="{buttonVariants({ variant: 'ghost' })} w-full"
               onclick={() => (open = false)}
             >
@@ -135,7 +149,7 @@
           </Tooltip.Trigger>
           <Tooltip.Content>
             <Typography variant="body-sm" class="font-light">
-              1 submission = 1 credit. <br/>
+              1 submission = 1 credit. <br />
               Contact me if you run out of credits: jorge.lewis@starti.no
             </Typography>
           </Tooltip.Content>
@@ -143,11 +157,13 @@
       </li>
       <li>
         <a
-          href="/account/sign_out"
-          class="{buttonVariants({ variant: 'ghost' })} w-full flex flex-col place-items-center"
+          href="/sign_out"
+          class="{buttonVariants({
+            variant: 'ghost',
+          })} w-full flex flex-col place-items-center"
         >
           Sign Out
-          <Typography variant="body-sm" class="font-light"> 
+          <Typography variant="body-sm" class="font-light">
             ({session?.user.user_metadata.full_name})
           </Typography>
         </a>
