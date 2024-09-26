@@ -45,18 +45,19 @@
   const form = superForm(projectForm, {
     delayMs: 400,
     timeoutMs: 3000,
-    onSubmit: async () => {
-    },
+    onSubmit: async () => {},
     validators: zodClient(projectSchema),
     resetForm: false,
     onResult: ({ result, formElement, cancel }) => {
       if (result.type == "success") {
-        if (!projects.some(project => project.id === $formData.id)) {
-          projects.push($formData as Tables<"projects">);
+        if (!projects.some((project) => project.id === $formData.id)) {
+          projects.push($formData as Tables<"projects">)
         } else {
-          projects = projects.map(project => 
-            project.id === $formData.id ? $formData as Tables<"projects"> : project
-          );
+          projects = projects.map((project) =>
+            project.id === $formData.id
+              ? ($formData as Tables<"projects">)
+              : project,
+          )
         }
       }
     },
@@ -72,14 +73,19 @@
     },
   })
 
-  const { form: formData, errors, enhance, message, delayed, timeout} = form
+  const { form: formData, errors, enhance, message, delayed, timeout } = form
 
   $effect(() => {
     $formData = selectedProject
     console.log("project id", selectedProjectId)
   })
 
-  let subreddits: { label: string, value: string }[] = $derived($formData.subreddits.map((subreddit) => ({ label: subreddit, value: subreddit })));
+  let subreddits: { label: string; value: string }[] = $derived(
+    $formData.subreddits.map((subreddit) => ({
+      label: subreddit,
+      value: subreddit,
+    })),
+  )
 
   let newSubreddit: string = $state("")
 
@@ -109,7 +115,12 @@
   }
 </script>
 
-<form method="POST" action="?/updateProject" class="flex flex-col gap-y-4" use:enhance >
+<form
+  method="POST"
+  action="?/updateProject"
+  class="flex flex-col gap-y-4"
+  use:enhance
+>
   <input type="hidden" name="id" bind:value={$formData.id} />
   <input type="hidden" name="profile_id" bind:value={$formData.profile_id} />
   <!-- this button has to be here for disabling submit on enter when focusing on input fields-->
@@ -120,7 +131,7 @@
     <Form.Control let:attrs>
       <Form.Label>Title</Form.Label>
       <Form.Description>This is the project's title.</Form.Description>
-      <Input {...attrs} class="max-w-sm"  bind:value={$formData.title} />
+      <Input {...attrs} class="max-w-sm" bind:value={$formData.title} />
     </Form.Control>
 
     <Form.FieldErrors />
@@ -134,32 +145,28 @@
       </div>
       <div class="grid grid-cols-4 gap-3 pt-4 items-center">
         <Input
-        class="max-w-xs"
-        placeholder="Type a subreddit here..."
-        bind:value={newSubreddit}
-        on:keydown={(e) => {
-          if (e.key == "Enter") {
-            addSubreddit()
-            newSubreddit = ""
-          }
-        }}
-        on:focusout={addSubreddit}
-      />
+          class="max-w-xs"
+          placeholder="Type a subreddit here..."
+          bind:value={newSubreddit}
+          on:keydown={(e) => {
+            if (e.key == "Enter") {
+              addSubreddit()
+              newSubreddit = ""
+            }
+          }}
+          on:focusout={addSubreddit}
+        />
         {#if $formData.subreddits.length == 0}
           <Typography variant="body-md" class="col-span-3s text-center">
             No subreddits yet.
           </Typography>
         {:else}
-        <Select.Root
-        {...attrs}
-				multiple
-				selected={subreddits}
-			  >
-        {#each $formData.subreddits as subreddits}
-          <input name={attrs.name} hidden value={subreddits} />
-        {/each}
-			  </Select.Root>
-       
+          <Select.Root {...attrs} multiple selected={subreddits}>
+            {#each $formData.subreddits as subreddits}
+              <input name={attrs.name} hidden value={subreddits} />
+            {/each}
+          </Select.Root>
+
           {#each $formData.subreddits as _, i}
             <Button
               variant="outline"
@@ -190,36 +197,47 @@
     </Form.Control>
     <Form.FieldErrors />
   </Form.Field>
-    <Form.Field
-      {form}
-      name="running"
-      class="flex flex-row items-center justify-between rounded-lg border p-4"
-    >
-      <Form.Control let:attrs>
-        <div class="space-y-0.5">
-          <Form.Label>Running</Form.Label>
-          <Form.Description>Turn on to start listening for Reddit posts.</Form.Description>
-        </div>
-        <Switch includeInput {...attrs} bind:checked={$formData.running} />
-      </Form.Control>
-    </Form.Field>
-  <Form.Button class="mt-2 " disabled={($timeout || $delayed)}>
+  <Form.Field
+    {form}
+    name="running"
+    class="flex flex-row items-center justify-between rounded-lg border p-4"
+  >
+    <Form.Control let:attrs>
+      <div class="space-y-0.5">
+        <Form.Label>Running</Form.Label>
+        <Form.Description
+          >Turn on to start listening for Reddit posts.</Form.Description
+        >
+      </div>
+      <Switch includeInput {...attrs} bind:checked={$formData.running} />
+    </Form.Control>
+  </Form.Field>
+  <Form.Button class="mt-2 " disabled={$timeout || $delayed}>
     {#if $timeout}
-      <LoaderCircle class="animate-spin"/>
+      <LoaderCircle class="animate-spin" />
     {:else if $delayed}
-      <Loader class="animate-spin"/>
+      <Loader class="animate-spin" />
     {:else}
-    Save
+      Save
     {/if}
   </Form.Button>
-  <Button variant="secondary" href="https://critino.starti.no/startino/projects/reletino/workflows/{selectedProjectId}" target="_blank" class="w-full">
+  <Button
+    variant="secondary"
+    href="https://critino.starti.no/startino/projects/reletino/workflows/{selectedProjectId}"
+    target="_blank"
+    class="w-full"
+  >
     Manage Critiques
-    <ExternalLink  class="ml-2 w-5"/> 
+    <ExternalLink class="ml-2 w-5" />
   </Button>
   {#if !newProject}
     <Dialog.Root>
       <Dialog.Trigger>
-        <Button variant="destructive" class="w-full"  disabled={($timeout || $delayed)}>Delete</Button>
+        <Button
+          variant="destructive"
+          class="w-full"
+          disabled={$timeout || $delayed}>Delete</Button
+        >
       </Dialog.Trigger>
       <Dialog.Content class="place-items-center">
         <Dialog.Header>

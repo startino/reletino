@@ -77,9 +77,7 @@
       </Button>
     </li>
     {#each projects as project}
-      <li
-        class="rounded-md bg-card"
-      >
+      <li class="rounded-md bg-card">
         <Button
           class="w-full h-full flex flex-col p-8 py-12 pt-3"
           variant="ghost"
@@ -92,7 +90,7 @@
               class="w-3 h-3 rounded-full {project.running
                 ? 'bg-emerald-500 animate-pulse'
                 : 'bg-orange-500'}"
-            > </div>
+            ></div>
             {#if project.running}
               <Typography variant="body-sm">Running</Typography>
             {:else}

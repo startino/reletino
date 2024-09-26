@@ -16,7 +16,7 @@ def get_reddit_instance():
         client_id=REDDIT_CLIENT_ID,
         client_secret=REDDIT_CLIENT_SECRET,
         password=REDDIT_PASSWORD,
-        user_agent="relevantino bot by u/antopia_hk",
+        user_agent="reletino bot by u/antopia_hk",
         username=REDDIT_USERNAME,
     )
 

@@ -9,11 +9,11 @@ export const load = async ({ locals: { safeGetSession } }) => {
     console.log("No session found in /(menu)/account")
     redirect(303, "/login")
   }
-  const { data: submissions, error: eSubmissions } =
-    await supabase
-      .from("submissions")
-      .select("*").eq("profile_id", session.user.id)
-      .order("created_at", { ascending: false })
+  const { data: submissions, error: eSubmissions } = await supabase
+    .from("submissions")
+    .select("*")
+    .eq("profile_id", session.user.id)
+    .order("created_at", { ascending: false })
 
   if (eSubmissions || !submissions) {
     console.error("Error loading submissions:", eSubmissions)

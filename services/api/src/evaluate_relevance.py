@@ -13,6 +13,8 @@ from src.models import Evaluation
 from src.prompts import calculate_relevance_prompt, context as company_context, purpose
 from src.filter_with_questions import filter_with_questions
 
+from src.critino import critino, CritinoConfig
+
 # Load Enviornment variables
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -86,7 +88,7 @@ def summarize_submission(submission: Submission) -> Submission:
     return submission
 
 
-def evaluate_submission(submission: Submission, project_prompt: str) -> Evaluation | None:
+def evaluate_submission(submission: Submission, project_prompt: str, workflow_name: str) -> Evaluation | None:
     """
     Evaluates the relevance of a submission using LLMs.
 
@@ -110,8 +112,8 @@ def evaluate_submission(submission: Submission, project_prompt: str) -> Evaluati
     parser = PydanticOutputParser(pydantic_object=Evaluation)
 
     prompt = PromptTemplate(
-        template="{format_instructions}\n{query}\n",
-        input_variables=["query"],
+        template="<format-instructions>{format_instructions}</format-instructions><query>{query}</query> {examples}",
+        input_variables=["query", "examples"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
     
@@ -120,13 +122,26 @@ def evaluate_submission(submission: Submission, project_prompt: str) -> Evaluati
     total_cost = 0
     
     evaluation: Evaluation | None = None
+    
+    query = f"<project-prompt>{project_prompt}</project-prompt> <title>{submission.title}</title> <selftext>{submission.selftext}</selftext>"
+    
+    examples = critino(
+        query = query,
+        agent_name = "main",
+        config=CritinoConfig(
+            team_name="startino",
+            project_name="reletino",
+            workflow_name=workflow_name,
+        )
+    )
 
     for _ in range(3):
         try:
             with get_openai_callback() as cb:
                 evaluation = chain.invoke(
                     {
-                        "query": f"{project_prompt} \n\n # POST CONTENT \n ```{submission.title}\n{submission.selftext}```"
+                        query: query,
+                        examples: examples,
                     }
                 )
                 total_cost += cb.total_cost

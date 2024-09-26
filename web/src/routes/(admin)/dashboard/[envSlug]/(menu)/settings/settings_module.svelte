@@ -122,7 +122,7 @@
         {/if}
         {#if editable}
           <form
-            class="form-widget flex flex-col"
+            class="form-widget flex flex-col gap-y-2"
             method="POST"
             action={formTarget}
             use:superEnhance

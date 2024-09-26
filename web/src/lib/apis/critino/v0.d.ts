@@ -4,260 +4,260 @@
  */
 
 export interface paths {
-    "/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Redirect To Docs */
-        get: operations["redirect_to_docs__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/critiques/ids": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Critique Ids */
-        get: operations["get_critique_ids_critiques_ids_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/critiques/relevant": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Relevant Critiques */
-        post: operations["post_relevant_critiques_critiques_relevant_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/critiques": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Upsert A Critique */
-        post: operations["upsert_a_critique_critiques_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
+  "/": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Redirect To Docs */
+    get: operations["redirect_to_docs__get"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/critiques/ids": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get Critique Ids */
+    get: operations["get_critique_ids_critiques_ids_get"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/critiques/relevant": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Post Relevant Critiques */
+    post: operations["post_relevant_critiques_critiques_relevant_post"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/critiques": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Upsert A Critique */
+    post: operations["upsert_a_critique_critiques_post"]
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
-export type webhooks = Record<string, never>;
+export type webhooks = Record<string, never>
 export interface components {
-    schemas: {
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /** PostCritiquesRelevantRequest */
-        PostCritiquesRelevantRequest: {
-            /** Query */
-            query: string;
-            /**
-             * K
-             * @default 4
-             */
-            k: number;
-            /** Team Name */
-            team_name: string;
-            /** Project Name */
-            project_name: string;
-            /** Workflow Name */
-            workflow_name?: string | null;
-            /** Agent Name */
-            agent_name?: string | null;
-        };
-        /** PostCritiquesRelevantResult */
-        PostCritiquesRelevantResult: {
-            /** Critiques */
-            critiques: components["schemas"]["StrippedCritique"][];
-            /** Examples */
-            examples: string;
-        };
-        /** PostCritiquesRequest */
-        PostCritiquesRequest: {
-            /** Id */
-            id: string;
-            /** Context */
-            context?: string | null;
-            /** Query */
-            query?: string | null;
-            /** Optimal */
-            optimal?: string | null;
-            /** Response */
-            response?: string | null;
-            /** Team Name */
-            team_name: string;
-            /** Project Name */
-            project_name: string;
-            /** Workflow Name */
-            workflow_name: string;
-            /** Agent Name */
-            agent_name: string;
-        };
-        /** StrippedCritique */
-        StrippedCritique: {
-            /** Context */
-            context: string;
-            /** Query */
-            query: string;
-            /** Optimal */
-            optimal: string;
-        };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-        };
-    };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+  schemas: {
+    /** HTTPValidationError */
+    HTTPValidationError: {
+      /** Detail */
+      detail?: components["schemas"]["ValidationError"][]
+    }
+    /** PostCritiquesRelevantRequest */
+    PostCritiquesRelevantRequest: {
+      /** Query */
+      query: string
+      /**
+       * K
+       * @default 4
+       */
+      k: number
+      /** Team Name */
+      team_name: string
+      /** Project Name */
+      project_name: string
+      /** Workflow Name */
+      workflow_name?: string | null
+      /** Agent Name */
+      agent_name?: string | null
+    }
+    /** PostCritiquesRelevantResult */
+    PostCritiquesRelevantResult: {
+      /** Critiques */
+      critiques: components["schemas"]["StrippedCritique"][]
+      /** Examples */
+      examples: string
+    }
+    /** PostCritiquesRequest */
+    PostCritiquesRequest: {
+      /** Id */
+      id: string
+      /** Context */
+      context?: string | null
+      /** Query */
+      query?: string | null
+      /** Optimal */
+      optimal?: string | null
+      /** Response */
+      response?: string | null
+      /** Team Name */
+      team_name: string
+      /** Project Name */
+      project_name: string
+      /** Workflow Name */
+      workflow_name: string
+      /** Agent Name */
+      agent_name: string
+    }
+    /** StrippedCritique */
+    StrippedCritique: {
+      /** Context */
+      context: string
+      /** Query */
+      query: string
+      /** Optimal */
+      optimal: string
+    }
+    /** ValidationError */
+    ValidationError: {
+      /** Location */
+      loc: (string | number)[]
+      /** Message */
+      msg: string
+      /** Error Type */
+      type: string
+    }
+  }
+  responses: never
+  parameters: never
+  requestBodies: never
+  headers: never
+  pathItems: never
 }
-export type $defs = Record<string, never>;
+export type $defs = Record<string, never>
 export interface operations {
-    redirect_to_docs__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
-    get_critique_ids_critiques_ids_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string[];
-                };
-            };
-        };
-    };
-    post_relevant_critiques_critiques_relevant_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PostCritiquesRelevantRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PostCritiquesRelevantResult"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    upsert_a_critique_critiques_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PostCritiquesRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
+  redirect_to_docs__get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": unknown
+        }
+      }
+    }
+  }
+  get_critique_ids_critiques_ids_get: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": string[]
+        }
+      }
+    }
+  }
+  post_relevant_critiques_critiques_relevant_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PostCritiquesRelevantRequest"]
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["PostCritiquesRelevantResult"]
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"]
+        }
+      }
+    }
+  }
+  upsert_a_critique_critiques_post: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PostCritiquesRequest"]
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": string
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"]
+        }
+      }
+    }
+  }
 }

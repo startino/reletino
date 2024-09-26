@@ -8,9 +8,9 @@ authors = [
 ]
 readme = "README.md"
 homepage = "https://releti.no"
-repository = "https://github.com/startino/relevantino"
+repository = "https://github.com/startino/reletino"
 documentation = "https://api.rest.futi.no/docs"
-license = "BSL-1.1 (https://github.com/startino/relevantino/blob/alpha/LICENSE)"
+license = "BSL-1.1 (https://github.com/startino/reletino/blob/alpha/LICENSE)"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
@@ -30,6 +30,7 @@ python-dotenv = "^1.0.1"
 diskcache = "^5.6.3"
 pydantic = "^2.6.4"
 fastapi-cli = "^0.0.5"
+html2text = "^2024.2.26"
 
 [build-system]
 requires = ["poetry-core"]

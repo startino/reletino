@@ -2,7 +2,7 @@
   import SettingsModule from "./settings_module.svelte"
 
   let { data } = $props()
-  let { session, profile, environment} = data
+  let { session, profile, environment } = data
 </script>
 
 <svelte:head>

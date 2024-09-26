@@ -45,13 +45,13 @@
   {#if !envCheck}
     <Card.Root>
       <Card.Header>
-        <Card.Title>Create a new environment</Card.Title>
+        <Card.Title>Create a new team</Card.Title>
       </Card.Header>
       <Card.Content>
         <form method="post" use:enhance>
           <Form.Field {form} name="name" class="mb-2">
             <Form.Control let:attrs>
-              <Form.Label>Environment Name</Form.Label>
+              <Form.Label>Team Name</Form.Label>
               <Input {...attrs} bind:value={$formData.name} />
               <Form.FieldErrors />
             </Form.Control>

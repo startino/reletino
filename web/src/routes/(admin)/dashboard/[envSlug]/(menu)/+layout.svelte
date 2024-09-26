@@ -80,7 +80,7 @@
   <nav
     class="w-full h-20 flex items-center justify-between lg:block lg:w-44 lg:h-dvh p-4 bg-card text-card-foreground"
   >
-    <a href="/" class="text-xl font-bold inline lg:hidden">Relevantino</a>
+    <a href="/" class="text-xl font-bold inline lg:hidden">reletino</a>
     <Dialog.Root bind:open>
       <Dialog.Trigger class="lg:hidden"
         ><button aria-label="open navigation"><Menu /></button></Dialog.Trigger
@@ -118,7 +118,7 @@
     </Dialog.Root>
     <ul class="hidden flex-col h-full lg:flex items-center">
       <li class="mb-6">
-        <a href="/" class="text-xl font-bold">Relevantino</a>
+        <a href="/" class="text-xl font-bold">reletino</a>
       </li>
 
       {#each navItems as item}
@@ -171,7 +171,7 @@
     </ul>
   </nav>
 
-  <div class="w-full px-6 lg:px-12 py-3 lg:py-6 overflow-y-scroll relative">
+  <div class="w-full px-6 lg:px-10 py-3 lg:py-6 overflow-y-scroll relative">
     {#if session?.user.is_anonymous}
       <p
         class="text-sm bg-destructive text-destructive-foreground sticky px-4 py-2 text-center rounded-sm mb-4 md:text-base"

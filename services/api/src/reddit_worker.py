@@ -82,7 +82,7 @@ class RedditStreamWorker:
                     self.stop()
                     break
 
-                evaluation: Evaluation | None = evaluate_submission(submission=submission, project_prompt=self.project.prompt)
+                evaluation: Evaluation | None = evaluate_submission(submission=submission, project_prompt=self.project.prompt, workflow_name=self.project.title)
                 
                 if evaluation is None:
                     logging.error(f"Error evaluating submission: {submission.id}")

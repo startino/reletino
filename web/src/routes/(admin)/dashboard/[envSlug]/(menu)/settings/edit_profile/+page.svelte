@@ -34,11 +34,5 @@
       initialValue: profile?.company_name ?? "",
       maxlength: 50,
     },
-    {
-      id: "website",
-      label: "Company Website",
-      initialValue: profile?.website ?? "",
-      maxlength: 50,
-    },
   ]}
 />
