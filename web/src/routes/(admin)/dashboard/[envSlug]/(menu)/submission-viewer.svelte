@@ -72,7 +72,7 @@
     const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`
     const response = `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`
     const team_name = $page.data.environment.slug
-    const workflow_name = submission.project_id
+    const workflow_name = projectName
     const project_name = projectName
     const agent_name = "main"
 

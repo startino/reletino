@@ -41,16 +41,19 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 async def lifespan(_: FastAPI):
     supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
 
-    res = supabase.table("projects").select("*").execute()
-    
-    for project_data in res.data:
+    project_res = supabase.table("projects").select("*").eq("running", True).execute()
+        
+    for project_data in project_res.data:
+        
+        profile_res = supabase.table("profiles").select("*, environments (*)").eq("id", project_data["profile_id"]).execute()
+        logging.info(f"Profile: {profile_res.data}")
         project = Project(**project_data)
         worker, _ = workers.get(project.id, (None, None))
                 
         # Project wasn't properly started
         if project.running and worker is None:
             logging.info(f"Starting project stream for project: {project.id}")
-            start_project_stream(project)
+            start_project_stream(StartStreamRequest(project=project, environment_name=profile_res.data[0]["environments"][0]["name"]))
         
         # Project was stopped but the worker is still running
         if not project.running and worker is not None:
@@ -76,17 +79,22 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 
-@app.post("/start")
-def start_project_stream(project: Project):
-    if project.id in workers:
-        logging.info(f"Restarting project stream for project: {project.id}")
-        stop_project_stream(StopStreamRequest(project_id=project.id))
+class StartStreamRequest(BaseModel):
+    project: Project
+    environment_name: str
 
-    worker = RedditStreamWorker(project=project)
+
+@app.post("/start")
+def start_project_stream(q: StartStreamRequest):
+    if q.project.id in workers:
+        logging.info(f"Restarting project stream for project: {q.project.id}")
+        stop_project_stream(StopStreamRequest(project_id=q.project.id))
+
+    worker = RedditStreamWorker(project=q.project, environment_name=q.environment_name)
     thread = threading.Thread(target=worker.start)
-    workers[project.id] = (worker, thread)
+    workers[q.project.id] = (worker, thread)
     thread.start()
-    logging.info(f"Started project stream: {project.id}")
+    logging.info(f"Started project stream: {q.project.id}")
     return {"status": "success", "message": "Stream started"}
 
 
@@ -95,20 +103,20 @@ class StopStreamRequest(BaseModel):
 
 
 @app.post("/stop")
-def stop_project_stream(stop_request: StopStreamRequest):
-    worker, thread = workers.get(stop_request.project_id, (None, None))
+def stop_project_stream(q: StopStreamRequest):
+    worker, thread = workers.get(q.project_id, (None, None))
     
     if worker is None:
-        logging.error(f"Worker not found for project: {stop_request.project_id}")
+        logging.error(f"Worker not found for project: {q.project_id}")
         return {"status": "success", "message": "Stream not found (probably already stopped or never started)"}
     
     worker.stop()
     thread.join(timeout=10)  # Waits 10 seconds for the thread to finish
 
     if thread.is_alive():
-        logging.error(f"Thread for Reddit worker didn't stop in time. Project: {stop_request.project_id}")
+        logging.error(f"Thread for Reddit worker didn't stop in time. Project: {q.project_id}")
 
-    del workers[stop_request.project_id]  # Cleanup
-    logging.info(f"Stopped project stream: {stop_request.project_id}")
+    del workers[q.project_id]  # Cleanup
+    logging.info(f"Stopped project stream: {q.project_id}")
 
     return {"status": "success", "message": "Stream stopped"}

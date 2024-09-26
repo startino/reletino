@@ -36,12 +36,13 @@ cache = dc.Cache(cache_filepath)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RedditStreamWorker:
-    def __init__(self, project: Project):
+    def __init__(self, project: Project, environment_name: str):
         self._running = False
         self.profile_id = project.profile_id
         self.project = project
         self.subreddits = get_subreddits(project.subreddits)
         self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
+        self.environment_name = environment_name
         logging.info(f"Initialized RedditStreamWorker for project: {self.project.id}")
 
     def start(self):
@@ -63,8 +64,6 @@ class RedditStreamWorker:
                     logging.info(f"Skipping cached submission: {submission.id}")
                     continue
                 
-                # Check if the user has credits and consume if available
-                
                 profile_credits = self.supabase.table("usage").select("credits").eq("profile_id", self.profile_id).execute()
                 
                 if len(profile_credits.data) == 0:
@@ -82,8 +81,14 @@ class RedditStreamWorker:
                     self.stop()
                     break
 
-                evaluation: Evaluation | None = evaluate_submission(submission=submission, project_prompt=self.project.prompt, workflow_name=self.project.title)
-                
+                evaluation: Evaluation | None = evaluate_submission(
+                    submission=submission,
+                    project_prompt=self.project.prompt,
+                    workflow_name=self.project.title,
+                    environment_name=self.environment_name,
+                    project_name=self.project.title,
+                )
+
                 if evaluation is None:
                     logging.error(f"Error evaluating submission: {submission.id}")
                     continue

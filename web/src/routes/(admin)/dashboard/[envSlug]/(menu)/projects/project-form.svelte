@@ -223,7 +223,7 @@
   </Form.Button>
   <Button
     variant="secondary"
-    href="https://critino.starti.no/startino/projects/reletino/workflows/{selectedProjectId}"
+    href="https://critino.starti.no/startino/projects/{selectedProject.title}/workflows/{selectedProject.title}"
     target="_blank"
     class="w-full"
   >

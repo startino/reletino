@@ -31,7 +31,7 @@ export const load = async ({ locals: { safeGetSession } }) => {
 }
 
 export const actions = {
-  updateProject: async ({ request }) => {
+  updateProject: async ({ request, params}) => {
     const form = await superValidate(request, zod(projectSchema))
 
     console.log("Updating project:", form.data)
@@ -46,6 +46,8 @@ export const actions = {
     // Used for telling the user if the server was able to start/stop the project
     let responseStatus: "success" | "error" = "error"
 
+    const envName = supabase.from("environments").select("name").eq("slug", params.envSlug)
+
     if (form.data.running) {
       // Start the project
       await fetch(`${PUBLIC_API_URL}/start`, {
@@ -54,7 +56,8 @@ export const actions = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...form.data,
+          project: {...form.data},
+          environment_name: envName,
         }),
       })
         .then((res) => res.json())

@@ -88,7 +88,13 @@ def summarize_submission(submission: Submission) -> Submission:
     return submission
 
 
-def evaluate_submission(submission: Submission, project_prompt: str, workflow_name: str) -> Evaluation | None:
+def evaluate_submission(
+    submission: Submission,
+    project_prompt: str,
+    environment_name: str,
+    workflow_name: str,
+    project_name: str,
+    ) -> Evaluation | None:
     """
     Evaluates the relevance of a submission using LLMs.
 
@@ -124,13 +130,13 @@ def evaluate_submission(submission: Submission, project_prompt: str, workflow_na
     evaluation: Evaluation | None = None
     
     query = f"<project-prompt>{project_prompt}</project-prompt> <title>{submission.title}</title> <selftext>{submission.selftext}</selftext>"
-    
+        
     examples = critino(
         query = query,
         agent_name = "main",
         config=CritinoConfig(
-            team_name="startino",
-            project_name="reletino",
+            team_name=environment_name,
+            project_name=project_name,
             workflow_name=workflow_name,
         )
     )
@@ -147,6 +153,6 @@ def evaluate_submission(submission: Submission, project_prompt: str, workflow_na
                 total_cost += cb.total_cost
         except Exception as e:
             print(f"An error occurred while evaluating relevance: {e}")
-            time.sleep(2)
+            time.sleep(5)
             
     return evaluation

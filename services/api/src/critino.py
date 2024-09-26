@@ -50,6 +50,16 @@ def critino(
         }
 
         url = f"{PUBLIC_CRITINO_API_URL}/critiques/relevant"
+        
+        _url = f"{PUBLIC_CRITINO_API_URL}/critiques"
+        
+        _response = requests.post(
+            _url,
+            json=body,
+        )
+        
+        _resoponses_json = _response.json()
+        logging.info(f"critino: {agent_name}: _response: {_resoponses_json}")
 
         response = requests.post(
             url,
@@ -59,7 +69,7 @@ def critino(
         response_json = response.json()
 
         examples = response_json.get("examples", "<examples></examples>")
-        logging.debug(f"critino: {agent_name}: examples: {examples}")
+        logging.info(f"critino: {agent_name}: examples: {examples}")
     except Exception as e:
         logging.error(f"critino: {agent_name}: Error fetching examples: {e}")
 
