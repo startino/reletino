@@ -51,16 +51,6 @@ def critino(
 
         url = f"{PUBLIC_CRITINO_API_URL}/critiques/relevant"
         
-        _url = f"{PUBLIC_CRITINO_API_URL}/critiques"
-        
-        _response = requests.post(
-            _url,
-            json=body,
-        )
-        
-        _resoponses_json = _response.json()
-        logging.info(f"critino: {agent_name}: _response: {_resoponses_json}")
-
         response = requests.post(
             url,
             json=body,
