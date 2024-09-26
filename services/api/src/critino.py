@@ -22,24 +22,24 @@ def critino(
 ) -> str:
     examples = "<examples></examples>"
     try:
-        config["team_name"] = html2text(config["team_name"])
-        config["project_name"] = html2text(config["project_name"])
-        config["workflow_name"] = html2text(config["workflow_name"])
+        config.team_name = html2text(config.team_name)
+        config.project_name = html2text(config.project_name)
+        config.workflow_name = html2text(config.workflow_name)
 
         if (
-            (config["team_name"] == "")
-            or (config["project_name"] == "")
-            or (config["workflow_name"] == "")
+            (config.team_name == "")
+            or (config.project_name == "")
+            or (config.workflow_name == "")
         ):
             print("team, project, or config name is empty")
-            print("team", config["team_name"])
-            print("project", config["project_name"])
-            print("config", config["workflow_name"])
+            print("team", config.team_name)
+            print("project", config.project_name)
+            print("config", config.workflow_name)
             return "<examples></examples>"
 
-        team = config["team_name"]
-        project = config["project_name"]
-        workflow_name = config["workflow_name"]
+        team = config.team_name
+        project = config.project_name
+        workflow_name = config.workflow_name
 
         body = {
             "query": query,
