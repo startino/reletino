@@ -23,9 +23,6 @@
 
   let { supabase, submission = $bindable() }: Props = $props()
 
-  let url = submission.url
-  let subreddit = submission.subreddit
-
   // Reactive UI
   let critinoLoading = $state(false);
   let markingAsRead = $state(false);
@@ -67,7 +64,7 @@
 
       const context = "";
       const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
-      const response = `{"reasoning": "${submission.reasoning}"", "is_relevant": "${submission.is_relevant}"}`;
+      const response = `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
       const team_name = "startino";
       const workflow_name = submission.project_id;
       const project_name = "reletino";
@@ -130,10 +127,7 @@
         <Typography variant="title-md" class="text-left">Author: {submission.author}</Typography>
         <Typography variant="title-md" class="text-left">Subredit: {submission.subreddit}</Typography>
     </div>
-    <Button href={url} target="_blank" variant="default" class="mt-2">
-      Visit Post <ExternalLink class="ml-2 w-5" />
-    </Button>
-      
+    
       
       </div>
 
@@ -160,7 +154,7 @@
   
     
       <Separator />
-      <div class="grid grid-cols-2 gap-6 w-full p-4">
+      <div class="grid grid-cols-3 gap-6 w-full p-4">
         <Button onclick={() => handleCritique(submission)} target="_blank" disabled={critinoLoading}>
           Create Critino Review
           {#if critinoLoading}
@@ -169,7 +163,10 @@
           <ExternalLink class="ml-2 w-5" />
           {/if}
         </Button>
-        <Button onclick={()=>markAsRead()}>
+        <Button href={submission.url} target="_blank" variant="default" class="">
+          Visit Post <ExternalLink class="ml-2 w-5" />
+        </Button>    
+        <Button onclick={()=>markAsRead()} disabled={markingAsRead}>
           {#if !submission.done}
           Mark as Read
           {:else}

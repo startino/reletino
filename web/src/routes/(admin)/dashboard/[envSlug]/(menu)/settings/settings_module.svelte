@@ -206,7 +206,7 @@
           <div class="text-base">{successBody}</div>
         </div>
         <a
-          href="/account/settings"
+          href="/dashboard/{envSlug}/settings"
           class="{buttonVariants({ size: 'sm' })} mt-3 min-w-[145px]"
         >
           Return to Settings

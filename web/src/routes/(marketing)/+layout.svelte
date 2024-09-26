@@ -18,11 +18,6 @@
   </div>
   <div class="flex-none">
     <ul class="px-1 hidden sm:flex font-bold text-lg">
-      <li class="md:mx-2">
-        <a href="/pricing" class={buttonVariants({ variant: "ghost" })}
-          >Pricing</a
-        >
-      </li>
       {#if data.auth.user?.is_anonymous && !environment.value}
         <li class="md:mx-2">
           <a href="/login/sign_in" class={buttonVariants({ variant: "ghost" })}
@@ -60,9 +55,6 @@
         </DropDownMenu.Trigger>
         <DropDownMenu.Content class="w-56 sm:hidden">
           <DropDownMenu.Item>
-            <a href="/pricing" class="w-full">Pricing</a>
-          </DropDownMenu.Item>
-          <DropDownMenu.Item>
             <a href="/account" class="w-full">Account</a>
           </DropDownMenu.Item>
         </DropDownMenu.Content>
@@ -85,7 +77,6 @@
     <nav class="grid gap-1 justify-center md:justify-end">
       <span class="font-bold text-2xl mb-2 block opacity-80">Explore</span>
       <a class="hover:underline" href="/">Overview</a>
-      <a class="hover:underline" href="/pricing">Pricing</a>
       <a class="hover:underline" href="/contact_us">Contact Us</a>
       <a class="hover:underline" href="https://github.com/startino/saas-starter"
         >Github</a

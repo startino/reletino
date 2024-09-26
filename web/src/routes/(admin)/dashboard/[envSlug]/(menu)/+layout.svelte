@@ -63,7 +63,7 @@
   })
 
   supabase
-    .channel("usage")
+    .channel("usage-channel")
     .on(
       "postgres_changes",
       { event: "UPDATE", schema: "public", table: "usage" },

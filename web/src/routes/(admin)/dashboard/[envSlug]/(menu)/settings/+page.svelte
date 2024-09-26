@@ -2,7 +2,7 @@
   import SettingsModule from "./settings_module.svelte"
 
   let { data } = $props()
-  let { session, profile } = data
+  let { session, profile, environment} = data
 </script>
 
 <svelte:head>
@@ -28,7 +28,7 @@
     },
   ]}
   editButtonTitle="Edit Profile"
-  editLink="/account/settings/edit_profile"
+  editLink="/dashboard/{environment?.slug}/settings/edit_profile"
 />
 
 {#if !session?.user.is_anonymous}
@@ -37,7 +37,7 @@
     editable={false}
     fields={[{ id: "email", initialValue: session?.user?.email || "" }]}
     editButtonTitle="Change Email"
-    editLink="/account/settings/change_email"
+    editLink="/dashboard/{environment?.slug}/settings/change_email"
   />
 {/if}
 
@@ -46,7 +46,7 @@
   editable={false}
   fields={[{ id: "password", initialValue: "••••••••••••••••" }]}
   editButtonTitle="Change Password"
-  editLink="/account/settings/change_password"
+  editLink="/dashboard/{environment?.slug}/settings/change_password"
 />
 
 <SettingsModule
@@ -59,7 +59,7 @@
     },
   ]}
   editButtonTitle="Change Subscription"
-  editLink="/account/settings/change_email_subscription"
+  editLink="/dashboard/{environment?.slug}/settings/change_email_subscription"
 />
 
 <SettingsModule
@@ -68,5 +68,5 @@
   dangerous={true}
   fields={[]}
   editButtonTitle="Delete Account"
-  editLink="/account/settings/delete_account"
+  editLink="/dashboard/{environment?.slug}/settings/delete_account"
 />

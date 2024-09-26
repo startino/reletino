@@ -19,7 +19,7 @@ export const load = async ({
 
   if (params.slug === "free_plan") {
     // plan with no stripe_price_id. Redirect to account home
-    redirect(303, "/account")
+    redirect(303, "/dashboard")
   }
 
   const { error: idError, customerId } = await getOrCreateCustomerId({
