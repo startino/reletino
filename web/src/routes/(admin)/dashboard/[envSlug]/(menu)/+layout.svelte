@@ -151,7 +151,8 @@
           <Tooltip.Content>
             <Typography variant="body-sm" class="font-light">
               1 submission = 1 credit. <br />
-              Contact me if you run out of credits: jorge.lewis@starti.no
+              1 credit ≈ $0.00324<br />
+              If you run out of credits: jorge.lewis@starti.no
             </Typography>
           </Tooltip.Content>
         </Tooltip.Root>

@@ -77,7 +77,6 @@
 
   $effect(() => {
     $formData = selectedProject
-    console.log("project id", selectedProjectId)
   })
 
   let subreddits: { label: string; value: string }[] = $derived(
