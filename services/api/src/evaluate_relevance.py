@@ -146,8 +146,8 @@ def evaluate_submission(
             with get_openai_callback() as cb:
                 evaluation = chain.invoke(
                     {
-                        query: query,
-                        examples: examples,
+                        "query": query,
+                        "examples": examples,
                     }
                 )
                 total_cost += cb.total_cost
