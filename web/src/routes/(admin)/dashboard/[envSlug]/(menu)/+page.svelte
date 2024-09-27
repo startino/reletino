@@ -38,11 +38,11 @@
     .channel("submissions")
     .on(
       "postgres_changes",
-      { event: "INSERT", schema: "public", table: "submission" },
+      { event: "INSERT", schema: "public", table: "submissions" },
       (payload) => {
         submissions.push(payload.new as Tables<"submissions">)
       },
-    )
+    ).subscribe()
 
   // Arbituarilly select the first submission
   let selectedSubmission: Tables<"submissions"> | null = $state(
@@ -137,7 +137,7 @@
         </div>
       </div>
 
-      <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-6 w-full">
+      <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-6">
         <Typography variant="headline-md" class="text-left"
           >Submissions ({displaySubmissions.length})</Typography
         >
@@ -150,7 +150,7 @@
             variant="outline"
             on:click={() => (selectedSubmission = submission)}
           >
-            <div class="col-span-6">
+            <div class="col-span-6 truncate">
               {submission.title}
             </div>
             <div class="ml-auto col-span-1">

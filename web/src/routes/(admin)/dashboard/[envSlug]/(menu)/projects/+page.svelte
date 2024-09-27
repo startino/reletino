@@ -27,7 +27,6 @@
 
   let newProject: Tables<"projects"> | null = $state(null)
 
-  $inspect(projects)
 </script>
 
 <div class="flex flex-col gap-8">
