@@ -1,11 +1,11 @@
 import { projectSchema } from "$lib/schemas"
-import { supabase, type Tables } from "$lib/supabase"
 import { redirect } from "@sveltejs/kit"
 import { message, superValidate } from "sveltekit-superforms"
 import { zod } from "sveltekit-superforms/adapters"
 import { PUBLIC_API_URL } from "$env/static/public"
+import type { Tables } from "$lib/supabase"
 
-export const load = async ({ locals: { safeGetSession } }) => {
+export const load = async ({ locals: { safeGetSession, supabase} }) => {
   const { session } = await safeGetSession()
 
   if (!session) {
@@ -31,7 +31,7 @@ export const load = async ({ locals: { safeGetSession } }) => {
 }
 
 export const actions = {
-  updateProject: async ({ request, params}) => {
+  updateProject: async ({ request, params, locals: {supabase}}) => {
     const form = await superValidate(request, zod(projectSchema))
 
     console.log("Updating project:", form.data)
@@ -46,7 +46,14 @@ export const actions = {
     // Used for telling the user if the server was able to start/stop the project
     let responseStatus: "success" | "error" = "error"
 
-    const envName = supabase.from("environments").select("name").eq("slug", params.envSlug)
+    const {data: env, error: eEnv} = await supabase.from("environments").select("name").eq("slug", params.envSlug).single()
+
+    if (!env || eEnv) {
+      return message(form, {
+        type: "error",
+        text: "Could not save project from an error with finding env name.",
+      })
+    }
 
     if (form.data.running) {
       // Start the project
@@ -57,7 +64,7 @@ export const actions = {
         },
         body: JSON.stringify({
           project: {...form.data},
-          environment_name: envName,
+          environment_name: env.name,
         }),
       })
         .then((res) => res.json())

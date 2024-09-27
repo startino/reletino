@@ -118,8 +118,8 @@ def evaluate_submission(
     parser = PydanticOutputParser(pydantic_object=Evaluation)
 
     prompt = PromptTemplate(
-        template="<format-instructions>{format_instructions}</format-instructions><query>{query}</query> {examples}",
-        input_variables=["query", "examples"],
+        template="<format-instructions>{format_instructions}</format-instructions><project-prompt>{project_prompt}</project-prompt><query>{query}</query> {examples}",
+        input_variables=["query", "examples", "project_prompt"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
     
@@ -129,7 +129,16 @@ def evaluate_submission(
     
     evaluation: Evaluation | None = None
     
-    query = f"<project-prompt>{project_prompt}</project-prompt> <title>{submission.title}</title> <selftext>{submission.selftext}</selftext>"
+    query = f"""
+    <post>
+        <title>
+            {submission.title}
+        </title>
+        <selftext>
+            {submission.selftext}
+        </selftext>
+    </post>
+    """
         
     examples = critino(
         query = query,
@@ -146,6 +155,7 @@ def evaluate_submission(
             with get_openai_callback() as cb:
                 evaluation = chain.invoke(
                     {
+                        "project_prompt": project_prompt,
                         "query": query,
                         "examples": examples,
                     }
