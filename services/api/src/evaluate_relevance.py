@@ -167,7 +167,7 @@ def evaluate_submission(
             with get_openai_callback() as cb:
                 evaluation = chain.invoke(
                     {
-                        universal_prompt: universal_prompt,
+                        "universal_prompt": universal_prompt,
                         "project_prompt": project_prompt,
                         "query": query,
                         "examples": examples,

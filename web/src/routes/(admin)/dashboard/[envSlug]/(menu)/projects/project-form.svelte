@@ -195,8 +195,8 @@
   <Form.Field {form} name="prompt">
     <Form.Control let:attrs>
       <Form.Label>Prompt</Form.Label>
-      <Form.Description>Find prompt teplates
-        <a class="text-primary underline" href="https://startino.notion.site/Prompt-Templates-10e00125c2a980a5bdffe7ecbd4a7659" target="_blank">
+      <Form.Description>Find prompt guides
+        <a class="text-primary underline" href="https://reletino.notion.site/" target="_blank">
           here
         </a>
       </Form.Description>
