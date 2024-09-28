@@ -46,7 +46,8 @@
   const form = superForm(projectForm, {
     delayMs: 400,
     timeoutMs: 3000,
-    onSubmit: async () => {},
+    onSubmit: async () => {
+    },
     validators: zodClient(projectSchema),
     resetForm: false,
     onResult: ({ result, formElement, cancel }) => {
@@ -199,6 +200,7 @@
           here
         </a>
       </Form.Description>
+      <input type="hidden" name="prompt" bind:value={$formData.prompt} />
       <Dialog.Root>
         <Dialog.Trigger>
           <Button variant="secondary" class="">Open Prompt</Button>
