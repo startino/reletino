@@ -103,11 +103,11 @@
     <div class="flex flex-col p-2 col-span-2 row-span-5">
       <div class="flex flex-col place-items-start w-full justify-between mb-4">
         <Select.Root portal={null} bind:selected={selectedProject}>
-          <div class="flex flex-col gap-y-0.5">
+          <div class="flex flex-row mb-4 gap-y-0.5 place-items-center gap-x-4 w-full">
             <Select.Label class="text-left pl-0">
               <Typography variant="headline-md" class="text-left">Project:</Typography>
             </Select.Label>
-            <Select.Trigger class="mb-4 bg-card border-none">
+            <Select.Trigger class=" bg-primary/80 text-primary-foreground w-[250px] border-none">
               <Select.Value placeholder="Select a project" />
             </Select.Trigger>
             <Select.Content>
