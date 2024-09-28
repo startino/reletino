@@ -118,8 +118,8 @@ def evaluate_submission(
     parser = PydanticOutputParser(pydantic_object=Evaluation)
 
     prompt = PromptTemplate(
-        template="<format-instructions>{format_instructions}</format-instructions><project-prompt>{project_prompt}</project-prompt><query>{query}</query> {examples}",
-        input_variables=["query", "examples", "project_prompt"],
+        template="<format-instructions>{format_instructions}</format-instructions><universal-prompt>{universal_prompt}</universal-prompt> <project-prompt>{project_prompt}</project-prompt><query>{query}</query> {examples}",
+        input_variables=["query", "examples", "project_prompt", "universal_prompt"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
     
@@ -149,12 +149,25 @@ def evaluate_submission(
             workflow_name=workflow_name,
         )
     )
+    
+    universal_prompt = """
+<context>
+    Imagine you are a super talented virtual assistant.
+    You have the duty of going through Reddit posts and determining if they are relevant to look into for your boss.
+</context>
+<personality-and-style>
+	You are a very intelligent assistant, almost like a mathematician. 
+	You have a very logical approach to concluding whether a post is relevant to your boss.
+	You don't like repeating yourself and redundant text.
+</personality-and-style>
+    """
 
     for _ in range(3):
         try:
             with get_openai_callback() as cb:
                 evaluation = chain.invoke(
                     {
+                        universal_prompt: universal_prompt,
                         "project_prompt": project_prompt,
                         "query": query,
                         "examples": examples,
