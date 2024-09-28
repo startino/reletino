@@ -34,17 +34,22 @@
         class="text-4xl md:text-6xl font-bold px-2"
         style="line-height: 1.2;"
       >
-        A Reddit tool that
+      Get relevant posts
         <span
           class="underline decoration-secondary decoration-4 md:decoration-[6px]"
-          >finds relevant posts</span
+          >
+          with plain English</span
         >
+        
+        <span class="underline decoration-pink-900 decoration-4 md:decoration-[6px]">not keywords</span>
       </div>
       <div class="mt-6 md:mt-10 text-sm md:text-lg">
         <p>
-          An AI Agent that gives you what is relevant to you. <br /> Tell it in plain
-          English what you want and it will find it for you.
+          Reletino is an AI agent with a poweful feedback loop to understand your <br />
+          naunced definition of which Reddit posts are actually useful to you. <br /> <br/>
+          If you have a product or service to offer, Reletino is for you.
         </p>
+        
       </div>
       <div class="mt-6 md:mt-2">
         <a

@@ -137,7 +137,7 @@
         </div>
       </div>
 
-      <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-6">
+      <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-4">
         <Typography variant="headline-md" class="text-left"
           >Submissions ({displaySubmissions.length})</Typography
         >
