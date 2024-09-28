@@ -105,7 +105,6 @@
         `Error:\nMessage: ${res.error.detail?.message}\n${res.error.detail?.traceback}`,
       )
       toast.error(`Error sending message: ${res.error.detail?.message}`)
-      return
     }
     critinoLoading = false
   }
