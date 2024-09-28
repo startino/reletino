@@ -114,7 +114,19 @@
 <div class="flex h-full flex-col">
   {#if submission}
     <div class="flex h-full flex-col">
-      <Typography variant="headline-md" class="text-left p-4">Post</Typography>
+     
+       <div class="flex flex-row place-items-center justify-between">
+        <Typography variant="headline-md" class="text-left p-4">Post</Typography>
+        <Button
+        href={submission.url}
+        target="_blank"
+        variant="default"
+        class=""
+      >
+        Visit Post <ExternalLink class="ml-2 w-5" />
+      </Button>
+       </div>
+     
       <div class="flex flex-row text-left justify-between p-4">
         <div>
           <Typography variant="title-md" class="text-left">
@@ -147,7 +159,7 @@
       </div>
 
       <Separator />
-      <div class="flex flex-col p-4 self-end">
+      <!-- <div class="flex flex-col p-4 self-end">
         <Typography variant="title-lg" class="text-left">
           {submission.is_relevant ? "Relevant" : "Irrelevant"}
         </Typography>
@@ -155,12 +167,13 @@
         <Typography variant="body-md" class="text-left">
           {submission.reasoning}
         </Typography>
-      </div>
+      </div> -->
 
       <Separator />
-      <div class="grid grid-cols-3 gap-6 w-full p-4">
+      <div class="grid grid-cols-2 gap-6 w-full p-4">
         <Button
           onclick={() => handleCritique(submission)}
+          variant="secondary"
           target="_blank"
           disabled={critinoLoading}
         >
@@ -170,14 +183,6 @@
           {:else}
             <ExternalLink class="ml-2 w-5" />
           {/if}
-        </Button>
-        <Button
-          href={submission.url}
-          target="_blank"
-          variant="default"
-          class=""
-        >
-          Visit Post <ExternalLink class="ml-2 w-5" />
         </Button>
         <Button onclick={() => markAsRead()} disabled={markingAsRead}>
           {#if !submission.done}

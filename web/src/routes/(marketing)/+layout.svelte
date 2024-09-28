@@ -47,7 +47,7 @@
               href="/dashboard/{environment.value.slug}"
               class={buttonVariants({ variant: "default" })}
             >
-              {environment.value.name}
+              Dashboard
             </a>
           {/if}
         </li>

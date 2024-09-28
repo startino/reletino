@@ -20,6 +20,7 @@
   import { toast } from "svelte-sonner"
   import type { SupabaseClient, Session } from "@supabase/supabase-js"
   import { Switch } from "$lib/components/ui/switch"
+  import { Root } from "$lib/components/ui/accordion"
 
   interface Props {
     session: Session
@@ -140,7 +141,9 @@
     <Form.Control let:attrs>
       <div class="space-y-0.5">
         <Form.Label>Subreddits</Form.Label>
-        <Form.Description>Subreddits will be shown below.</Form.Description>
+        <Form.Description>Manually add your subreddits, For example: "saas", "startups".<br/>
+           The cost of the project is proportional to the size and number of the subreddits you add.
+          </Form.Description>
       </div>
       <div class="grid grid-cols-4 gap-3 pt-4 items-center">
         <Input
@@ -191,10 +194,21 @@
   <Form.Field {form} name="prompt">
     <Form.Control let:attrs>
       <Form.Label>Prompt</Form.Label>
-      <Form.Description>This is the prompt.</Form.Description>
-      <Textarea {...attrs} rows={8} bind:value={$formData.prompt} />
-    </Form.Control>
+      <Form.Description>Find prompt teplates
+        <a class="text-primary underline" href="https://startino.notion.site/Prompt-Templates-10e00125c2a980a5bdffe7ecbd4a7659" target="_blank">
+          here
+        </a>
+      </Form.Description>
+      <Dialog.Root>
+        <Dialog.Trigger>
+          <Button variant="secondary" class="">Open Prompt</Button>
+        </Dialog.Trigger>
+        <Dialog.Content class="place-items-center max-w-5xl h-full min-h-96 w-full px-7">
+          <Textarea {...attrs} rows={35} bind:value={$formData.prompt} />
+        </Dialog.Content>
+      </Dialog.Root>
     <Form.FieldErrors />
+    </Form.Control>
   </Form.Field>
   <Form.Field
     {form}

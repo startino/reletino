@@ -39,7 +39,7 @@
       }
     }}
   >
-    <Dialog.Content class="w-full max-w-7xl">
+    <Dialog.Content class="w-full max-w-5xl">
       <Dialog.Header>
         <Dialog.Title>Project</Dialog.Title>
       </Dialog.Header>

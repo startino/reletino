@@ -173,7 +173,7 @@
     </ul>
   </nav>
 
-  <div class="w-full px-6 lg:px-10 py-3 lg:py-6 overflow-y-scroll relative">
+  <div class="w-full px-6 px-6 py-3 lg:py-6 overflow-y-scroll relative">
     {#if session?.user.is_anonymous}
       <p
         class="text-sm bg-destructive text-destructive-foreground sticky px-4 py-2 text-center rounded-sm mb-4 md:text-base"

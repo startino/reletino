@@ -105,7 +105,7 @@
         <Select.Root portal={null} bind:selected={selectedProject}>
           <div class="flex flex-col gap-y-0.5">
             <Select.Label class="text-left pl-0">
-              <Typography variant="headline-md">Project:</Typography>
+              <Typography variant="headline-md" class="text-left">Project:</Typography>
             </Select.Label>
             <Select.Trigger class="mb-4 bg-card border-none">
               <Select.Value placeholder="Select a project" />
