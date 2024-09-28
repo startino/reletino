@@ -45,7 +45,7 @@
       </div>
       <div class="mt-6 md:mt-10 text-sm md:text-lg">
         <p>
-          Reletino is an AI agent with a poweful feedback loop to understand your <br />
+          Reletino is an AI agent with a powerful feedback loop to understand your <br />
           naunced definition of which Reddit posts are actually useful to you. <br /> <br/>
           If you have a product or service to offer, Reletino is for you.
         </p>
