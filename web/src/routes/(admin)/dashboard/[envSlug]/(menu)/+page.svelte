@@ -79,6 +79,13 @@
       }
     })
 
+  // Ensure submission_created_utc is a valid date string and sort submissions by submission_created_utc
+  _submissions.sort((a, b) => {
+    const dateA = new Date(a.submission_created_utc).getTime();
+    const dateB = new Date(b.submission_created_utc).getTime();
+    return dateB - dateA; // Newest items first
+  }); 
+
     return _submissions
   })
 
