@@ -29,7 +29,7 @@
       <form
         class="grid gap-4"
         method="POST"
-        action="/account/api?/updateProfile"
+        action="/api?/updateProfile"
         use:enhance
       >
         <Form.Field {form} name="full_name">
@@ -44,14 +44,6 @@
           <Form.Control let:attrs>
             <Form.Label>Company Name</Form.Label>
             <Input {...attrs} bind:value={$formData.company_name} />
-            <Form.FieldErrors />
-          </Form.Control>
-        </Form.Field>
-
-        <Form.Field {form} name="website">
-          <Form.Control let:attrs>
-            <Form.Label>Company Website</Form.Label>
-            <Input {...attrs} bind:value={$formData.website} />
             <Form.FieldErrors />
           </Form.Control>
         </Form.Field>
@@ -75,7 +67,7 @@
       <div class="text-sm mt-14">
         You are logged in as {session?.user?.email ?? "an anonymous user"}.
         <br />
-        <a class="underline" href="/account/sign_out"> Sign out </a>
+        <a class="underline" href="/sign_out"> Sign out </a>
       </div>
     </div>
   </div>

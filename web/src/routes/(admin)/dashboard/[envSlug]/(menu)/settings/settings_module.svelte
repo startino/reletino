@@ -6,6 +6,7 @@
     superForm,
   } from "sveltekit-superforms"
   import { zodClient } from "sveltekit-superforms/adapters"
+  import SuperDebug from "sveltekit-superforms"
 
   import * as Card from "$lib/components/ui/card"
   import * as Form from "$lib/components/ui/form"
@@ -19,11 +20,14 @@
     type ProfileSchema,
   } from "$lib/schemas"
   import { enhance } from "$app/forms"
+  import { getEnvironmentState } from "$lib/states"
 
   const fieldError = (liveForm: FormAccountUpdateResult, name: string) => {
     let errors = liveForm?.errorFields ?? []
     return errors.includes(name)
   }
+
+  const environment = getEnvironmentState()
 
   // Page state
   let showSuccess = $state(false)
@@ -78,6 +82,8 @@
           onUpdated: ({ form: f }) => {
             if (f.valid) {
               showSuccess = true
+            } else {
+              console.log({ f })
             }
           },
         })
@@ -127,6 +133,8 @@
             action={formTarget}
             use:superEnhance
           >
+            <SuperDebug data={$formData} />
+            {formTarget}
             {#if form && $errors && $formData}
               {#each fields as field}
                 <Form.Field {form} name={field.id}>
@@ -145,7 +153,9 @@
                         class="{fieldError($page?.form, field.id)
                           ? 'border-destructive'
                           : ''} w-full max-w-xs mb-3 py-4"
-                        value={$formData[field.id as keyof typeof $formData]}
+                        bind:value={$formData[
+                          field.id as keyof typeof $formData
+                        ]}
                         maxlength={field.maxlength ? field.maxlength : null}
                       />
 
@@ -206,7 +216,7 @@
           <div class="text-base">{successBody}</div>
         </div>
         <a
-          href="/dashboard/{envSlug}/settings"
+          href="/dashboard/{environment.value?.slug}/settings"
           class="{buttonVariants({ size: 'sm' })} mt-3 min-w-[145px]"
         >
           Return to Settings

@@ -10,9 +10,9 @@ export const load = async ({ parent }) => {
     {
       full_name: profile?.full_name ?? "",
       company_name: profile?.company_name ?? "",
-      website: profile?.website ?? "",
     },
     zod(profileSchema),
+    { errors: false },
   )
 
   return { form }

@@ -215,7 +215,7 @@ export const actions = {
     if (newProfile) {
       await sendAdminEmail({
         subject: "Profile Created",
-        body: `Profile created by ${session.user.email}\nFull name: ${form.data.full_name}\nCompany name: ${form.data.company_name}\nWebsite: ${form.data.website}`,
+        body: `Profile created by ${session.user.email}\nFull name: ${form.data.full_name}\nCompany name: ${form.data.company_name}`,
       })
 
       // Send welcome email

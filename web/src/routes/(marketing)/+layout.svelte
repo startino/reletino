@@ -60,7 +60,9 @@
           </DropDownMenu.Trigger>
           <DropDownMenu.Content class="w-56 sm:hidden">
             <DropDownMenu.Item>
-              <a href="/account" class="w-full">Account</a>
+              <a href="/dashboard/{environment.value?.slug}" class="w-full"
+                >Dashboard</a
+              >
             </DropDownMenu.Item>
           </DropDownMenu.Content>
         </DropDownMenu.Root>

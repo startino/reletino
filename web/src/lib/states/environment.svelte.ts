@@ -1,4 +1,4 @@
-import type { Tables } from "$lib/supabase/supabase.types"
+import type { Tables } from "$lib/supabase/database.types"
 import { setContext, getContext } from "svelte"
 
 const ENVIRONMENT_KEY = Symbol("ENVIRONMENT")

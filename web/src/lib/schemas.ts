@@ -104,13 +104,6 @@ export const profileSchema = z.object({
       "Company name is required. If this is a hobby project or personal app, please put your name.",
     )
     .max(50, "Company name must be less than 50 characters"),
-  website: z
-    .string()
-    .min(
-      1,
-      "Company website is required. An app store URL is a good alternative if you don't have a website.",
-    )
-    .max(50, "Name must be less than 50 characters"),
 })
 
 export type ProfileSchema = typeof profileSchema

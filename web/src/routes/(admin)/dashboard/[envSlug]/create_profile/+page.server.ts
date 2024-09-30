@@ -18,7 +18,6 @@ export const load = async ({ parent }) => {
     {
       full_name: data.profile?.full_name ?? "",
       company_name: data.profile?.company_name ?? "",
-      website: data.profile?.website ?? "",
     },
     zod(profileSchema),
     { errors: false },
