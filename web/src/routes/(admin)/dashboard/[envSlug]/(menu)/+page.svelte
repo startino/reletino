@@ -4,20 +4,19 @@
   import * as ToggleGroup from "$lib/components/ui/toggle-group"
   import * as Select from "$lib/components/ui/select"
   import SubmissionViewer from "./submission-viewer.svelte"
-  import type { Tables } from "$lib/supabase/database.types"
+  import type { Database, Tables } from "$lib/supabase"
   import type { SupabaseClient } from "@supabase/supabase-js"
   import { Toggle } from "$lib/components/ui/toggle"
-  import { BookCheck, Trash, LocateOff, CheckCheck } from "lucide-svelte"
+  import { BookCheck, Trash, LocateOff, CheckCheck, LoaderCircle } from "lucide-svelte"
   import { Button } from "$lib/components/ui/button"
   import { Typography } from "$lib/components/ui/typography"
   import { onMount } from "svelte"
   import { invalidate } from "$app/navigation"
   import { page } from "$app/stores"
 
-  interface Props {
+  type Props = {
     data: {
-      supabase: SupabaseClient<any, "public", any>
-      submissions: Tables<"submissions">[]
+      supabase: SupabaseClient<Database>
       projects: Tables<"projects">[]
     }
   }
@@ -32,7 +31,7 @@
       : undefined,
   )
 
-  let submissions: Tables<"submissions">[] = $state(data.submissions || [])
+  let submissions: Tables<"submissions">[] = $state([])
 
   supabase
     .channel("submissions")
@@ -45,9 +44,7 @@
     ).subscribe()
 
   // Arbituarilly select the first submission
-  let selectedSubmission: Tables<"submissions"> | null = $state(
-    submissions[0] ?? null,
-  )
+  let selectedSubmission: Tables<"submissions"> | null = $state(null)
 
   let relevantSubmissions: Tables<"submissions">[] = $derived(
     submissions.filter(
@@ -57,6 +54,25 @@
 
   let includeRead: boolean = $state(false)
   let includeIrrelevant: boolean = $state(false)
+
+  let projectLoading = $state(false)
+
+  const getSubmissionsFromDB = async (project_id: string) => {
+    projectLoading = true
+    submissions = []
+    console.log(selectedProject)
+    const { data, error } = await supabase
+      .from("submissions")
+      .select("*")
+      .eq("project_id", project_id)
+    if (error) {
+      console.error(error)
+    } else {
+      console.log("data: ", data)
+      submissions = data || []
+    }
+    projectLoading = false
+  }
 
   // List that is displayed
   let displaySubmissions = $derived.by(() => {
@@ -109,7 +125,11 @@
   <div class="grid grid-cols-5 grid-rows-5 gap-6 h-full">
     <div class="flex flex-col p-2 col-span-2 row-span-5">
       <div class="flex flex-col place-items-start w-full justify-between mb-4">
-        <Select.Root portal={null} bind:selected={selectedProject}>
+        <Select.Root portal={null} bind:selected={selectedProject} 
+        onSelectedChange={(project)=>{
+          console.log("changing project")
+          project && getSubmissionsFromDB(project.value)
+          }} >
           <div class="flex flex-row mb-4 gap-y-0.5 place-items-center gap-x-4 w-full">
             <Select.Label class="text-left pl-0">
               <Typography variant="headline-md" class="text-left">Project:</Typography>
@@ -146,8 +166,12 @@
 
       <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-4">
         <Typography variant="headline-md" class="text-left"
-          >Submissions ({displaySubmissions.length})</Typography
-        >
+          >Submissions {!projectLoading ? "(" + displaySubmissions.length + ")" : ""}
+            {#if projectLoading}
+            <LoaderCircle class="animate-spin text-primary h-24 w-24" />
+        {/if}
+            </Typography>
+
         {#each displaySubmissions as submission}
           <Button
             class="text-wrap text-left h-fit mx-2 grid grid-cols-7 {selectedSubmission ==
