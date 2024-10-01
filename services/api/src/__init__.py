@@ -61,6 +61,19 @@ async def lifespan(_: FastAPI):
             stop_project_stream(StopStreamRequest(project_id=project.id))
             
     yield
+    
+    # Clean up the threads
+    for project_id, (worker, thread) in workers.items():
+        logging.info(f"Stopping worker for project: {project_id}")
+        worker.stop()
+        thread.join(timeout=10)  # Waits 10 seconds for the thread to finish
+
+        if thread.is_alive():
+            logging.error(f"Thread for Reddit worker didn't stop in time. Project: {project_id}")
+        else:
+            logging.info(f"Successfully stopped worker for project: {project_id}")
+
+    workers.clear()  # Clear the workers dictionary
 
 
 app = FastAPI(lifespan=lifespan)

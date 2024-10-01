@@ -1,16 +1,15 @@
+import textwrap
 import time
-from typing import List
 import os
 from dotenv import load_dotenv
+from langsmith import traceable
 
 from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import JsonOutputParser, PydanticOutputParser
 from langchain_community.callbacks import get_openai_callback
 
 from src.models import Evaluation
-from src.prompts import calculate_relevance_prompt, context as company_context, purpose
+from src.prompts import context as company_context, purpose
 from src.filter_with_questions import filter_with_questions
 
 from src.critino import critino, CritinoConfig
@@ -105,31 +104,10 @@ def evaluate_submission(
     Returns:
     - evaluation: The evaluation object containing the relevance score and the reasoning.
     """
- 
-    llm = AzureChatOpenAI(
-        api_key=AZURE_API_KEY,
-        deployment_name="gpt-4o",
-        model="gpt-4o",
-        azure_endpoint="https://startino.openai.azure.com/",
-        api_version="2024-02-01",
-        max_retries=20,
-    )
-
-    parser = PydanticOutputParser(pydantic_object=Evaluation)
-
-    prompt = PromptTemplate(
-        template="<format-instructions>{format_instructions}</format-instructions><universal-prompt>{universal_prompt}</universal-prompt> <project-prompt>{project_prompt}</project-prompt><query>{query}</query> {examples}",
-        input_variables=["query", "examples", "project_prompt", "universal_prompt"],
-        partial_variables={"format_instructions": parser.get_format_instructions()},
-    )
-    
-    chain = prompt | llm | parser
     
     total_cost = 0
     
-    evaluation: Evaluation | None = None
-    
-    query = f"""
+    post_query = f"""
     <post>
         <title>
             {submission.title}
@@ -139,9 +117,9 @@ def evaluate_submission(
         </selftext>
     </post>
     """
-        
+    
     examples = critino(
-        query = query,
+        query = post_query,
         agent_name = "main",
         config=CritinoConfig(
             team_name=environment_name,
@@ -150,32 +128,80 @@ def evaluate_submission(
         )
     )
     
-    universal_prompt = """
-<context>
-    Imagine you are a super talented virtual assistant.
-    You have the duty of going through Reddit posts and determining if they are relevant to look into for your boss.
-</context>
-<personality-and-style>
-	You are a very intelligent assistant, almost like a mathematician. 
-	You have a very logical approach to concluding whether a post is relevant to your boss.
-	You don't like repeating yourself and redundant text.
-</personality-and-style>
-    """
+    def junior_evaluation() -> Evaluation:  
+        llm = AzureChatOpenAI(
+            api_key=AZURE_API_KEY,
+            deployment_name="gpt-4o-mini",
+            model="gpt-4o-mini",
+            azure_endpoint="https://startino.openai.azure.com/",
+            api_version="2024-02-01",
+            max_retries=20,
+        )
+    
+        structured_llm = llm.with_structured_output(Evaluation)
+    
+        junior_evaluation: Evaluation = structured_llm.invoke(textwrap.dedent(f"""
+            <context>
+            You are a super intelligent junior assistant that helps the senior assistant in filtering Reddit posts for the Boss.
+            You and your supervisor have the duty of going through Reddit posts and determining if they are relevant to look into for the Boss.
+            You are the first line of defense in filtering out irrelevant posts,
+            with the goal of saving time for the senior assistant, since there are too many posts that are clearly irrelevant.
+            It is important to note that because you are a junior assistant,
+            you are expected to make mistakes, and because of this and because we do not want to miss any relevant posts,
+            you will mark only the most obvious irrelevant posts as irrelevant.
+            This means that you will mark posts as relevant even if you are not sure if they are relevant or not.
+            </context>
+            <personality-and-style>
+                You are a very intelligent junior assistant, almost like a mathematician. 
+                You have a very logical approach to concluding whether a post is relevant to the senior assistant.
+                You don't like repeating yourself and redundant text.
+            </personality-and-style>
+            <project-instructions>
+                {project_prompt}
+            </project-instructions>
+            {post_query}
+            {examples}
+            """
+        ))
+        
+        return junior_evaluation
+    
+    junior_evaluation = junior_evaluation()
+ 
+    if junior_evaluation.is_relevant is False:
+        return junior_evaluation
+ 
+    def senior_evaluation() -> Evaluation:
+        llm = AzureChatOpenAI(
+            api_key=AZURE_API_KEY,
+            deployment_name="gpt-4o",
+            model="gpt-4o",
+            azure_endpoint="https://startino.openai.azure.com/",
+            api_version="2024-02-01",
+            max_retries=20,
+        )
 
-    for _ in range(3):
-        try:
-            with get_openai_callback() as cb:
-                evaluation = chain.invoke(
-                    {
-                        "universal_prompt": universal_prompt,
-                        "project_prompt": project_prompt,
-                        "query": query,
-                        "examples": examples,
-                    }
-                )
-                total_cost += cb.total_cost
-        except Exception as e:
-            print(f"An error occurred while evaluating relevance: {e}")
-            time.sleep(5)
-            
-    return evaluation
+        structured_llm = llm.with_structured_output(Evaluation)
+
+        senior_evaluation: Evaluation = structured_llm.invoke(textwrap.dedent(f"""
+            <context>
+                You are a very intelligent senior assistant that filters Reddit posts for your boss.
+                You have the duty of going through the Reddit posts and determining if they are relevant to look into for your boss.
+            </context>
+            <personality-and-style>
+                You are a very intelligent assistant, almost like a mathematician. 
+                You have a very logical approach to concluding whether a post is relevant to your boss.
+                You don't like repeating yourself and redundant text.
+            </personality-and-style>
+            <project>
+                {project_prompt}
+            </project>
+            {post_query}
+            {examples}
+            """
+        ))
+        return senior_evaluation
+    
+    senior_evaluation = senior_evaluation()
+
+    return senior_evaluation

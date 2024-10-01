@@ -34,8 +34,6 @@ export const actions = {
   updateProject: async ({ request, params, locals: {supabase}}) => {
     const form = await superValidate(request, zod(projectSchema))
 
-    console.log("Updating project:", form.data)
-
     if (!form.valid) {
       return message(form, {
         type: "error",
