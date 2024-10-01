@@ -87,6 +87,7 @@ def summarize_submission(submission: Submission) -> Submission:
     return submission
 
 
+@traceable(run_type="chain", name="Evaluate Submission", output_type=Evaluation)
 def evaluate_submission(
     submission: Submission,
     project_prompt: str,
@@ -128,6 +129,7 @@ def evaluate_submission(
         )
     )
     
+    @traceable
     def junior_evaluation() -> Evaluation:  
         llm = AzureChatOpenAI(
             api_key=AZURE_API_KEY,
@@ -142,14 +144,15 @@ def evaluate_submission(
     
         junior_evaluation: Evaluation = structured_llm.invoke(textwrap.dedent(f"""
             <context>
-            You are a super intelligent junior assistant that helps the senior assistant in filtering Reddit posts for the Boss.
-            You and your supervisor have the duty of going through Reddit posts and determining if they are relevant to look into for the Boss.
-            You are the first line of defense in filtering out irrelevant posts,
-            with the goal of saving time for the senior assistant, since there are too many posts that are clearly irrelevant.
-            It is important to note that because you are a junior assistant,
-            you are expected to make mistakes, and because of this and because we do not want to miss any relevant posts,
-            you will mark only the most obvious irrelevant posts as irrelevant.
-            This means that you will mark posts as relevant even if you are not sure if they are relevant or not.
+                You are a super intelligent junior assistant that helps the senior assistant in filtering Reddit posts for the Boss.
+                You and the senior assistant have the duty of going through Reddit posts and determining if they are relevant to look into for the Boss.
+                You are the first line of defense in filtering out irrelevant posts,
+                with the goal of saving time for the senior assistant,
+                since there are too many posts that are clearly and blatantly irrelevant.
+                It is important to note that because you are a junior assistant,
+                you are expected to make mistakes, and because of this and because we do not want to miss any relevant posts,
+                you will mark only the most obvious irrelevant posts as irrelevant.
+                This means that you should be biased towards marking posts as relevant.
             </context>
             <personality-and-style>
                 You are a very intelligent junior assistant, almost like a mathematician. 
@@ -171,6 +174,7 @@ def evaluate_submission(
     if junior_evaluation.is_relevant is False:
         return junior_evaluation
  
+    @traceable
     def senior_evaluation() -> Evaluation:
         llm = AzureChatOpenAI(
             api_key=AZURE_API_KEY,
