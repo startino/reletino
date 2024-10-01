@@ -9,6 +9,7 @@
   import { Input } from "$lib/components/ui/input"
   import { Button } from "$lib/components/ui/button"
   import { Separator } from "$lib/components/ui/separator"
+  import { PUBLIC_SITE_URL } from "$env/static/public"
 
   let { data } = $props()
 
@@ -53,6 +54,9 @@
 
     const { data: oauthData, error } = await data.supabase.auth.linkIdentity({
       provider,
+      options: {
+        redirectTo: PUBLIC_SITE_URL,
+      },
     })
 
     if (error) {

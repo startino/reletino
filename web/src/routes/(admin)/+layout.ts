@@ -6,9 +6,7 @@ import { createBrowserClient } from "@supabase/ssr"
 
 import type { Database, Tables } from "$lib/supabase/database.types"
 
-export const load = async ({ data, depends }) => {
-  depends("supabase:auth")
-
+export const load = async ({ data }) => {
   const supabase = createBrowserClient<Database>(
     PUBLIC_SUPABASE_URL,
     PUBLIC_SUPABASE_ANON_KEY,

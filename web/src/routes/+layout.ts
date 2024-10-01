@@ -4,14 +4,11 @@ import {
 } from "$env/static/public"
 import { createBrowserClient } from "@supabase/ssr"
 
-export const load = async ({ data, depends }) => {
-  depends("supabase:auth")
+export const load = async ({ data }) => {
   const supabase = createBrowserClient(
     PUBLIC_SUPABASE_URL,
     PUBLIC_SUPABASE_ANON_KEY,
   )
 
-  const url = data.url
-
-  return { supabase, url }
+  return { ...data, supabase }
 }

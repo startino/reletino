@@ -5,14 +5,37 @@
   import { slide } from "svelte/transition"
   import { Toaster } from "$lib/components/ui/sonner"
 
-  import { setEnvironmentState } from "$lib/states"
+  import { setEnvironmentState, setAuthState } from "$lib/states"
+  import { onMount } from "svelte"
+  import { goto, invalidate } from "$app/navigation"
 
   let { children, data } = $props()
 
   setEnvironmentState(data.environment)
+  const authState = setAuthState(data.auth)
 
   $effect(() => {
     setEnvironmentState(data.environment)
+    setAuthState(data.auth)
+  })
+
+  onMount(() => {
+    data.supabase.auth.onAuthStateChange((event, session) => {
+      // Redirect to account after successful login
+      if (event == "SIGNED_IN") {
+        authState.session = session
+        authState.user = session ? session.user : null
+        // Delay needed because order of callback not guaranteed.
+        // Give the layout callback priority to update state or
+        // we'll just bounch back to login when /account tries to load
+        if (session?.user.is_anonymous) {
+          return
+        }
+        setTimeout(() => {
+          goto("/find-env")
+        }, 1)
+      }
+    })
   })
 </script>
 

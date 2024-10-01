@@ -2,12 +2,13 @@
   import { Menu } from "lucide-svelte"
   import { Button, buttonVariants } from "$lib/components/ui/button"
   import * as DropDownMenu from "$lib/components/ui/dropdown-menu"
-  import { getEnvironmentState } from "$lib/states/environment.svelte"
+  import { getEnvironmentState, getAuthState } from "$lib/states"
 
   import { WebsiteName } from "$lib/config"
 
-  let { data, children } = $props()
+  let { children } = $props()
   const environment = getEnvironmentState()
+  const authState = getAuthState()
 </script>
 
 <div class="h-dvh">
@@ -19,7 +20,7 @@
     </div>
     <div class="flex-none">
       <ul class="px-1 hidden sm:flex font-bold text-lg">
-        {#if data.auth.user?.is_anonymous && !environment.value}
+        {#if authState.user?.is_anonymous && !environment.value}
           <li class="md:mx-2">
             <a
               href="/login/sign_in"
@@ -27,7 +28,7 @@
             >
           </li>
         {/if}
-        {#if !data.auth.user?.is_anonymous}
+        {#if !authState.user?.is_anonymous}
           <li class="md:mx-2">
             <a href="/sign_out" class={buttonVariants({ variant: "ghost" })}
               >Sign Out</a

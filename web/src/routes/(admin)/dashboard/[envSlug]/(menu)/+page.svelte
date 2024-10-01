@@ -1,17 +1,12 @@
 <script lang="ts">
-  import * as Resizable from "$lib/components/ui/resizable"
-  import DataTable from "$lib/components/ui/data-table/data-table.svelte"
-  import * as ToggleGroup from "$lib/components/ui/toggle-group"
   import * as Select from "$lib/components/ui/select"
   import SubmissionViewer from "./submission-viewer.svelte"
   import type { Database, Tables } from "$lib/supabase"
   import type { SupabaseClient } from "@supabase/supabase-js"
   import { Toggle } from "$lib/components/ui/toggle"
-  import { BookCheck, Trash, LocateOff, CheckCheck, LoaderCircle } from "lucide-svelte"
+  import { LocateOff, CheckCheck, LoaderCircle } from "lucide-svelte"
   import { Button } from "$lib/components/ui/button"
   import { Typography } from "$lib/components/ui/typography"
-  import { onMount } from "svelte"
-  import { invalidate } from "$app/navigation"
   import { page } from "$app/stores"
 
   type Props = {
@@ -41,7 +36,8 @@
       (payload) => {
         submissions.push(payload.new as Tables<"submissions">)
       },
-    ).subscribe()
+    )
+    .subscribe()
 
   // Arbituarilly select the first submission
   let selectedSubmission: Tables<"submissions"> | null = $state(null)
@@ -95,18 +91,14 @@
       }
     })
 
-  // Ensure submission_created_utc is a valid date string and sort submissions by submission_created_utc
-  _submissions.sort((a, b) => {
-    const dateA = new Date(a.submission_created_utc).getTime();
-    const dateB = new Date(b.submission_created_utc).getTime();
-    return dateB - dateA; // Newest items first
-  }); 
+    // Ensure submission_created_utc is a valid date string and sort submissions by submission_created_utc
+    _submissions.sort((a, b) => {
+      const dateA = new Date(a.submission_created_utc).getTime()
+      const dateB = new Date(b.submission_created_utc).getTime()
+      return dateB - dateA // Newest items first
+    })
 
     return _submissions
-  })
-
-  onMount(async () => {
-    invalidate("data:init")
   })
 </script>
 
@@ -125,16 +117,25 @@
   <div class="grid grid-cols-5 grid-rows-5 gap-6 h-full">
     <div class="flex flex-col p-2 col-span-2 row-span-5">
       <div class="flex flex-col place-items-start w-full justify-between mb-4">
-        <Select.Root portal={null} bind:selected={selectedProject} 
-        onSelectedChange={(project)=>{
-          console.log("changing project")
-          project && getSubmissionsFromDB(project.value)
-          }} >
-          <div class="flex flex-row mb-4 gap-y-0.5 place-items-center gap-x-4 w-full">
+        <Select.Root
+          portal={null}
+          bind:selected={selectedProject}
+          onSelectedChange={(project) => {
+            console.log("changing project")
+            project && getSubmissionsFromDB(project.value)
+          }}
+        >
+          <div
+            class="flex flex-row mb-4 gap-y-0.5 place-items-center gap-x-4 w-full"
+          >
             <Select.Label class="text-left pl-0">
-              <Typography variant="headline-md" class="text-left">Project:</Typography>
+              <Typography variant="headline-md" class="text-left"
+                >Project:</Typography
+              >
             </Select.Label>
-            <Select.Trigger class=" bg-primary/80 text-primary-foreground w-[250px] border-none">
+            <Select.Trigger
+              class=" bg-primary/80 text-primary-foreground w-[250px] border-none"
+            >
               <Select.Value placeholder="Select a project" />
             </Select.Trigger>
             <Select.Content>
@@ -166,11 +167,13 @@
 
       <div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-4">
         <Typography variant="headline-md" class="text-left"
-          >Submissions {!projectLoading ? "(" + displaySubmissions.length + ")" : ""}
-            {#if projectLoading}
+          >Submissions {!projectLoading
+            ? "(" + displaySubmissions.length + ")"
+            : ""}
+          {#if projectLoading}
             <LoaderCircle class="animate-spin text-primary h-24 w-24" />
-        {/if}
-            </Typography>
+          {/if}
+        </Typography>
 
         {#each displaySubmissions as submission}
           <Button
@@ -199,7 +202,11 @@
 
     <div class="col-span-3 row-span-5">
       {#if selectedSubmission}
-        <SubmissionViewer {supabase} bind:submission={selectedSubmission} bind:projectName={selectedProject.label} />
+        <SubmissionViewer
+          {supabase}
+          bind:submission={selectedSubmission}
+          bind:projectName={selectedProject.label}
+        />
       {:else}
         <div class="flex items-center justify-center p-6">
           <p class="text-muted-foreground">No submission selected</p>

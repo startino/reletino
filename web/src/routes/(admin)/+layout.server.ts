@@ -17,5 +17,5 @@ export const load = async ({ locals: { supabase, safeGetSession } }) => {
     return error(500, "Something went wrong")
   }
 
-  return { session, profile, user }
+  return { profile, user }
 }
