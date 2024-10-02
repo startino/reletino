@@ -12,13 +12,13 @@
 </script>
 
 <div class="h-dvh relative">
-  <div class="flex py-12 container mx-auto absolute left-1/2 -translate-x-1/2 px-4 lg:px-0 z-50">
-    <div class="flex-1">
+  <div class="flex w-full place-content-between py-12 absolute left-1/2 -translate-x-1/2 px-12 lg:px-24 z-50">
+    <div class="">
       <Button variant="ghost" href="/" class="p-0 text-lg text-background hover:bg-inherit">
         {WebsiteName}
       </Button>
     </div>
-    <div class="flex-none">
+    <div class="">
       <ul class="px-1 hidden sm:flex place-items-center font-bold text-md text-background">
         {#if authState.user?.is_anonymous && !environment.value}
           <li class="md:mx-2">
