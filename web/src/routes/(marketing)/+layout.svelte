@@ -11,45 +11,40 @@
   const authState = getAuthState()
 </script>
 
-<div class="h-dvh">
-  <div class="flex py-4 container mx-auto sticky">
+<div class="h-dvh relative">
+  <div class="flex py-12 container mx-auto absolute left-1/2 -translate-x-1/2 px-4 z-50">
     <div class="flex-1">
-      <Button variant="ghost" href="/" class="text-lg">
+      <Button variant="ghost" href="/" class="text-lg text-background">
         {WebsiteName}
       </Button>
     </div>
     <div class="flex-none">
-      <ul class="px-1 hidden sm:flex font-bold text-lg">
+      <ul class="px-1 hidden sm:flex place-items-center font-bold text-md text-background">
         {#if authState.user?.is_anonymous && !environment.value}
           <li class="md:mx-2">
-            <a
+            <Button
               href="/login/sign_in"
-              class={buttonVariants({ variant: "outline" })}>Sign In</a
-            >
+              class="w-full bg-background text-background rounded-3xl px-7 bg-foreground/60 border-2 border-foreground/50 font-bold hover:bg-background/80 hover:text-foreground/80"
+              variant="outline"
+              >Login</Button>
           </li>
         {/if}
         {#if !authState.user?.is_anonymous}
           <li class="md:mx-2">
-            <a href="/sign_out" class={buttonVariants({ variant: "ghost" })}
-              >Sign Out</a
+            <Button href="/sign_out" 
+            class="w-full bg-background text-background rounded-3xl px-7 bg-foreground/60 border-2 border-foreground/50 font-bold hover:bg-background/80 hover:text-foreground/80"
+              >Sign Out</Button
             >
           </li>
         {/if}
         <li class="md:mx-2">
-          {#if !environment.value}
-            <a
-              href="/onboarding"
-              class={buttonVariants({ variant: "default" })}
-            >
-              Get Started
-            </a>
-          {:else}
-            <a
+          {#if environment.value}
+            <Button
               href="/dashboard/{environment.value.slug}"
-              class={buttonVariants({ variant: "default" })}
+              class="w-full bg-background text-background rounded-3xl px-7 bg-foreground/60 border-2 border-foreground/50 font-bold hover:bg-background/80 hover:text-foreground/80"
             >
               Dashboard
-            </a>
+        </Button>
           {/if}
         </li>
       </ul>

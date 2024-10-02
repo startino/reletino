@@ -134,9 +134,9 @@
               >
             </Select.Label>
             <Select.Trigger
-              class=" bg-primary/80 text-primary-foreground w-[250px] border-none"
+              class="border border-foreground text-primary w-[250px]"
             >
-              <Select.Value placeholder="Select a project" />
+              <Select.Value placeholder="Select a project" class="text-foreground"/>
             </Select.Trigger>
             <Select.Content>
               <Select.Group>

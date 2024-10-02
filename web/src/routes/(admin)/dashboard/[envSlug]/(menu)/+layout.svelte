@@ -81,7 +81,7 @@
   <nav
     class="w-full h-20 flex items-center justify-between lg:block lg:w-44 lg:h-dvh p-4 bg-card text-card-foreground"
   >
-    <a href="/" class="text-xl font-bold inline lg:hidden">reletino</a>
+    <a href="/" class="text-xl font-bold inline lg:hidden">reletino <span class="text-sm">beta</span></a>
     <Dialog.Root bind:open>
       <Dialog.Trigger class="lg:hidden"
         ><button aria-label="open navigation"><Menu /></button></Dialog.Trigger
@@ -118,12 +118,13 @@
       </Dialog.Content>
     </Dialog.Root>
     <ul class="hidden flex-col h-full lg:flex items-center">
-      <li class="mb-6">
+      <li class="mb-6 flex">
         <a href="/" class="text-xl font-bold">reletino</a>
+        <span class="ml-1 text-xs">beta</span>
       </li>
 
       {#each navItems as item}
-        <li class="my-1">
+        <li class="my-1 w-full">
           <a
             href={item.href}
             class="{buttonVariants({
