@@ -41,14 +41,14 @@
       >
         Get Started
       </Button>
-      <Button
+      <!-- <Button
         href="#demo-video"
         class="w-full bg-background text-background rounded-3xl bg-foreground/40 border-2 border-foreground/50 hover:bg-foreground/60 font-semibold"
         variant="outline"
         size="lg"
       >
         Learn More
-      </Button> 
+      </Button>  -->
    </div>
    <Typography variant="body-md" class="pt-24 text-start">
     *Reletino is in Beta, credits are free for early users.
