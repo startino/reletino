@@ -143,6 +143,12 @@ def evaluate_submission(
         structured_llm = llm.with_structured_output(Evaluation)
     
         junior_evaluation: Evaluation = structured_llm.invoke(textwrap.dedent(f"""
+            <format-instructions>
+                {{
+                    "reasoning": "... ...",
+                    "is_relevant": "..."
+                }}
+            </format-instructions>
             <context>
                 You are a super intelligent junior assistant that helps the senior assistant in filtering Reddit posts for the Boss.
                 You and the senior assistant have the duty of going through Reddit posts and determining if they are relevant to look into for the Boss.
@@ -188,6 +194,12 @@ def evaluate_submission(
         structured_llm = llm.with_structured_output(Evaluation)
 
         senior_evaluation: Evaluation = structured_llm.invoke(textwrap.dedent(f"""
+            <format-instructions>
+                {{
+                    "reasoning": "... ...",
+                    "is_relevant": "..."
+                }}
+            </format-instructions>
             <context>
                 You are a very intelligent senior assistant that filters Reddit posts for your boss.
                 You have the duty of going through the Reddit posts and determining if they are relevant to look into for your boss.
