@@ -12,9 +12,9 @@
 </script>
 
 <div class="h-dvh relative">
-  <div class="flex py-12 container mx-auto absolute left-1/2 -translate-x-1/2 px-4 z-50">
+  <div class="flex py-12 container mx-auto absolute left-1/2 -translate-x-1/2 px-4 lg:px-0 z-50">
     <div class="flex-1">
-      <Button variant="ghost" href="/" class="text-lg text-background">
+      <Button variant="ghost" href="/" class="p-0 text-lg text-background hover:bg-inherit">
         {WebsiteName}
       </Button>
     </div>
