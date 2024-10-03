@@ -53,6 +53,9 @@
 
 		const { data: oauthData, error } = await data.supabase.auth.linkIdentity({
 			provider,
+			options: {
+				redirectTo: `${data.url}/auth/callback`,
+			},
 		});
 
 		if (error) {
@@ -75,7 +78,7 @@
 {#if step === 'signup'}
 	<Card.Root class="mt-6">
 		<Card.Header>
-			<Card.Title class="text-2xl font-bold text-center">Sign Up</Card.Title>
+			<Card.Title class="text-center text-2xl font-bold">Sign Up</Card.Title>
 		</Card.Header>
 		<Card.Content>
 			{#if oauthError}
@@ -151,7 +154,7 @@
 				</Form.Field>
 
 				{#if $signUpErrors._errors}
-					<p class="text-destructive text-sm font-bold mt-1">
+					<p class="mt-1 text-sm font-bold text-destructive">
 						{$signUpErrors._errors[0]}
 					</p>
 				{/if}
@@ -167,7 +170,7 @@
 		</Card.Content>
 
 		<Card.Footer>
-			<div class="mt-4 mb-2">
+			<div class="mb-2 mt-4">
 				Have an account? <a class="underline" href="/login/sign_in">Sign in</a>
 				.
 			</div>
@@ -176,7 +179,7 @@
 {:else}
 	<Card.Root class="mt-6">
 		<Card.Header>
-			<Card.Title class="text-2xl font-bold text-center">
+			<Card.Title class="text-center text-2xl font-bold">
 				Enter your verification code
 			</Card.Title>
 			<Card.Description>
@@ -199,7 +202,7 @@
 				</Form.Field>
 
 				{#if $otpErrors._errors}
-					<p class="text-destructive text-sm font-bold mt-1">
+					<p class="mt-1 text-sm font-bold text-destructive">
 						{$otpErrors._errors[0]}
 					</p>
 				{/if}

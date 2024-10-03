@@ -13,7 +13,7 @@ services:
     volumes:
       - ./web:/app
     environment:
-      - PUBLIC_CRITINO_API_URL="http://0.0.0.0:7531"
+      - PUBLIC_CRITINO_API_URL=https://api.critino.starti.no
       - PUBLIC_CRITINO_API_KEY
       - PUBLIC_SUPABASE_URL
       - PUBLIC_SUPABASE_ANON_KEY
@@ -40,7 +40,7 @@ services:
     volumes:
       - ./services/api:/app
     environment:
-      - PUBLIC_CRITINO_API_URL="http://0.0.0.0:7531"
+      - PUBLIC_CRITINO_API_URL=https://api.critino.starti.no
       - PUBLIC_CRITINO_API_KEY
       - SUPABASE_URL
       - SUPABASE_ANON_KEY
