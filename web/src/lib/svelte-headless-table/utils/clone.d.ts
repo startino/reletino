@@ -1,7 +1,7 @@
 export interface Clonable<T> {
-  clone(): T
+	clone(): T;
 }
-export declare const isClonable: <T>(obj: unknown) => obj is Clonable<T>
+export declare const isClonable: <T>(obj: unknown) => obj is Clonable<T>;
 /**
  * Create a new instance of a class instance with all properties shallow
  * copied. This is unsafe as it does not re-run the constructor. Therefore,
@@ -11,6 +11,6 @@ export declare const isClonable: <T>(obj: unknown) => obj is Clonable<T>
  * @returns A new instance object with all properties shallow copied.
  */
 export declare const unsafeClone: <T extends object>(
-  source: T,
-  props?: Partial<T> | undefined,
-) => T
+	source: T,
+	props?: Partial<T> | undefined
+) => T;

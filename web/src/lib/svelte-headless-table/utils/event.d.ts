@@ -1,1 +1,1 @@
-export declare const isShiftClick: (event: Event) => boolean
+export declare const isShiftClick: (event: Event) => boolean;

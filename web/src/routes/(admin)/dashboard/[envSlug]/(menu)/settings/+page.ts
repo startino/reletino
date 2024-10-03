@@ -1,5 +1,5 @@
 export const load = ({ params }) => {
-  return {
-    envSlug: params.slug,
-  }
-}
+	return {
+		envSlug: params.slug,
+	};
+};

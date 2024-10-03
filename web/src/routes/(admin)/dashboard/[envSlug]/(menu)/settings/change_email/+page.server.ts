@@ -1,10 +1,10 @@
-import { superValidate } from "sveltekit-superforms"
-import { zod } from "sveltekit-superforms/adapters"
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
-import { emailSchema } from "$lib/schemas"
+import { emailSchema } from '$lib/schemas';
 
 export const load = async () => {
-  const form = await superValidate(zod(emailSchema))
+	const form = await superValidate(zod(emailSchema));
 
-  return { form }
-}
+	return { form };
+};

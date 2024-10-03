@@ -4,9 +4,9 @@ SaaS Starter includes email capabilities for sending emails to users, and admins
 
 There are three types of emails:
 
-- Admin emails: sent to a static admin email address, useful for monitoring app activity like new signups and contact-us form submissions.
-- User emails: sent to the user's email address. For example: a welcome email.
-- Auth emails: verifing the user's email address and magic links. Auth emails are covered in the main README setup docs, and not covered here.
+-   Admin emails: sent to a static admin email address, useful for monitoring app activity like new signups and contact-us form submissions.
+-   User emails: sent to the user's email address. For example: a welcome email.
+-   Auth emails: verifing the user's email address and magic links. Auth emails are covered in the main README setup docs, and not covered here.
 
 ## Set Up Email
 
@@ -14,9 +14,9 @@ To enable email capabilities, set the following environment variables:
 
 **Important**: The template includes a welcome email, which will be enabled once you set your Resend API key. You should customize the email to fit your brand and content or remove it **BEFORE** you enable the email with environment variables. See below.
 
-- `PRIVATE_RESEND_API_KEY`: a https://resend.com API key. Note, you'll need to verify your 'from' domain with them before you can use their service.
-- `PRIVATE_ADMIN_EMAIL`: the email address to which admin emails will be sent. If unset, admin emails will not be sent.
-  - `PRIVATE_FROM_ADMIN_EMAIL`: the email address to use as the from address for admin emails (defaults to `PRIVATE_ADMIN_EMAIL` if not set).
+-   `PRIVATE_RESEND_API_KEY`: a https://resend.com API key. Note, you'll need to verify your 'from' domain with them before you can use their service.
+-   `PRIVATE_ADMIN_EMAIL`: the email address to which admin emails will be sent. If unset, admin emails will not be sent.
+    -   `PRIVATE_FROM_ADMIN_EMAIL`: the email address to use as the from address for admin emails (defaults to `PRIVATE_ADMIN_EMAIL` if not set).
 
 ## Customize Welcome Email
 
@@ -24,9 +24,9 @@ SaaS Starter includes a welcome email template that you can customize to fit you
 
 To customize the email:
 
-- edit the properties like company name, from email, and subject in the call to sendTemplatedEmail in src/routes/(admin)/account/api/+page.server.ts
-- edit the plaintext email content in src/lib/emails/welcome_email_text.svelte
-- edit the html email content in src/lib/emails/welcome_email_html.svelte - don't forget address and preheader text which won't render in a preview, but will in the client's email client.
+-   edit the properties like company name, from email, and subject in the call to sendTemplatedEmail in src/routes/(admin)/account/api/+page.server.ts
+-   edit the plaintext email content in src/lib/emails/welcome_email_text.svelte
+-   edit the html email content in src/lib/emails/welcome_email_html.svelte - don't forget address and preheader text which won't render in a preview, but will in the client's email client.
 
 You can also delete the welcome email by removing the call to sendTemplatedEmail in src/routes/(admin)/account/api/+page.server.ts
 

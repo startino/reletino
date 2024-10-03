@@ -1,5 +1,5 @@
 export const load = async ({ url }) => {
-  return {
-    url: url.origin,
-  }
-}
+	return {
+		url: url.origin,
+	};
+};
