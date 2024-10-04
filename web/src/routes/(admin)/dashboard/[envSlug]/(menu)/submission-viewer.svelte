@@ -16,6 +16,7 @@
 	import { Typography } from '$lib/components/ui/typography';
 	import type { SupabaseClient } from '@supabase/supabase-js';
 	import { CheckCheck, ExternalLink, LoaderCircle, Undo } from 'lucide-svelte';
+	import { PUBLIC_CRITINO_API_KEY } from '$env/static/public';
 
 	interface Props {
 		supabase: SupabaseClient<any, 'public', any>;
@@ -71,32 +72,31 @@
 		const context = '';
 		const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
 		const response = `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
-		const team_name = $page.data.environment.slug;
-		const workflow_name = projectName;
-		const project_name = projectName;
-		const agent_name = 'main';
+		const optimal = '';
 
-		const tags: string[] = [];
-
-		// will be set by the user in the critique editor
-		const optimal: string = '';
-
-		const body = {
-			id: submission.id,
-			context,
-			query,
-			optimal,
-			response,
-			team_name,
-			project_name,
-			workflow_name,
-			agent_name,
-		};
-		console.log('body:', JSON.stringify(body, null, 2));
-		const res = await critino.POST('/critiques', { body });
+		const res = await critino.POST('/critiques/{id}', {
+			params: {
+				path: { id: submission.id },
+				query: {
+					team_name: 'startino',
+					environment_name: 'reletino/' + $page.data.environment.slug + '/' + projectName,
+					workflow_name: projectName,
+					agent_name: 'main',
+				},
+				header: {
+					'x-critino-key': PUBLIC_CRITINO_API_KEY,
+				},
+			},
+			body: {
+				context,
+				query,
+				optimal,
+				response,
+			},
+		});
 		if (res.data) {
 			critinoLoading = false;
-			window.open(res.data, '_blank');
+			window.open(res.data.url, '_blank');
 			return;
 		}
 		if (res.error) {
@@ -114,13 +114,13 @@
 	{#if submission}
 		<div class="flex h-full flex-col">
 			<div class="flex flex-row place-items-center justify-between">
-				<Typography variant="headline-md" class="text-left p-4">Post</Typography>
+				<Typography variant="headline-md" class="p-4 text-left">Post</Typography>
 				<Button href={submission.url} target="_blank" variant="default" class="">
 					Visit Post <ExternalLink class="ml-2 w-5" />
 				</Button>
 			</div>
 
-			<div class="flex flex-row text-left justify-between p-4">
+			<div class="flex flex-row justify-between p-4 text-left">
 				<div>
 					<Typography variant="title-md" class="text-left">
 						Title: {submission.title}
@@ -156,7 +156,7 @@
       </div> -->
 
 			<Separator />
-			<div class="grid grid-cols-2 gap-6 w-full p-4">
+			<div class="grid w-full grid-cols-2 gap-6 p-4">
 				<Button
 					onclick={() => handleCritique(submission)}
 					variant="secondary"
@@ -165,7 +165,7 @@
 				>
 					Create Critino Review
 					{#if critinoLoading}
-						<LoaderCircle class="animate-spin ml-2 w-5" />
+						<LoaderCircle class="ml-2 w-5 animate-spin" />
 					{:else}
 						<ExternalLink class="ml-2 w-5" />
 					{/if}
@@ -177,7 +177,7 @@
 						Mark as Unread
 					{/if}
 					{#if markingAsRead}
-						<LoaderCircle class="animate-spin ml-2 w-5" />
+						<LoaderCircle class="ml-2 w-5 animate-spin" />
 					{:else if !submission.done}
 						<CheckCheck class="ml-2 w-5" />
 					{:else}
