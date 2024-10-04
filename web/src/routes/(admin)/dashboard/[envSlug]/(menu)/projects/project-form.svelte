@@ -21,11 +21,13 @@
 	import type { SupabaseClient, Session } from '@supabase/supabase-js';
 	import { Switch } from '$lib/components/ui/switch';
 	import { Root } from '$lib/components/ui/accordion';
+	import { PUBLIC_CRITINO_URL } from '$env/static/public';
 
 	interface Props {
 		session: Session;
 		supabase: SupabaseClient<any, 'public', any>;
 		projectForm: SuperValidated<Infer<ProjectSchema>>;
+		environment: Tables<'environments'>;
 		selectedProjectId: string;
 		newProject: Tables<'projects'> | null;
 		projects: Tables<'projects'>[];
@@ -34,6 +36,7 @@
 	let {
 		session,
 		supabase,
+		environment,
 		projectForm,
 		selectedProjectId = $bindable(),
 		projects = $bindable(),
@@ -141,7 +144,7 @@
 					you add.
 				</Form.Description>
 			</div>
-			<div class="grid grid-cols-4 gap-3 pt-4 items-center">
+			<div class="grid grid-cols-4 items-center gap-3 pt-4">
 				<Input
 					class="max-w-xs"
 					placeholder="Type a subreddit here..."
@@ -168,7 +171,7 @@
 					{#each $formData.subreddits as _, i}
 						<Button
 							variant="outline"
-							class="rounded-md flex flex-row w-full justify-between bg-card hover:bg-destructive/20 px-2 py-1"
+							class="flex w-full flex-row justify-between rounded-md bg-card px-2 py-1 hover:bg-destructive/20"
 							on:click={() => {
 								$formData.subreddits = $formData.subreddits.filter(
 									(subreddit) => subreddit != $formData.subreddits[i]
@@ -205,7 +208,7 @@
 				<Dialog.Trigger>
 					<Button variant="secondary" class="">Open Prompt</Button>
 				</Dialog.Trigger>
-				<Dialog.Content class="place-items-center max-w-5xl h-full min-h-96 w-full px-7">
+				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
 					<Textarea {...attrs} rows={35} bind:value={$formData.prompt} />
 				</Dialog.Content>
 			</Dialog.Root>
@@ -236,7 +239,7 @@
 	</Form.Button>
 	<Button
 		variant="secondary"
-		href="https://critino.starti.no/startino/projects/{selectedProject.title}/workflows/{selectedProject.title}"
+		href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment.name}/${selectedProject.title}/workflows`}
 		target="_blank"
 		class="w-full"
 	>

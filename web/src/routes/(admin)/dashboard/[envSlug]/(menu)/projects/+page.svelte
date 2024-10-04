@@ -12,6 +12,7 @@
 	interface Props {
 		data: {
 			supabase: SupabaseClient<any, 'public', any>;
+			environment: Tables<'environments'>;
 			session: Session;
 			projects: Tables<'projects'>[];
 			projectForm: SuperValidated<Infer<ProjectSchema>>;
@@ -20,7 +21,7 @@
 
 	let { data }: Props = $props();
 
-	let { supabase, session, projects: dataProjects } = data;
+	let { supabase, session, environment, projects: dataProjects } = data;
 
 	let projects: Tables<'projects'>[] = $state(dataProjects || []);
 	let selectedProjectId: string = $state('');
@@ -46,6 +47,7 @@
 				<ProjectForm
 					{session}
 					{supabase}
+					{environment}
 					projectForm={data.projectForm}
 					bind:projects
 					bind:selectedProjectId
@@ -77,16 +79,16 @@
 		{#each projects as project}
 			<li class="rounded-md bg-card">
 				<Button
-					class="w-full h-full flex flex-col p-8 py-12 pt-3"
+					class="flex h-full w-full flex-col p-8 py-12 pt-3"
 					variant="ghost"
 					onclick={() => {
 						selectedProjectId = project.id;
 					}}
 				>
-					<div class="flex flex-row gap-x-2 place-items-center ml-auto mb-4">
+					<div class="mb-4 ml-auto flex flex-row place-items-center gap-x-2">
 						<div
-							class="w-3 h-3 rounded-full {project.running
-								? 'bg-emerald-500 animate-pulse'
+							class="h-3 w-3 rounded-full {project.running
+								? 'animate-pulse bg-emerald-500'
 								: 'bg-orange-500'}"
 						></div>
 						{#if project.running}

@@ -1,10 +1,17 @@
 import type { Tables } from '$lib/supabase';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import critino from '$lib/apis/critino';
 import { PUBLIC_CRITINO_API_KEY } from '$env/static/public';
 
-export const load = async ({ locals: { supabase, environment, auth }, params }) => {
+export const load = async ({ locals: { safeGetSession, supabase, environment, auth }, params }) => {
 	console.log('load in env slug menu');
+	const { session } = await safeGetSession();
+
+	if (!session) {
+		console.log('No session found in /(menu)/dashboard');
+		redirect(303, '/login');
+	}
+
 	const { data, error: err } = await supabase
 		.from('environments')
 		.select('id')
@@ -37,6 +44,8 @@ export const load = async ({ locals: { supabase, environment, auth }, params }) 
 		console.error('Error loading credits:', eUsage);
 		return { status: 500, error: new Error('Failed to load credits') };
 	}
+
+	console.log('critino api key: ', PUBLIC_CRITINO_API_KEY);
 
 	const getOrCreateCritinoEnvironment = async (env: Tables<'environments'>) => {
 		console.log('getOrCreateCritinoEnvironment');
@@ -84,7 +93,66 @@ export const load = async ({ locals: { supabase, environment, auth }, params }) 
 
 	await getOrCreateCritinoEnvironment(environment);
 
+	const { data: projects, error: eProjects } = await supabase
+		.from('projects')
+		.select('*')
+		.eq('profile_id', session.user.id);
+
+	if (eProjects || !projects) {
+		console.error('Error loading submissions:', eProjects);
+		return { status: 500, error: new Error('Failed to load leads') };
+	}
+
+	const getOrCreateCritinoProject = async (project: Tables<'projects'>) => {
+		console.log('getOrCreateCritinoProject');
+		const readResponse = await critino.GET('/environments/{name}', {
+			params: {
+				query: {
+					team_name: 'startino',
+					parent_name: 'reletino/' + environment?.name,
+				},
+				path: {
+					name: project.title, // TODO: rename project title to project name
+				},
+				header: {
+					'x-critino-key': PUBLIC_CRITINO_API_KEY,
+				},
+			},
+		});
+		console.log('readResponse', readResponse);
+
+		if (readResponse.error) {
+			console.log('getOrCreateCritinoProject error');
+			const createResponse = await critino.POST('/environments/{name}', {
+				params: {
+					query: {
+						team_name: 'startino',
+						parent_name: 'reletino/' + environment?.name,
+					},
+					path: {
+						name: project.title, // TODO: rename project title to project name
+					},
+					header: {
+						'x-critino-key': PUBLIC_CRITINO_API_KEY,
+					},
+				},
+				body: {
+					gen_key: false,
+					description: `proj name: ${project.title}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`, // TODO: rename project title to project name
+				},
+			});
+			console.log('createResponse', createResponse);
+		}
+
+		console.log('getOrCreateCritinoProject end');
+	};
+
+	for (const project of projects) {
+		await getOrCreateCritinoProject(project);
+	}
+
 	return {
+		projects,
 		usage,
 	};
 };
