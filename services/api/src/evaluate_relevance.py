@@ -8,11 +8,11 @@ from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
 from langchain_community.callbacks import get_openai_callback
 
-from src.models import Evaluation
+from src.models import Evaluation, project
 from src.prompts import context as company_context, purpose
 from src.filter_with_questions import filter_with_questions
 
-from src.critino import critino, CritinoConfig
+from src.critino import critino
 
 # Load Enviornment variables
 load_dotenv()
@@ -69,7 +69,7 @@ def summarize_submission(submission: Submission) -> Submission:
     {purpose}
 
     """
-    
+
     summary = llm.invoke(template)
     summarized_selftext = summary.content
 
@@ -94,7 +94,7 @@ def evaluate_submission(
     environment_name: str,
     workflow_name: str,
     project_name: str,
-    ) -> Evaluation | None:
+) -> Evaluation | None:
     """
     Evaluates the relevance of a submission using LLMs.
 
@@ -105,9 +105,9 @@ def evaluate_submission(
     Returns:
     - evaluation: The evaluation object containing the relevance score and the reasoning.
     """
-    
+
     total_cost = 0
-    
+
     post_query = f"""
     <post>
         <title>
@@ -118,19 +118,16 @@ def evaluate_submission(
         </selftext>
     </post>
     """
-    
+
     examples = critino(
-        query = post_query,
-        agent_name = "main",
-        config=CritinoConfig(
-            team_name=environment_name,
-            project_name=project_name,
-            workflow_name=workflow_name,
-        )
+        query=post_query,
+        agent_name="main",
+        project_name=project_name,
+        environment_name=environment_name,
     )
-    
+
     @traceable
-    def junior_evaluation() -> Evaluation:  
+    def junior_evaluation() -> Evaluation:
         llm = AzureChatOpenAI(
             api_key=AZURE_API_KEY,
             deployment_name="gpt-4o-mini",
@@ -139,10 +136,12 @@ def evaluate_submission(
             api_version="2024-02-01",
             max_retries=20,
         )
-    
+
         structured_llm = llm.with_structured_output(Evaluation)
-    
-        junior_evaluation: Evaluation = structured_llm.invoke(textwrap.dedent(f"""
+
+        junior_evaluation: Evaluation = structured_llm.invoke(
+            textwrap.dedent(
+                f"""
             <format-instructions>
                 {{
                     "reasoning": "... ...",
@@ -171,15 +170,16 @@ def evaluate_submission(
             {post_query}
             {examples}
             """
-        ))
-        
+            )
+        )
+
         return junior_evaluation
-    
+
     junior_evaluation = junior_evaluation()
- 
+
     if junior_evaluation.is_relevant is False:
         return junior_evaluation
- 
+
     @traceable
     def senior_evaluation() -> Evaluation:
         llm = AzureChatOpenAI(
@@ -193,7 +193,9 @@ def evaluate_submission(
 
         structured_llm = llm.with_structured_output(Evaluation)
 
-        senior_evaluation: Evaluation = structured_llm.invoke(textwrap.dedent(f"""
+        senior_evaluation: Evaluation = structured_llm.invoke(
+            textwrap.dedent(
+                f"""
             <format-instructions>
                 {{
                     "reasoning": "... ...",
@@ -215,9 +217,10 @@ def evaluate_submission(
             {post_query}
             {examples}
             """
-        ))
+            )
+        )
         return senior_evaluation
-    
+
     senior_evaluation = senior_evaluation()
 
     return senior_evaluation
