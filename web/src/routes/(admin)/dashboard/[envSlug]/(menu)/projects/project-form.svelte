@@ -239,7 +239,7 @@
 	</Form.Button>
 	<Button
 		variant="secondary"
-		href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment.name}/${selectedProject.title}/workflows`}
+		href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment.name}/${selectedProject.title}/workflows?key=${environment.critino_key}`}
 		target="_blank"
 		class="w-full"
 	>
