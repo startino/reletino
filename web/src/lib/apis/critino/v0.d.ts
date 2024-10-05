@@ -21,6 +21,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/team/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Authenticate Team */
+        get: operations["authenticate_team_auth_team__name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/environment/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Authenticate Environment */
+        get: operations["authenticate_environment_auth_environment__name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/environments": {
         parameters: {
             query?: never;
@@ -54,7 +88,26 @@ export interface paths {
         delete: operations["delete_environment_environments__name__delete"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update Environment */
+        patch: operations["update_environment_environments__name__patch"];
+        trace?: never;
+    };
+    "/environments/{name}/key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Environment Key */
+        delete: operations["delete_environment_key_environments__name__key_delete"];
+        options?: never;
+        head?: never;
+        /** Update Environment Key */
+        patch: operations["update_environment_key_environments__name__key_patch"];
         trace?: never;
     };
     "/critiques/ids": {
@@ -112,6 +165,20 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** DeleteEnvironmentsKeyResponse */
+        DeleteEnvironmentsKeyResponse: {
+            /** Data */
+            data: Record<string, never>;
+            /** Key */
+            key: string | null;
+        };
+        /** GetAuthResponse */
+        GetAuthResponse: {
+            /** Status */
+            status: number;
+            /** Detail */
+            detail: string;
+        };
         /** GetCritiquesResult */
         GetCritiquesResult: {
             /** Data */
@@ -119,22 +186,22 @@ export interface components {
             /** Count */
             count: number;
         };
-        /** GetEnvironmentResponse */
-        GetEnvironmentResponse: {
-            /** Data */
-            data: Record<string, never>;
-        };
-        /** GetEnvironmentsResponse */
-        GetEnvironmentsResponse: {
-            /** Data */
-            data: unknown[];
-            /** Count */
-            count: number;
-        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** PatchEnvironmentsKeyResponse */
+        PatchEnvironmentsKeyResponse: {
+            /** Data */
+            data: Record<string, never>;
+            /** Key */
+            key: string | null;
+        };
+        /** PatchEnvironmentsResponse */
+        PatchEnvironmentsResponse: {
+            /** Data */
+            data: Record<string, never>;
         };
         /** PostCritiquesBody */
         PostCritiquesBody: {
@@ -192,6 +259,18 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** GetEnvironmentsResponse */
+        src__routers__environments__GetEnvironmentsResponse__1: {
+            /** Data */
+            data: unknown[];
+            /** Count */
+            count: number;
+        };
+        /** GetEnvironmentsResponse */
+        src__routers__environments__GetEnvironmentsResponse__2: {
+            /** Data */
+            data: Record<string, never>;
+        };
     };
     responses: never;
     parameters: never;
@@ -221,6 +300,75 @@ export interface operations {
             };
         };
     };
+    authenticate_team_auth_team__name__get: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-critino-key": string;
+            };
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetAuthResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    authenticate_environment_auth_environment__name__get: {
+        parameters: {
+            query: {
+                team_name: string;
+                parent_name?: string | null;
+            };
+            header: {
+                "x-critino-key": string;
+            };
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GetAuthResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_environments_environments_get: {
         parameters: {
             query: {
@@ -241,7 +389,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GetEnvironmentsResponse"];
+                    "application/json": components["schemas"]["src__routers__environments__GetEnvironmentsResponse__1"];
                 };
             };
             /** @description Validation Error */
@@ -277,7 +425,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GetEnvironmentResponse"];
+                    "application/json": components["schemas"]["src__routers__environments__GetEnvironmentsResponse__2"];
                 };
             };
             /** @description Validation Error */
@@ -354,6 +502,118 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_environment_environments__name__patch: {
+        parameters: {
+            query: {
+                team_name: string;
+                parent_name?: string | null;
+            };
+            header: {
+                "x-critino-key": string;
+            };
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostEnvironmentsBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatchEnvironmentsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_environment_key_environments__name__key_delete: {
+        parameters: {
+            query: {
+                team_name: string;
+                parent_name?: string | null;
+            };
+            header: {
+                "x-critino-key": string;
+            };
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeleteEnvironmentsKeyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_environment_key_environments__name__key_patch: {
+        parameters: {
+            query: {
+                team_name: string;
+                parent_name?: string | null;
+            };
+            header: {
+                "x-critino-key": string;
+            };
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatchEnvironmentsKeyResponse"];
                 };
             };
             /** @description Validation Error */
