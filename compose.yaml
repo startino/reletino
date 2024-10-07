@@ -20,6 +20,7 @@ services:
       - PRIVATE_SUPABASE_SERVICE_ROLE
       - PRIVATE_STRIPE_API_KEY
       - PUBLIC_API_URL
+      - PRIVATE_API_URL
     env_file: ./web/.env
   api:
     build:

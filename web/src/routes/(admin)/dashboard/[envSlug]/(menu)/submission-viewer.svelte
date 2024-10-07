@@ -74,7 +74,7 @@
 		const response = `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
 		const optimal = '';
 
-		const res = await critino.POST('/critiques/{id}', {
+		const postObject = {
 			params: {
 				path: { id: submission.id },
 				query: {
@@ -93,7 +93,13 @@
 				optimal,
 				response,
 			},
-		});
+		};
+		console.log(`Creating Critique with object: ${JSON.stringify(postObject, null, 2)}...`);
+
+		const res = await critino.POST('/critiques/{id}', postObject);
+
+		console.log(`Creating Critique with response: ${JSON.stringify(res, null, 2)}`);
+
 		if (res.data) {
 			critinoLoading = false;
 			window.open(res.data.url, '_blank');
@@ -158,7 +164,7 @@
 			<Separator />
 			<div class="grid w-full grid-cols-2 gap-6 p-4">
 				<Button
-					onclick={() => handleCritique(submission)}
+					onclick={async () => await handleCritique(submission)}
 					variant="secondary"
 					target="_blank"
 					disabled={critinoLoading}

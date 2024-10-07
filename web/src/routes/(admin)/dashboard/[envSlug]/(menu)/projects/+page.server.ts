@@ -2,7 +2,7 @@ import { projectSchema } from '$lib/schemas';
 import { redirect } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { PUBLIC_API_URL } from '$env/static/public';
+import { PRIVATE_API_URL } from '$env/static/public';
 import type { Tables } from '$lib/supabase';
 
 export const load = async ({ locals: { safeGetSession, supabase } }) => {
@@ -59,7 +59,7 @@ export const actions = {
 
 		if (form.data.running) {
 			// Start the project
-			await fetch(`${PUBLIC_API_URL}/start`, {
+			await fetch(`${PRIVATE_API_URL}/start`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export const actions = {
 				.then((data) => (responseStatus = data.status));
 		} else {
 			// Stop the project
-			await fetch(`${PUBLIC_API_URL}/stop`, {
+			await fetch(`${PRIVATE_API_URL}/stop`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

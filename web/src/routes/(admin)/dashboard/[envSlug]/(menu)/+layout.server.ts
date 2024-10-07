@@ -160,55 +160,55 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		throw error(500, 'Failed to load leads');
 	}
 
-	// const getOrCreateCritinoProject = async (project: Tables<'projects'>) => {
-	// 	console.log('getOrCreateCritinoProject');
-	// 	const readResponse = await critino.GET('/environments/{name}', {
-	// 		params: {
-	// 			query: {
-	// 				team_name: 'startino',
-	// 				parent_name: 'reletino/' + environment?.name,
-	// 			},
-	// 			path: {
-	// 				name: project.title, // TODO: rename project title to project name
-	// 			},
-	// 			header: {
-	// 				'x-critino-key': PUBLIC_CRITINO_API_KEY,
-	// 			},
-	// 		},
-	// 	});
-	// 	console.log('readResponse', readResponse);
-	//
-	// 	if (readResponse.error) {
-	// 		console.log('getOrCreateCritinoProject error');
-	// 		const createResponse = await critino.POST('/environments/{name}', {
-	// 			params: {
-	// 				query: {
-	// 					team_name: 'startino',
-	// 					parent_name: 'reletino/' + environment?.name,
-	// 				},
-	// 				path: {
-	// 					name: project.title, // TODO: rename project title to project name
-	// 				},
-	// 				header: {
-	// 					'x-critino-key': PUBLIC_CRITINO_API_KEY,
-	// 				},
-	// 			},
-	// 			body: {
-	// 				gen_key: false,
-	// 				description: `proj name: ${project.title}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`, // TODO: rename project title to project name
-	// 			},
-	// 		});
-	//
-	// 		environment.key = createResponse.data?.key;
-	// 		console.log('createResponse', createResponse);
-	// 	}
-	//
-	// 	console.log('getOrCreateCritinoProject end');
-	// };
-	//
-	// for (const project of projects) {
-	// 	await getOrCreateCritinoProject(project);
-	// }
+	const getOrCreateCritinoProject = async (project: Tables<'projects'>) => {
+		console.log('getOrCreateCritinoProject');
+		const readResponse = await critino.GET('/environments/{name}', {
+			params: {
+				query: {
+					team_name: 'startino',
+					parent_name: 'reletino/' + environment?.name,
+				},
+				path: {
+					name: project.title, // TODO: rename project title to project name
+				},
+				header: {
+					'x-critino-key': PUBLIC_CRITINO_API_KEY,
+				},
+			},
+		});
+		console.log('readResponse', readResponse);
+
+		if (readResponse.error) {
+			console.log('getOrCreateCritinoProject error');
+			const createResponse = await critino.POST('/environments/{name}', {
+				params: {
+					query: {
+						team_name: 'startino',
+						parent_name: 'reletino/' + environment?.name,
+					},
+					path: {
+						name: project.title, // TODO: rename project title to project name
+					},
+					header: {
+						'x-critino-key': PUBLIC_CRITINO_API_KEY,
+					},
+				},
+				body: {
+					gen_key: false,
+					description: `proj name: ${project.title}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`, // TODO: rename project title to project name
+				},
+			});
+
+			environment.key = createResponse.data?.key;
+			console.log('createResponse', createResponse);
+		}
+
+		console.log('getOrCreateCritinoProject end');
+	};
+
+	for (const project of projects) {
+		await getOrCreateCritinoProject(project);
+	}
 
 	return {
 		projects,
