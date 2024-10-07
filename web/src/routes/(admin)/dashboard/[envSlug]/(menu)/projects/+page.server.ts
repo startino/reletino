@@ -2,8 +2,8 @@ import { projectSchema } from '$lib/schemas';
 import { redirect } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { PRIVATE_API_URL } from '$env/static/public';
 import type { Tables } from '$lib/supabase';
+import { PRIVATE_API_URL } from '$env/static/private';
 
 export const load = async ({ locals: { safeGetSession, supabase } }) => {
 	const { session } = await safeGetSession();
