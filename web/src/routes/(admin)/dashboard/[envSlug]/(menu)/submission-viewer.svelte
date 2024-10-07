@@ -20,7 +20,6 @@
 
 	interface Props {
 		supabase: SupabaseClient<any, 'public', any>;
-		environment: Tables<'environment'>;
 		submission: Tables<'submissions'>;
 		projectName: string;
 	}
