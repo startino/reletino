@@ -8,7 +8,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
-	import type { Tables } from '$lib/supabase/database.types';
+	import type { Tables } from '$lib/supabase';
 
 	import { toast } from 'svelte-sonner';
 
