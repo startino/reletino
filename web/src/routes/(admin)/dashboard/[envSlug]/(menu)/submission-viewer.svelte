@@ -79,7 +79,7 @@
 				path: { id: submission.id },
 				query: {
 					team_name: 'startino',
-					environment_name: 'reletino/' + $page.data.environment.slug + '/' + projectName,
+					environment_name: 'reletino/' + $page.data.environment.name + '/' + projectName,
 					workflow_name: projectName,
 					agent_name: 'main',
 				},
@@ -121,7 +121,14 @@
 		<div class="flex h-full flex-col">
 			<div class="flex flex-row place-items-center justify-between">
 				<Typography variant="headline-md" class="p-4 text-left">Post</Typography>
-				<Button href={submission.url.includes("http") ? submission.url : "https://reddit.com/" + submission.url } target="_blank" variant="default" class="">
+				<Button
+					href={submission.url.includes('http')
+						? submission.url
+						: 'https://reddit.com/' + submission.url}
+					target="_blank"
+					variant="default"
+					class=""
+				>
 					Visit Post <ExternalLink class="ml-2 w-5" />
 				</Button>
 			</div>
