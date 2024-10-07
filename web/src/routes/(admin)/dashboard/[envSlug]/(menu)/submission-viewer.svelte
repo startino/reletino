@@ -121,7 +121,7 @@
 		<div class="flex h-full flex-col">
 			<div class="flex flex-row place-items-center justify-between">
 				<Typography variant="headline-md" class="p-4 text-left">Post</Typography>
-				<Button href={submission.url} target="_blank" variant="default" class="">
+				<Button href={submission.url.includes("http") ? submission.url : "https://reddit.com/" + submission.url } target="_blank" variant="default" class="">
 					Visit Post <ExternalLink class="ml-2 w-5" />
 				</Button>
 			</div>
