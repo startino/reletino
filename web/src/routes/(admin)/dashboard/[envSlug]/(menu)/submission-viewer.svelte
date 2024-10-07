@@ -20,6 +20,7 @@
 
 	interface Props {
 		supabase: SupabaseClient<any, 'public', any>;
+		environment: Tables<'environment'>;
 		submission: Tables<'submissions'>;
 		projectName: string;
 	}
@@ -102,7 +103,8 @@
 
 		if (res.data) {
 			critinoLoading = false;
-			window.open(res.data.url, '_blank');
+			console.log('Opening Critino');
+			window.open(res.data.url + '?key=' + $page.data.environment.critino_key, '_blank');
 			return;
 		}
 		if (res.error) {
