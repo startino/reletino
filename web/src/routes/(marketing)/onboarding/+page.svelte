@@ -41,7 +41,7 @@
 	const { form: formData, enhance, errors, delayed } = form;
 </script>
 
-<div class="max-w-xl mx-auto mt-8">
+<div class="max-w-xl mx-auto pt-24">
 	{#if !envCheck}
 		<Card.Root>
 			<Card.Header>
