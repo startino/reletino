@@ -210,7 +210,9 @@
 					<Button variant="secondary" class="">Open Prompt</Button>
 				</Dialog.Trigger>
 				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
-					<TipTap {...attrs} class="p-3 max-h-[700px] overflow-y-scroll" bind:content={$formData.prompt} />
+					<div class="p-3 w-full h-full min-h-96">
+						<TipTap class="p-3 h-full w-full min-h-[500px] overflow-y-scroll" bind:content={$formData.prompt} />
+					</div>
 				</Dialog.Content>
 			</Dialog.Root>
 			<Form.FieldErrors />
