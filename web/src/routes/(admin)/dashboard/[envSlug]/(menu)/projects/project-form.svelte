@@ -22,6 +22,7 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { Root } from '$lib/components/ui/accordion';
 	import { PUBLIC_CRITINO_URL } from '$env/static/public';
+	import { TipTap } from '$lib/components/ui/tiptap';
 
 	interface Props {
 		session: Session;
@@ -209,7 +210,7 @@
 					<Button variant="secondary" class="">Open Prompt</Button>
 				</Dialog.Trigger>
 				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
-					<Textarea {...attrs} rows={35} bind:value={$formData.prompt} />
+					<TipTap {...attrs} class="p-3 max-h-[700px] overflow-y-scroll" bind:content={$formData.prompt} />
 				</Dialog.Content>
 			</Dialog.Root>
 			<Form.FieldErrors />
