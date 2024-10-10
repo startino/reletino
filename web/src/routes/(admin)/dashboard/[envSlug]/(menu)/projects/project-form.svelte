@@ -95,6 +95,7 @@
 
 	const addSubreddit = () => {
 		if (newSubreddit != '') {
+			newSubreddit = newSubreddit.toLowerCase().trim().replace('r/', '');
 			$formData.subreddits = [...$formData.subreddits, newSubreddit];
 		}
 		newSubreddit = '';
