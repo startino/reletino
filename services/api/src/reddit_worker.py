@@ -63,24 +63,7 @@ class RedditStreamWorker:
                 if is_cached:
                     logging.info(f"Skipping cached submission: {submission.id}")
                     continue
-                
-                profile_credits = self.supabase.table("usage").select("credits").eq("profile_id", self.profile_id).execute()
-                
-                if len(profile_credits.data) == 0:
-                    logging.error("Error getting credits from table.")
-                    continue
-                
-                no_of_credits = profile_credits.data[0]["credits"]
-                
-                if no_of_credits >= 1:
-                    self.supabase.table("usage").update({
-                        "credits": no_of_credits - 1
-                        }).eq("profile_id", self.profile_id).execute()
-                else:
-                    logging.info(f"No credits available for user: {self.profile_id}.")
-                    self.stop()
-                    break
-
+            
                 evaluation: Evaluation | None = evaluate_submission(
                     submission=submission,
                     project_prompt=self.project.prompt,
@@ -120,9 +103,27 @@ class RedditStreamWorker:
                         **evaluation.dict(),
                     }
                 ).execute()
+                
                 logging.info(f"Inserted new submission: {submission.id}")
                 
                 cache.set(submission.id, submission.id)
+                
+                profile_credits = self.supabase.table("usage").select("credits").eq("profile_id", self.profile_id).execute()
+                
+                if len(profile_credits.data) == 0:
+                    logging.error("Error getting credits from table.")
+                    continue
+                
+                no_of_credits = profile_credits.data[0]["credits"]
+                
+                if no_of_credits >= 1:
+                    self.supabase.table("usage").update({
+                        "credits": no_of_credits - 1
+                        }).eq("profile_id", self.profile_id).execute()
+                else:
+                    logging.info(f"No credits available for user: {self.profile_id}.")
+                    self.stop()
+                    break
                 
         
     def stop(self):
