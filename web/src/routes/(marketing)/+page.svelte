@@ -37,9 +37,9 @@
 			</Typography>
 			<Typography
 				variant="title-md"
-				class="text-balance pt-8 max-w-lg text-xl/7 font-medium 5 sm:text-2xl/8 text-start"
+				class="pt-8 max-w-xl text-xl/7 font-medium sm:text-2xl/8 text-start"
 			>
-				Reletino helps you sell more by revealing leads from Reddit, through an AI Agent.
+				Reletino helps SaaS owners sell more by  <br /> revealing leads from Reddit, through an AI Agent.
 			</Typography>
 		</div>
 		<div class="flex flex-col gap-6 mt-12 gap-x-6 gap-y-4 sm:flex-row">
