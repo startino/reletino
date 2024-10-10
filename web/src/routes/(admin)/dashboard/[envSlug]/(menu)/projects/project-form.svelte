@@ -195,14 +195,7 @@
 		<Form.Control let:attrs>
 			<Form.Label>Prompt</Form.Label>
 			<Form.Description>
-				Find prompt guides
-				<a
-					class="text-primary underline"
-					href="https://reletino.notion.site/"
-					target="_blank"
-				>
-					here
-				</a>
+				Accurate results are achieved by providing a great prompt. <br /> Tell the AI exactly what to look for.
 			</Form.Description>
 			<input type="hidden" name="prompt" bind:value={$formData.prompt} />
 			<Dialog.Root>
@@ -211,7 +204,7 @@
 				</Dialog.Trigger>
 				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
 					<div class="p-3 w-full h-full min-h-96">
-						<TipTap class="p-3 h-full w-full min-h-[500px] overflow-y-scroll" bind:content={$formData.prompt} />
+						<TipTap class="p-3 h-full w-full min-h-[500px] max-h-[700px] overflow-y-scroll" bind:content={$formData.prompt} />
 					</div>
 				</Dialog.Content>
 			</Dialog.Root>
