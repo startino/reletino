@@ -1,7 +1,7 @@
 // src/hooks.server.ts
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { PRIVATE_SUPABASE_SERVICE_ROLE } from '$env/static/private';
-import { type Handle } from '@sveltejs/kit';
+import { error, type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
@@ -48,7 +48,9 @@ const auth: Handle = async ({ event, resolve }) => {
 		if (!session) {
 			const {
 				data: { session, user },
+				error,
 			} = await event.locals.supabase.auth.signInAnonymously();
+			console.log(error);
 
 			return { session, user };
 		} else {
