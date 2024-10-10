@@ -63,4 +63,9 @@
 			*Reletino is in Beta, credits are free for early users.
 		</Typography>
 	</div>
+
 </main>
+<div class="max-w-5xl mx-auto mt-12 h-full">
+	<div style="position: relative; padding-bottom: 56.25%; height: 0;"><iframe src="https://www.loom.com/embed/61475d8b2c264c309348aa88b52e7f9e?sid=f6efc182-732e-475c-91d5-64aeafeac636" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+	</div>
+</div>
