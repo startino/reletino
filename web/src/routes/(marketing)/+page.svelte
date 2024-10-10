@@ -22,6 +22,7 @@
 	{@html jsonldScript}
 </svelte:head>
 
+<div class="bg-background">
 <main class="relative">
 	<div
 		class="absolute inset-2 bottom-0 rounded-3xl ring-1 ring-inset ring-black/5 bg-[linear-gradient(115deg,var(--tw-gradient-stops))] from-tertiary from-[28%] via-secondary to-primary sm:bg-[linear-gradient(145deg,var(--tw-gradient-stops))]"
@@ -65,7 +66,9 @@
 	</div>
 
 </main>
-<div class="max-w-5xl mx-auto mt-12 h-full">
-	<div style="position: relative; padding-bottom: 56.25%; height: 0;"><iframe src="https://www.loom.com/embed/61475d8b2c264c309348aa88b52e7f9e?sid=f6efc182-732e-475c-91d5-64aeafeac636" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
+<div class="max-w-5xl mx-auto my-12 p-1.5 rounded-3xl bg-[linear-gradient(115deg,var(--tw-gradient-stops))] from-primary from-[28%] via-secondary to-tertiary sm:bg-[linear-gradient(145deg,var(--tw-gradient-stops))]">
+	<div class="" style="position: relative; padding-bottom: 56.25%; height: 0;"><iframe class="rounded-3xl" src="https://www.loom.com/embed/61475d8b2c264c309348aa88b52e7f9e?sid=f6efc182-732e-475c-91d5-64aeafeac636" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
 	</div>
+</div>
+
 </div>
