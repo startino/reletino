@@ -23,6 +23,8 @@
 	import { Root } from '$lib/components/ui/accordion';
 	import { PUBLIC_CRITINO_URL } from '$env/static/public';
 	import { TipTap } from '$lib/components/ui/tiptap';
+	import { generateHTML } from '@tiptap/core';
+	import StarterKit from '@tiptap/starter-kit';
 
 	interface Props {
 		session: Session;
@@ -115,6 +117,166 @@
 			toast.success('Project successfully deleted.');
 		}
 	};
+
+	const fillPromptWithTemplate = () => {
+		const defaultPrompt = generateHTML(
+			{
+				type: 'doc',
+				content: [
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Objective' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'The end-goal is to use the relevant posts to acquire new users for Reletino.',
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'General Guidance' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'The author must own/run an existing SaaS product or is planning on building one.',
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Relevant Post Examples' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'A post of someone asking for marketing tools they can use to help sell their software product.',
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'A post from someone that is running a SaaS business and needs to market it.',
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Irrelevant Post Examples' }],
+					},
+					{
+						type: 'bulletList',
+						content: [
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: "A really technical post about a person's software.",
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Someone with an idea that is too vague or still in the concept phase, with the author not already committing to building the product.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'A post related to e-commerce or physical products.',
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'About Reletino' }],
+					},
+					{
+						type: 'paragraph',
+						content: [{ type: 'text', text: 'Reletino is a Reddit automation tool.' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Its primary goal is to help users find relevant posts.',
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: "It uses AI to filter a live stream of Reddit posts based on a prompt; you simply tell it what is relevant to you in plain English and it'll give you relevant posts as they get published.",
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Reletino is great at connecting someone with a product/service to someone that needs it.',
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: "Reletino is like RedditFlow and GummySearch, but instead of using keywords which don't capture nuance, Reletino does.",
+							},
+						],
+					},
+				],
+			},
+			[StarterKit]
+		);
+		$formData.prompt = defaultPrompt;
+	};
 </script>
 
 <form method="POST" action="?/updateProject" class="flex flex-col gap-y-4" use:enhance>
@@ -172,7 +334,7 @@
 					{#each $formData.subreddits as _, i}
 						<Button
 							variant="outline"
-							class="flex w-full flex-row justify-between rounded-md bg-card px-2 py-1 hover:bg-destructive/20"
+							class="bg-card hover:bg-destructive/20 flex w-full flex-row justify-between rounded-md px-2 py-1"
 							on:click={() => {
 								$formData.subreddits = $formData.subreddits.filter(
 									(subreddit) => subreddit != $formData.subreddits[i]
@@ -195,7 +357,8 @@
 		<Form.Control let:attrs>
 			<Form.Label>Prompt</Form.Label>
 			<Form.Description>
-				Accurate results are achieved by providing a great prompt. <br /> Tell the AI exactly what to look for.
+				Accurate results are achieved by providing a great prompt. <br />
+				 Tell the AI exactly what to look for.
 			</Form.Description>
 			<input type="hidden" name="prompt" bind:value={$formData.prompt} />
 			<Dialog.Root>
@@ -203,8 +366,14 @@
 					<Button variant="secondary" class="">Open Prompt</Button>
 				</Dialog.Trigger>
 				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
-					<div class="p-3 w-full h-full min-h-96">
-						<TipTap class="p-3 h-full w-full min-h-[500px] max-h-[700px] overflow-y-scroll" bind:content={$formData.prompt} />
+					<Button onclick={fillPromptWithTemplate} variant="outline" class="right-2 top-2">
+						Insert Example Prompt (Reletino's)
+					</Button>
+					<div class="h-full min-h-96 w-full p-3">
+						<TipTap
+							class="h-full max-h-[700px] min-h-[500px] w-full overflow-y-scroll p-3"
+							bind:content={$formData.prompt}
+						/>
 					</div>
 				</Dialog.Content>
 			</Dialog.Root>
