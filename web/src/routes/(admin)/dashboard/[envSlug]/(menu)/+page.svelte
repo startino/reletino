@@ -98,6 +98,12 @@
 
 		return _submissions;
 	});
+
+	onMount(() => {
+		if (data.projects.length > 0) {
+			getSubmissionsFromDB(data.projects[0].id);
+		}
+	});
 </script>
 
 {#if data.projects.length == 0}
