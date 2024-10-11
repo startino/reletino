@@ -8,6 +8,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Typography } from '$lib/components/ui/typography';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
 	type Props = {
 		data: {
