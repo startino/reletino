@@ -126,7 +126,6 @@
 						action={formTarget}
 						use:superEnhance
 					>
-						{formTarget}
 						{#if form && $errors && $formData}
 							{#each fields as field}
 								<Form.Field {form} name={field.id}>
