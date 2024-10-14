@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import SuperDebug from 'sveltekit-superforms';
 
 	import * as Card from '$lib/components/ui/card';
 	import * as Form from '$lib/components/ui/form';
@@ -127,7 +126,6 @@
 						action={formTarget}
 						use:superEnhance
 					>
-						<SuperDebug data={$formData} />
 						{formTarget}
 						{#if form && $errors && $formData}
 							{#each fields as field}
