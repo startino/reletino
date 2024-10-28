@@ -22,36 +22,37 @@
 	{@html jsonldScript}
 </svelte:head>
 
-<div class="bg-background">
-<main class="relative">
-	<div
-		class="absolute inset-2 bottom-0 rounded-3xl ring-1 ring-inset ring-black/5 bg-[linear-gradient(115deg,var(--tw-gradient-stops))] from-tertiary from-[28%] via-secondary to-primary sm:bg-[linear-gradient(145deg,var(--tw-gradient-stops))]"
-	></div>
-	<div
-		class="px-12 lg:px-24 py-44 lg:pb-12 flex flex-col text-primary-foreground rounded-3xl text-start relative place-items-start"
-	>
-		<div class="">
-			<Typography
-				class="text-balance text-6xl/[0.9] font-medium tracking-tight text-start sm:text-8xl/[0.8] md:text-9xl/[0.8]"
-			>
-				Close every deal.
-			</Typography>
-			<Typography
-				variant="title-md"
-				class="pt-8 max-w-xl text-xl/7 font-medium sm:text-2xl/8 text-start"
-			>
-				Reletino helps SaaS owners sell more by  <br /> revealing leads from Reddit, through an AI Agent.
-			</Typography>
-		</div>
-		<div class="flex flex-col gap-6 mt-12 gap-x-6 gap-y-4 sm:flex-row">
-			<Button
-				href="/onboarding"
-				class="w-full bg-background text-foreground rounded-3xl hover:bg-background/80"
-				size="lg"
-			>
-				Get Started
-			</Button>
-			<!-- <Button
+<main class="bg-background z-10 -mt-32">
+	<div class="relative">
+		<div
+			class="from-tertiary via-secondary to-primary absolute inset-2 bottom-0 rounded-3xl bg-[linear-gradient(115deg,var(--tw-gradient-stops))] from-[28%] ring-1 ring-inset ring-black/5 sm:bg-[linear-gradient(145deg,var(--tw-gradient-stops))]"
+		></div>
+		<div
+			class="text-primary-foreground relative flex flex-col place-items-start rounded-3xl px-12 py-44 text-start lg:px-24 lg:pb-12"
+		>
+			<div class="">
+				<Typography
+					class="text-balance text-start text-6xl/[0.9] font-medium tracking-tight sm:text-8xl/[0.8] md:text-9xl/[0.8]"
+				>
+					Close every deal.
+				</Typography>
+				<Typography
+					variant="title-md"
+					class="max-w-xl pt-8 text-start text-xl/7 font-medium sm:text-2xl/8"
+				>
+					Reletino helps SaaS owners sell more by <br />
+					revealing leads from Reddit, through an AI Agent.
+				</Typography>
+			</div>
+			<div class="mt-12 flex flex-col gap-6 gap-x-6 gap-y-4 sm:flex-row">
+				<Button
+					href="/onboarding"
+					class="bg-background text-foreground hover:bg-background/80 w-full rounded-3xl"
+					size="lg"
+				>
+					Get Started
+				</Button>
+				<!-- <Button
         href="#demo-video"
         class="w-full bg-background text-background rounded-3xl bg-foreground/40 border-2 border-foreground/50 hover:bg-foreground/60 font-semibold"
         variant="outline"
@@ -59,16 +60,26 @@
       >
         Learn More
       </Button>  -->
+			</div>
+			<Typography variant="body-md" class="pt-24 text-start">
+				*Reletino is in Beta, credits are free for early users.
+			</Typography>
 		</div>
-		<Typography variant="body-md" class="pt-24 text-start">
-			*Reletino is in Beta, credits are free for early users.
-		</Typography>
 	</div>
 
+	<div
+		class="from-primary via-secondary to-tertiary mx-auto my-12 max-w-5xl rounded-3xl bg-[linear-gradient(115deg,var(--tw-gradient-stops))] from-[28%] p-1.5 sm:bg-[linear-gradient(145deg,var(--tw-gradient-stops))]"
+	>
+		<div class="" style="position: relative; padding-bottom: 56.25%; height: 0;">
+			<iframe
+				class="rounded-3xl"
+				src="https://www.loom.com/embed/61475d8b2c264c309348aa88b52e7f9e?sid=f6efc182-732e-475c-91d5-64aeafeac636"
+				frameborder="0"
+				webkitallowfullscreen
+				mozallowfullscreen
+				allowfullscreen
+				style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+			></iframe>
+		</div>
+	</div>
 </main>
-<div class="max-w-5xl mx-auto my-12 p-1.5 rounded-3xl bg-[linear-gradient(115deg,var(--tw-gradient-stops))] from-primary from-[28%] via-secondary to-tertiary sm:bg-[linear-gradient(145deg,var(--tw-gradient-stops))]">
-	<div class="" style="position: relative; padding-bottom: 56.25%; height: 0;"><iframe class="rounded-3xl" src="https://www.loom.com/embed/61475d8b2c264c309348aa88b52e7f9e?sid=f6efc182-732e-475c-91d5-64aeafeac636" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
-	</div>
-</div>
-
-</div>

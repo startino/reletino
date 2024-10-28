@@ -37,6 +37,7 @@
 					return;
 				}
 				setTimeout(() => {
+					invalidate('data:init');
 					goto('/find-env');
 				}, 1);
 			}

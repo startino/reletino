@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Menu } from 'lucide-svelte';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import * as DropDownMenu from '$lib/components/ui/dropdown-menu';
 	import { getEnvironmentState, getAuthState } from '$lib/states';
 
@@ -11,22 +11,20 @@
 	const authState = getAuthState();
 </script>
 
-<div class="h-dvh relative">
-	<div
-		class="flex w-full place-content-between py-12 absolute left-1/2 -translate-x-1/2 px-12 lg:px-24 z-50"
-	>
+<div class="relative h-dvh">
+	<div class="relative z-50 flex w-full place-content-between px-12 py-12 lg:px-24">
 		<div class="">
-			<Button variant="ghost" href="/" class="p-0 text-lg text-background hover:bg-inherit">
+			<Button variant="ghost" href="/" class="text-background p-0 text-lg hover:bg-inherit">
 				{WebsiteName}
 			</Button>
 		</div>
 		<div class="">
-			<ul class="px-1 hidden sm:flex place-items-center font-bold text-md text-background">
+			<ul class="text-md text-background hidden place-items-center px-1 font-bold sm:flex">
 				{#if authState.user?.is_anonymous && !environment.value}
 					<li class="md:mx-2">
 						<Button
 							href="/login/sign_in"
-							class="w-full bg-background text-background rounded-3xl px-7 bg-foreground/60 border-2 border-foreground/50 font-bold hover:bg-background/80 hover:text-foreground/80"
+							class="bg-background text-background bg-foreground/60 border-foreground/50 hover:bg-background/80 hover:text-foreground/80 w-full rounded-3xl border-2 px-7 font-bold"
 							variant="outline"
 						>
 							Login
@@ -37,7 +35,7 @@
 					<li class="md:mx-2">
 						<Button
 							href="/sign_out"
-							class="w-full bg-background text-background rounded-3xl px-7 bg-foreground/60 border-2 border-foreground/50 font-bold hover:bg-background/80 hover:text-foreground/80"
+							class="bg-background text-background bg-foreground/60 border-foreground/50 hover:bg-background/80 hover:text-foreground/80 w-full rounded-3xl border-2 px-7 font-bold"
 						>
 							Sign Out
 						</Button>
@@ -47,7 +45,7 @@
 					{#if environment.value}
 						<Button
 							href="/dashboard/{environment.value.slug}"
-							class="w-full bg-background text-background rounded-3xl px-7 bg-foreground/60 border-2 border-foreground/50 font-bold hover:bg-background/80 hover:text-foreground/80"
+							class="bg-background text-background bg-foreground/60 border-foreground/50 hover:bg-background/80 hover:text-foreground/80 w-full rounded-3xl border-2 px-7 font-bold"
 						>
 							Dashboard
 						</Button>
