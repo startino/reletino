@@ -11,18 +11,20 @@
 
 	let { children, data } = $props();
 
-	setEnvironmentState(data.environment);
+	const envState = setEnvironmentState(data.environment);
 	const authState = setAuthState(data.auth);
 
 	$effect(() => {
-		setEnvironmentState(data.environment);
+		envState.value = data.environment;
 		setAuthState(data.auth);
 	});
 
 	onMount(() => {
-		data.supabase.auth.onAuthStateChange((event, session) => {
+		data.supabase.auth.onAuthStateChange(async (event, session) => {
 			// Redirect to account after successful login
 			if (event == 'SIGNED_IN') {
+				await invalidate('data:init');
+
 				const freshLogin = session?.access_token !== authState.session?.access_token;
 
 				authState.session = session;
@@ -37,9 +39,8 @@
 					return;
 				}
 				setTimeout(() => {
-					invalidate('data:init');
 					goto('/find-env');
-				}, 1);
+				}, 200);
 			}
 		});
 	});
