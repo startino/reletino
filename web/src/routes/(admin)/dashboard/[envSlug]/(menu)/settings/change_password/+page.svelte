@@ -6,18 +6,19 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { passwordSchema } from '$lib/schemas';
+	import { getEnvironmentState } from '$lib/states';
 
 	let { data } = $props();
 	let { session, supabase } = data;
 
+	const env = getEnvironmentState();
+
 	// True if definitely has a password, but can be false if they
 	// logged in with oAuth or email link
 
-	// @ts-expect-error: we ignore because Supabase does not maintain an AMR typedef
-	let hasPassword = session?.user?.amr?.find((x) => x.method === 'password') ? true : false;
+	let hasPassword = Boolean(session?.user.user_metadata.hasPassword);
 
-	// @ts-expect-error: we ignore because Supabase does not maintain an AMR typedef
-	let usingOAuth = session?.user?.amr?.find((x) => x.method === 'oauth') ? true : false;
+	let usingOAuth = ['google', 'github'].includes(session?.user?.app_metadata?.provider ?? '');
 
 	let sendBtn = $state<HTMLButtonElement>();
 	let sentEmail = $state(false);
@@ -30,7 +31,7 @@
 		if (email) {
 			supabase.auth
 				.resetPasswordForEmail(email, {
-					redirectTo: `${$page.url.origin}/auth/callback?next=%2Faccount%2Fsettings%2Freset_password`,
+					redirectTo: `${$page.url.origin}/auth/callback?next=%2Fdashboard%2F${env.value?.name}%2Fsettings%2Freset_password`,
 				})
 				.then((d) => {
 					sentEmail = d.error ? false : true;
@@ -43,7 +44,7 @@
 	<title>Change Password</title>
 </svelte:head>
 
-<h1 class="text-2xl font-bold mb-6">Change Password</h1>
+<h1 class="mb-6 text-2xl font-bold">Change Password</h1>
 
 {#if hasPassword}
 	<SettingsModule

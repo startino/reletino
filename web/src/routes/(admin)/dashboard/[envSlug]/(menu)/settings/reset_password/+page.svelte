@@ -1,14 +1,19 @@
 <script lang="ts">
+	import { passwordSchema } from '$lib/schemas';
 	import SettingsModule from '../settings_module.svelte';
+
+	let { data } = $props();
 </script>
 
 <svelte:head>
 	<title>Reset Password</title>
 </svelte:head>
 
-<h1 class="text-2xl font-bold mb-6">Settings</h1>
+<h1 class="mb-6 text-2xl font-bold">Settings</h1>
 
 <SettingsModule
+	data={data.form}
+	schema={passwordSchema}
 	title="Reset Password"
 	editable={true}
 	saveButtonTitle="Reset Password"

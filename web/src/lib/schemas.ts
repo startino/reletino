@@ -43,7 +43,9 @@ export const passwordSchema = z
 			.min(
 				1,
 				"You must include your current password. If you forgot it, sign out then use 'forgot password' on the sign in page."
-			),
+			)
+			.optional(),
+
 		newPassword1: z
 			.string()
 			.min(6, 'The new password must be at least 6 charaters long')

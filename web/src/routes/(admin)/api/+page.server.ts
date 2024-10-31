@@ -49,14 +49,13 @@ export const actions = {
 		const { error } = await supabase.auth.updateUser({ email: form.data.email });
 
 		if (error) {
+			console.error(error);
 			return setError(form, 'Unknown error. If this persists please contact us.', {
 				status: 500,
 			});
 		}
 
-		return {
-			form,
-		};
+		redirect(303, `/login/confirm?email=${form.data.email}`);
 	},
 	updatePassword: async ({ request, locals: { supabase, safeGetSession } }) => {
 		const { session } = await safeGetSession();
@@ -66,15 +65,12 @@ export const actions = {
 
 		const form = await superValidate(request, zod(passwordSchema));
 
-		// Can check if we're a "password recovery" session by checking session amr
-		// let currentPassword take priority if provided (user can use either form)
-		// @ts-expect-error: we ignore because Supabase does not maintain an AMR typedef
-		const recoveryAmr = session.user?.amr?.find((x) => x.method === 'recovery');
-		const isRecoverySession = recoveryAmr && !form.data.currentPassword;
+		const isRecoverySession = session.user.recovery_sent_at && !form.data.currentPassword;
 
 		// if this is password recovery session, check timestamp of recovery session
 		if (isRecoverySession) {
-			const timeSinceLogin = Date.now() - recoveryAmr.timestamp * 1000;
+			const timeSinceLogin =
+				Date.now() - Date.parse(session.user.recovery_sent_at as string) * 1000;
 			if (timeSinceLogin > 1000 * 60 * 15) {
 				// 15 mins in milliseconds
 				return setError(
@@ -97,18 +93,25 @@ export const actions = {
 		if (!isRecoverySession) {
 			const { error } = await supabase.auth.signInWithPassword({
 				email: session?.user.email || '',
-				password: form.data.currentPassword,
+				password: form.data.currentPassword as string,
 			});
 			if (error) {
+				await supabase.auth.signOut();
 				// The user was logged out because of bad password. Redirect to error page explaining.
 				redirect(303, '/login/current_password_error');
 			}
 		}
 
 		const { error } = await supabase.auth.updateUser({
+			email: session.user.email,
 			password: form.data.newPassword1,
+			data: {
+				hasPassword: true,
+			},
 		});
 		if (error) {
+			console.log(error);
+
 			return setError(form, 'Unknown error. If this persists please contact us.', {
 				status: 500,
 			});
@@ -139,6 +142,7 @@ export const actions = {
 			password: form.data.currentPassword,
 		});
 		if (pwError) {
+			await supabase.auth.signOut();
 			// The user was logged out because of bad password. Redirect to error page explaining.
 			redirect(303, '/login/current_password_error');
 		}
