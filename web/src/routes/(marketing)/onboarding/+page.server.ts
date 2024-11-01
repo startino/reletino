@@ -29,6 +29,7 @@ export const actions = {
 				.single();
 
 			if (profileError) {
+				console.warn("Couldn't get the user profile:", profileError);
 				throw profileError;
 			}
 
@@ -42,16 +43,25 @@ export const actions = {
 				.single();
 
 			if (envError) {
+				console.warn('Error while creating the environment', envError);
 				throw envError;
 			}
 
-			await supabaseServiceRole
+			const { error: envProfileError } = await supabaseServiceRole
 				.from('environments_profiles')
 				.insert({ environment_id: env?.id, profile_id: profile?.id });
+
+			if (envProfileError) {
+				console.warn("Couldn't link the environment to the profile: ", envProfileError);
+				throw envProfileError;
+			}
 
 			return { form, env };
 		} catch (err) {
 			const error = err as PostgrestError;
+			console.warn(
+				'Error while creating environment. Referer the previous logs for more details'
+			);
 
 			if (error.code === '23505') {
 				return setError(form, 'Environment name already taken', { status: 403 });

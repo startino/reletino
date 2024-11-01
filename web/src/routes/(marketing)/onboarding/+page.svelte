@@ -41,7 +41,7 @@
 	const { form: formData, enhance, errors, delayed } = form;
 </script>
 
-<div class="max-w-xl mx-auto pt-24">
+<div class="mx-auto max-w-xl pt-24">
 	{#if !envCheck}
 		<Card.Root>
 			<Card.Header>
@@ -60,7 +60,7 @@
 					<Button disabled={$delayed} type="submit">Create</Button>
 
 					{#if $errors._errors}
-						<p class="text-destructive text-sm font-bold mt-1">
+						<p class="text-destructive mt-1 text-sm font-bold">
 							{$errors._errors[0]}
 						</p>
 					{/if}
