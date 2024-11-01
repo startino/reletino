@@ -65,9 +65,7 @@
 			<Button
 				class="bg-card flex h-full w-full flex-col p-8 py-12 pt-3"
 				variant="ghost"
-				onclick={() => {
-					selectedProjectId = project.id;
-				}}
+				href="/dashboard/{environment?.name}/projects/{project.id}"
 			>
 				<div class="mb-4 ml-auto flex flex-row place-items-center gap-x-2">
 					<div

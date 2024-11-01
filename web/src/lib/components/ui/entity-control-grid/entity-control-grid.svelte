@@ -12,7 +12,7 @@
 		itemCell?: Snippet<
 			[T, { onclick?: OnInteract; ondelete?: OnInteract; onedit?: OnInteract }]
 		>;
-		addCell?: Snippet;
+		addCell?: Snippet<[]>;
 		oncreate?: () => void;
 		onclick?: OnInteract;
 		ondelete?: OnInteract;
@@ -32,7 +32,7 @@
 <ul
 	class="grid w-full grid-cols-[repeat(auto-fit,_minmax(0,_300px))] items-start justify-center gap-4"
 >
-	{#if oncreate}
+	{#if oncreate || (!oncreate && addCell)}
 		<li class="h-full w-full">
 			{#if addCell}
 				{@render addCell()}
