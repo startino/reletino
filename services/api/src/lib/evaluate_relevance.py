@@ -10,9 +10,8 @@ from langchain_community.callbacks import get_openai_callback
 
 from src.models import Evaluation, project
 from src.prompts import context as company_context, purpose
-from src.filter_with_questions import filter_with_questions
 
-from src.critino import critino
+from src.lib.critino import critino
 
 # Load Enviornment variables
 load_dotenv()

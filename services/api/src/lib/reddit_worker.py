@@ -15,9 +15,9 @@ from supabase import Client, create_client
 
 from src.models.project import Project
 from src.models import SavedSubmission
-from src.evaluate_relevance import evaluate_submission
+from src.lib.evaluate_relevance import evaluate_submission
 from src.models import Evaluation
-from src.reddit_utils import get_subreddits, get_reddit_instance
+from src.lib.reddit_utils import get_subreddits, get_reddit_instance
 
 load_dotenv()
 
