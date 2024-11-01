@@ -32,12 +32,10 @@ class State(BaseModel):
     form: list[FormField]
     use_case: Literal["leads", "competition_research", "other"]
     processed_website: ProcessedWebsite | None = None
-    current_field_label: str | None = None
-    completed_field_labels: list[str] = []
-    
+    current_action: Action | None = None
 
 
-async def autofill_form(use_case: Literal["leads", "competition_research", "other"], url: str, fields: list[FormField]) -> Dict[str, FormField]:
+async def autofill_form(use_case: Literal["leads", "competition_research", "other"], url: str, fields: list[FormField]) -> list[FormField]:
     """
     Main function to autofill a form based on website content
     
@@ -95,7 +93,7 @@ async def autofill_form(use_case: Literal["leads", "competition_research", "othe
     
     async def field_autocompleter(state: State):
         """Create a node for processing a single form field"""
-        logger.debug(f"Processing field: {state.current_field_label}")
+        logger.debug(f"Processing field: {state.current_action.field_label}")
         
         llm = gpt_4o_mini().with_structured_output(FormField)
         logger.debug(f"Current state: {state}")
@@ -107,50 +105,78 @@ async def autofill_form(use_case: Literal["leads", "competition_research", "othe
             Business Name: {state.processed_website.business_name}
             Summary: {state.processed_website.summary}
             
-            Field to fill: {state.current_field_label}
-            Description: {state.form[state.current_field_label].description}
+            Field to fill: {state.current_action.field_label}
+            Description: {next((field.description for field in state.form if field.label == state.current_action.field_label), "No description found")}
             """)
         ])
 
         chain = prompt | llm
-        result = await chain.invoke({})
+        result = await chain.ainvoke({})
         logger.debug(f"Field completion result: {result}")
-        return result
-    
-    async def verify_form(state: State) -> Literal["continue", "end"]:
-        """Verify that the form is complete"""
-        logger.debug(f"Verifying form completion. Completed fields: {state.completed_field_labels}")
-        logger.debug(f"Total fields: {len(state.form)}")
         
-        # Check if all fields are completed
-        if len(state.completed_field_labels) == len(state.form):
-            logger.debug("All fields completed, ending workflow")
-            return END
-        else:
-            logger.debug("Form incomplete, continuing workflow")
-            return "field_autocompleter"
+        updated_form = [
+            result if field.label == result.label else field
+            for field in state.form
+        ]
+        
+        return { "form": updated_form }
+
+    async def supervisor(state: State) -> Action:
+        """Route to next action based on form state"""
+        logger.debug(f"Routing next action. Completed fields: {[field.label for field in state.form]}")
+        remaining_fields = [field for field in state.form if field.value == ""]
+        logger.debug(f"Remaining fields: {remaining_fields}")
+        
+        llm = gpt_4o_mini().with_structured_output(Action)
+        
+        prompt = (
+            "You are an AI agent deciding how to fill a form based on website content.\n\n"
+            "Website Content:\n"
+            f"Business Name: {state.processed_website.business_name if state.processed_website else 'Not processed'}\n"
+            f"Summary: {state.processed_website.summary if state.processed_website else 'Not processed'}\n\n"
+            "Form Status:\n"
+            f"Current Form: {[field for field in state.form]}\n"
+            "Choose your next action:\n"
+            "1. Fill a specific field (action: 'fill_field')\n"
+            "2. Finish if all fields are complete (action: 'finish')"
+        )
+
+        return { "current_action": await llm.ainvoke(prompt) }
     
     # Create graph
     workflow = StateGraph(State)
     
-    workflow.add_node("route_next", route_next)
+    workflow.add_node("supervisor", supervisor)
     workflow.add_node("field_autocompleter", field_autocompleter)
-    workflow.add_node("verify", verify_form)
     
-    # Add conditional edges
+    def routing_function(state: State) -> Literal["fill_field", "finish"]:  
+        if state.current_action.action != "finish":
+            return "try_again"
+        
+        # Check if all fields are completed
+        if all(field.value != "" for field in state.form):
+            logger.info("All fields completed, ending workflow")
+            return END # can route to a verification agent to review the form before submitting in the future
+        else:
+            logger.info("Form incomplete, continuing workflow")
+            return "try_again"
+    
     workflow.add_conditional_edges(
-        "verify",
-        lambda x: x,  # Pass through the verify_form result
+        "supervisor",
+        routing_function,
         {
-            "end": END,
-            "field_autocompleter": "field_autocompleter"
+            "try_again": "field_autocompleter",
+            END: END
         }
     )
     
-    workflow.add_edge("field_autocompleter", "verify")
-    
+    workflow.add_edge(
+        "field_autocompleter",
+        "supervisor"
+    )
+
     # Set entry point
-    workflow.set_entry_point("route_next")
+    workflow.set_entry_point("supervisor")
     
     # Add website content to inputs
     starting_state: State = State(
@@ -163,36 +189,11 @@ async def autofill_form(use_case: Literal["leads", "competition_research", "othe
     graph = workflow.compile()
     
     # Execute graph
-    async for event in graph.astream_events(
-        starting_state,
-        version="v2"
-    ):
-        logger.debug(f"Event: {event}")
+    async for event in graph.astream(starting_state, stream_mode="values"):
+        final_state = State(**event)
         
-    return event.state
+    return final_state.form
 
-async def route_next(state: State) -> Action:
-    """Route to next action based on form state"""
-    logger.debug(f"Routing next action. Completed fields: {state.completed_field_labels}")
-    remaining_fields = [field for field in state.form if field.label not in state.completed_field_labels]
-    logger.debug(f"Remaining fields: {remaining_fields}")
-    
-    llm = gpt_4o_mini().with_structured_output(Action)
-    
-    prompt = (
-        "You are an AI agent deciding how to fill a form based on website content.\n\n"
-        "Website Content:\n"
-        f"Business Name: {state.processed_website.business_name if state.processed_website else 'Not processed'}\n"
-        f"Summary: {state.processed_website.summary if state.processed_website else 'Not processed'}\n\n"
-        "Form Status:\n"
-        f"Completed Fields: {state.completed_field_labels}\n"
-        f"Remaining Fields: {[field.label for field in remaining_fields]}\n\n"
-        "Choose your next action:\n"
-        "1. Fill a specific field (action: 'fill_field')\n"
-        "2. Finish if all fields are complete (action: 'finish')"
-    )
-
-    return await llm.ainvoke(prompt)
 
 # Example usage:
 if __name__ == "__main__":
@@ -205,7 +206,7 @@ if __name__ == "__main__":
     async def main():
         results = await autofill_form(
             "leads",
-            "https://releti.no",
+            "https://monday.com",
             fields=form_fields
         )
         print(results)
