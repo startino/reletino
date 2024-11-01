@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client
 
 from src.models.project import Project
-from src.reddit_worker import RedditStreamWorker
+from src.lib.reddit_worker import RedditStreamWorker
 
 load_dotenv()
 
@@ -41,24 +41,24 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 async def lifespan(_: FastAPI):
     supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
 
-    project_res = supabase.table("projects").select("*").eq("running", True).execute()
+    # project_res = supabase.table("projects").select("*").eq("running", True).execute()
         
-    for project_data in project_res.data:
+    # for project_data in project_res.data:
         
-        profile_res = supabase.table("profiles").select("*, environments (*)").eq("id", project_data["profile_id"]).execute()
-        logging.info(f"Profile: {profile_res.data}")
-        project = Project(**project_data)
-        worker, _ = workers.get(project.id, (None, None))
+    #     profile_res = supabase.table("profiles").select("*, environments (*)").eq("id", project_data["profile_id"]).execute()
+    #     logging.info(f"Profile: {profile_res.data}")
+    #     project = Project(**project_data)
+    #     worker, _ = workers.get(project.id, (None, None))
                 
-        # Project wasn't properly started
-        if project.running and worker is None:
-            logging.info(f"Starting project stream for project: {project.id}")
-            start_project_stream(StartStreamRequest(project=project, environment_name=profile_res.data[0]["environments"][0]["name"]))
+    #     # Project wasn't properly started
+    #     if project.running and worker is None:
+    #         logging.info(f"Starting project stream for project: {project.id}")
+    #         start_project_stream(StartStreamRequest(project=project, environment_name=profile_res.data[0]["environments"][0]["name"]))
         
-        # Project was stopped but the worker is still running
-        if not project.running and worker is not None:
-            logging.info(f"Stopping project stream for project: {project.id}")
-            stop_project_stream(StopStreamRequest(project_id=project.id))
+    #     # Project was stopped but the worker is still running
+    #     if not project.running and worker is not None:
+    #         logging.info(f"Stopping project stream for project: {project.id}")
+    #         stop_project_stream(StopStreamRequest(project_id=project.id))
             
     yield
     
