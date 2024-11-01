@@ -7,10 +7,15 @@ import aiohttp
 from pydantic import BaseModel, Field
 import asyncio
 from src.interfaces.llm import gpt_4o_mini
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class FormField(BaseModel):
     label: str = Field(description="Label of the field")
-    value: str = Field(description="Value to populate the field with")
+    value: str = Field(description="Value to populate the field with", default="")
     description: str = Field(description="Description of the field")
 
 class ProcessedWebsite(BaseModel):
@@ -24,39 +29,44 @@ class Action(BaseModel):
     
 
 class State(BaseModel):
-    form: Dict[str, FormField]
+    form: list[FormField]
     use_case: Literal["leads", "competition_research", "other"]
     processed_website: ProcessedWebsite | None = None
     current_field_label: str | None = None
-    completed_fields: Dict[str, FormField] = {}
+    completed_field_labels: list[str] = []
     
 
 
-async def autofill_form(use_case: Literal["leads", "competition_research", "other"], url: str, form_fields: Dict[str, str]) -> Dict[str, FormField]:
+async def autofill_form(use_case: Literal["leads", "competition_research", "other"], url: str, fields: list[FormField]) -> Dict[str, FormField]:
     """
     Main function to autofill a form based on website content
     
     Args:
         use_case: Purpose of the form filling according to the user
         url: Website URL to scrape
-        form_fields: Dict mapping field IDs to descriptions
+        fields: List of FormField objects
         
     Returns:
         Dict mapping field IDs to FormField objects with generated values
     """
     
-    async def website_processing(use_case: Literal["leads", "competition_research", "other"], url: str) -> ProcessedWebsite:
+    async def website_processing() -> ProcessedWebsite:
         """Scrape website content using BeautifulSoup"""
+        logger.debug(f"Starting website processing for URL: {url}")
+        
         async with aiohttp.ClientSession() as session:
             try:
+                logger.debug("Making HTTP request")
                 async with session.get(url) as response:
                     html = await response.text()
-                    soup = BeautifulSoup(html, 'html.parser')
+                    logger.debug(f"Got HTML response of length: {len(html)}")
                     
-                    # Get text content
+                    soup = BeautifulSoup(html, 'html.parser')
                     page_content = soup.get_text()
+                    logger.debug(f"Extracted text content of length: {len(page_content)}")
                     
                     # Use GPT-4o Mini to extract relevant content
+                    logger.debug("Initializing GPT-4o Mini")
                     llm = gpt_4o_mini().with_structured_output(ProcessedWebsite)
                     
                     prompt = ChatPromptTemplate.from_messages([
@@ -67,151 +77,136 @@ async def autofill_form(use_case: Literal["leads", "competition_research", "othe
                         ### PURPOSE ###
                         The purpose is to understand the product/service and the business behind it in order to fill out a form.
                         The user has specified that the purpose for this project is {use_case}
-                        
-                        ### CONTEXT ###
-                        - The name should be a single sentence.
-                        - The summary should be a concise description of the website's content.
-                        
-                        ### STYLE ###
-                        - The title and summary should be in plain text, not markdown.
-                        - The summary should be concise but detailed. Using short sentences to describe the website with a lot of details.
                         """)
                         ,
                         ("user", f"Website content: {page_content}")
                     ])
                     
+                    logger.debug("Sending content to LLM")
                     chain = prompt | llm
-                    processed_website = await chain.invoke({})
+                    processed_website = await chain.ainvoke({})
+                    logger.debug(f"Got LLM response: {processed_website}")
                     
                     return processed_website
                     
             except Exception as e:
-                print(f"Error scraping website: {e}")
+                logger.error(f"Error processing website: {e}", exc_info=True)
                 raise
     
-    # Scrape website
-    processed_website = await website_processing(use_case, url)
-    
-    def field_autocompleter(state: State):
+    async def field_autocompleter(state: State):
         """Create a node for processing a single form field"""
+        logger.debug(f"Processing field: {state.current_field_label}")
         
         llm = gpt_4o_mini().with_structured_output(FormField)
+        logger.debug(f"Current state: {state}")
         
         prompt = ChatPromptTemplate.from_messages([
-            ("system", f"""
-            You are an AI assistant that fills form fields based on website content for a specific project.
-            The purpose of this project is for {state.use_case}, according to the user.
-            """),
+            ("system", f"You are an AI assistant that fills form fields based on website content for {state.use_case}"),
             ("user", f"""
             Website Content:
             Business Name: {state.processed_website.business_name}
             Summary: {state.processed_website.summary}
             
-            Field to fill:
-            Label: {state.current_field_label}
+            Field to fill: {state.current_field_label}
             Description: {state.form[state.current_field_label].description}
-            
-            Consider the relationships between this field and any completed fields: {state.completed_fields}
             """)
         ])
-    
+
         chain = prompt | llm
-        return chain
+        result = await chain.invoke({})
+        logger.debug(f"Field completion result: {result}")
+        return result
     
+    async def verify_form(state: State) -> Literal["continue", "end"]:
+        """Verify that the form is complete"""
+        logger.debug(f"Verifying form completion. Completed fields: {state.completed_field_labels}")
+        logger.debug(f"Total fields: {len(state.form)}")
+        
+        # Check if all fields are completed
+        if len(state.completed_field_labels) == len(state.form):
+            logger.debug("All fields completed, ending workflow")
+            return END
+        else:
+            logger.debug("Form incomplete, continuing workflow")
+            return "field_autocompleter"
     
     # Create graph
     workflow = StateGraph(State)
     
-    # Add nodes for website processing and field filling
-    workflow.add_node("website_processing", website_processing)
-    workflow.add_node("field_autocomplete", field_autocompleter)
+    workflow.add_node("route_next", route_next)
+    workflow.add_node("field_autocompleter", field_autocompleter)
+    workflow.add_node("verify", verify_form)
     
-    # Add conditional edges based on router
+    # Add conditional edges
     workflow.add_conditional_edges(
-        "website_processing",
-        lambda state: route_next(state),
+        "verify",
+        lambda x: x,  # Pass through the verify_form result
         {
-            "finish": END,
-            "fill_field": "field_autocomplete" 
+            "end": END,
+            "field_autocompleter": "field_autocompleter"
         }
     )
-
-    workflow.add_conditional_edges(
-        "field_autocomplete",
-        lambda state: route_next(state), 
-        {
-            "finish": END,
-            "fill_field": "field_autocomplete"
-        }
-    )
-
+    
+    workflow.add_edge("field_autocompleter", "verify")
+    
     # Set entry point
-    workflow.set_entry_point("website_processing")
+    workflow.set_entry_point("route_next")
+    
+    # Add website content to inputs
+    starting_state: State = State(
+        use_case=use_case,
+        url=url,
+        form=fields,
+        processed_website= await website_processing()
+    )
     
     graph = workflow.compile()
     
-    # Add website content to inputs
-    starting_state = {
-        "use_case": use_case,
-        "url": url,
-        "form": form_fields
-    }
-    
     # Execute graph
-    results = await graph.ainvoke(starting_state)
-    
-    return results
+    async for event in graph.astream_events(
+        starting_state,
+        version="v2"
+    ):
+        logger.debug(f"Event: {event}")
+        
+    return event.state
 
-def route_next(state: State) -> Action:
+async def route_next(state: State) -> Action:
     """Route to next action based on form state"""
+    logger.debug(f"Routing next action. Completed fields: {state.completed_field_labels}")
+    remaining_fields = [field for field in state.form if field.label not in state.completed_field_labels]
+    logger.debug(f"Remaining fields: {remaining_fields}")
     
     llm = gpt_4o_mini().with_structured_output(Action)
     
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are an AI agent deciding how to fill a form based on website content.
-        You will decide to either:
-        1. Fill a specific field (action: "fill_field") 
-        2. Finish if all fields are complete (action: "finish")
-        
-        When filling fields:
-        - Explain the step by step reasoning that leads to your decision
-        - Choose fields that are not yet completed
-        - Consider relationships between fields
-        - Fill fields in a logical order
-        - Ensure that the label of the field is accurate without any typos
-        """),
-        ("user", f"""
-        Website Content:
-        Business Name: {state.processed_website.business_name if state.processed_website else 'Not processed'}
-        Summary: {state.processed_website.summary if state.processed_website else 'Not processed'}
-        
-        Form Status:
-        Completed Fields: {state.completed_fields}
-        Remaining Fields: {set(state.form.keys()) - set(state.completed_fields.keys())}
-        
-        Choose your next action:
-        1. Fill a specific field (action: "fill_field")
-        2. Finish if all fields are complete (action: "finish")
-        """)
-    ])
-    
-    chain = prompt | llm
-    return chain.invoke()
+    prompt = (
+        "You are an AI agent deciding how to fill a form based on website content.\n\n"
+        "Website Content:\n"
+        f"Business Name: {state.processed_website.business_name if state.processed_website else 'Not processed'}\n"
+        f"Summary: {state.processed_website.summary if state.processed_website else 'Not processed'}\n\n"
+        "Form Status:\n"
+        f"Completed Fields: {state.completed_field_labels}\n"
+        f"Remaining Fields: {[field.label for field in remaining_fields]}\n\n"
+        "Choose your next action:\n"
+        "1. Fill a specific field (action: 'fill_field')\n"
+        "2. Finish if all fields are complete (action: 'finish')"
+    )
+
+    return await llm.ainvoke(prompt)
 
 # Example usage:
 if __name__ == "__main__":
-    form_fields = {
-        "company_name": "Company name",
-        "description": "Brief company description", 
-        "industry": "Company industry/sector",
-        "target_audience": "Target audience/customer base"
-    }
+    form_fields = [
+        FormField(label="business name", description="Company name"),
+        FormField(label="subreddits", description="Subreddits to post to"),
+        FormField(label="target audience", description="Target audience/customer base")
+    ]
     
     async def main():
         results = await autofill_form(
             "leads",
             "https://releti.no",
-            form_fields
+            fields=form_fields
         )
         print(results)
     
