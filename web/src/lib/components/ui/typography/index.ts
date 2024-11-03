@@ -3,7 +3,7 @@ import Root from './typography.svelte';
 import type { HTMLParamAttributes } from 'svelte/elements';
 
 const typographyVariants = tv({
-	base: 'block text-inherit antialiased m-0 sm:m-0',
+	base: 'block text-inherit antialiased',
 	variants: {
 		variant: {
 			'display-lg': 'text-[4.0rem] font-semibold leading-tight',

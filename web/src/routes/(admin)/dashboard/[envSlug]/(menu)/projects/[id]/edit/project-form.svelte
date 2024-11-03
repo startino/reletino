@@ -4,50 +4,30 @@
 	import * as Form from '$lib/components/ui/form';
 	import * as Select from '$lib/components/ui/select';
 	import { Input } from '$lib/components/ui/input';
-	import { Textarea } from '$lib/components/ui/textarea';
 	import { projectSchema, type ProjectSchema } from '$lib/schemas';
 	import { LoaderCircle, Loader, ExternalLink } from 'lucide-svelte';
-	import type { Tables } from '$lib/supabase';
-	import {
-		superForm,
-		type SuperForm,
-		type SuperValidated,
-		type Infer,
-	} from 'sveltekit-superforms';
+	import type { Database, Tables } from '$lib/supabase';
+	import { superForm, type SuperValidated, type Infer } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { X } from 'lucide-svelte';
 	import { Typography } from '$lib/components/ui/typography';
 	import { toast } from 'svelte-sonner';
 	import type { SupabaseClient, Session } from '@supabase/supabase-js';
 	import { Switch } from '$lib/components/ui/switch';
-	import { Root } from '$lib/components/ui/accordion';
 	import { PUBLIC_CRITINO_URL } from '$env/static/public';
 	import { TipTap } from '$lib/components/ui/tiptap';
 	import { generateHTML } from '@tiptap/core';
 	import StarterKit from '@tiptap/starter-kit';
+	import { goto } from '$app/navigation';
 
 	interface Props {
-		session: Session;
-		supabase: SupabaseClient<any, 'public', any>;
+		supabase: SupabaseClient<Database>;
 		projectForm: SuperValidated<Infer<ProjectSchema>>;
 		environment: Tables<'environments'>;
-		selectedProjectId: string;
-		newProject: Tables<'projects'> | null;
-		projects: Tables<'projects'>[];
+		project: Tables<'projects'>;
 	}
 
-	let {
-		session,
-		supabase,
-		environment,
-		projectForm,
-		selectedProjectId = $bindable(),
-		projects = $bindable(),
-		newProject = $bindable(),
-	}: Props = $props();
-
-	let selectedProject: Tables<'projects'> =
-		newProject ?? projects.find((project) => project.id == selectedProjectId)!;
+	let { supabase, environment, projectForm, project = $bindable() }: Props = $props();
 
 	const form = superForm(projectForm, {
 		delayMs: 400,
@@ -55,19 +35,7 @@
 		onSubmit: async () => {},
 		validators: zodClient(projectSchema),
 		resetForm: false,
-		onResult: ({ result, formElement, cancel }) => {
-			if (result.type == 'success') {
-				if (!projects.some((project) => project.id === $formData.id)) {
-					projects.push($formData as Tables<'projects'>);
-				} else {
-					projects = projects.map((project) =>
-						project.id === $formData.id ? ($formData as Tables<'projects'>) : project
-					);
-				}
-			}
-		},
 		onUpdated({ form }) {
-			newProject = null;
 			if (form.message) {
 				if (form.message.type == 'error') {
 					toast.error(form.message.text);
@@ -81,7 +49,7 @@
 	const { form: formData, errors, enhance, message, delayed, timeout } = form;
 
 	$effect(() => {
-		$formData = selectedProject;
+		$formData = project;
 	});
 
 	let subreddits: { label: string; value: string }[] = $derived(
@@ -105,7 +73,7 @@
 		const { data, error } = await supabase
 			.from('projects')
 			.delete()
-			.eq('id', selectedProjectId)
+			.eq('id', project.id)
 			.select();
 		if (error) {
 			toast.error('An error occurred. Try again.');
@@ -113,9 +81,8 @@
 			console.log(data);
 			toast.error('Could not delete project. Project not found.');
 		} else {
-			projects = projects.filter((project) => project.id != selectedProjectId);
-			selectedProjectId = '';
 			toast.success('Project successfully deleted.');
+			goto(`/dashboard/${environment.name}/projects`);
 		}
 	};
 
@@ -359,7 +326,7 @@
 			<Form.Label>Prompt</Form.Label>
 			<Form.Description>
 				Accurate results are achieved by providing a great prompt. <br />
-				 Tell the AI exactly what to look for.
+				Tell the AI exactly what to look for.
 			</Form.Description>
 			<input type="hidden" name="prompt" bind:value={$formData.prompt} />
 			<Dialog.Root>
@@ -367,7 +334,11 @@
 					<Button variant="secondary" class="">Open Prompt</Button>
 				</Dialog.Trigger>
 				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
-					<Button onclick={fillPromptWithTemplate} variant="outline" class="right-2 top-2">
+					<Button
+						onclick={fillPromptWithTemplate}
+						variant="outline"
+						class="right-2 top-2"
+					>
 						Insert Example Prompt (Reletino's)
 					</Button>
 					<div class="h-full min-h-96 w-full p-3">
@@ -405,37 +376,33 @@
 	</Form.Button>
 	<Button
 		variant="secondary"
-		href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment.name}/${selectedProject.title}/workflows?key=${environment.critino_key}`}
+		href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment.name}/${project.title}/workflows?key=${environment.critino_key}`}
 		target="_blank"
 		class="w-full"
 	>
 		Manage Critiques
 		<ExternalLink class="ml-2 w-5" />
 	</Button>
-	{#if !newProject}
-		<Dialog.Root>
-			<Dialog.Trigger>
-				<Button variant="destructive" class="w-full" disabled={$timeout || $delayed}>
-					Delete
+	<Dialog.Root>
+		<Dialog.Trigger>
+			<Button variant="destructive" class="w-full" disabled={$timeout || $delayed}>
+				Delete
+			</Button>
+		</Dialog.Trigger>
+		<Dialog.Content class="place-items-center">
+			<Dialog.Header>
+				<Dialog.Title class="text-center">
+					YOU ARE ABOUT TO DELETE THIS PROJECT.
+				</Dialog.Title>
+			</Dialog.Header>
+
+			<Typography variant="body-md">Are you sure you want to delete this project?</Typography>
+
+			<Dialog.Footer>
+				<Button class="w-full" variant="destructive" on:click={() => deleteProject()}>
+					If I click this, I am sure.
 				</Button>
-			</Dialog.Trigger>
-			<Dialog.Content class="place-items-center">
-				<Dialog.Header>
-					<Dialog.Title class="text-center">
-						YOU ARE ABOUT TO DELETE THIS PROJECT.
-					</Dialog.Title>
-				</Dialog.Header>
-
-				<Typography variant="body-md">
-					Are you sure you want to delete this project?
-				</Typography>
-
-				<Dialog.Footer>
-					<Button class="w-full" variant="destructive" on:click={() => deleteProject()}>
-						If I click this, I am sure.
-					</Button>
-				</Dialog.Footer>
-			</Dialog.Content>
-		</Dialog.Root>
-	{/if}
+			</Dialog.Footer>
+		</Dialog.Content>
+	</Dialog.Root>
 </form>
