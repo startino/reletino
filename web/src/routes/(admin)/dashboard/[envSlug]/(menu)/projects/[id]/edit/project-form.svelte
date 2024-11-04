@@ -19,6 +19,7 @@
 	import { generateHTML } from '@tiptap/core';
 	import StarterKit from '@tiptap/starter-kit';
 	import { goto } from '$app/navigation';
+	import { deleteProject as deleteProjectById } from '$lib/supabase/projects';
 
 	interface Props {
 		supabase: SupabaseClient<Database>;
@@ -70,16 +71,12 @@
 	};
 
 	const deleteProject = async () => {
-		const { data, error } = await supabase
-			.from('projects')
-			.delete()
-			.eq('id', project.id)
-			.select();
+		const { error } = await deleteProjectById(project.id, { supabase });
+
 		if (error) {
+			console.log(error);
+
 			toast.error('An error occurred. Try again.');
-		} else if (!data) {
-			console.log(data);
-			toast.error('Could not delete project. Project not found.');
 		} else {
 			toast.success('Project successfully deleted.');
 			goto(`/dashboard/${environment.name}/projects`);

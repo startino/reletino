@@ -7,6 +7,7 @@
 	import { Pen, X } from 'lucide-svelte';
 	import { getEnvironmentState } from '$lib/states';
 	import { deleteProject } from '$lib/supabase/projects';
+	import { goto } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -26,7 +27,9 @@
 	<EntityControlGrid
 		{entities}
 		name="Project"
-		oncreate={() => {}}
+		oncreate={() => {
+			goto(`${baseURL}/create`);
+		}}
 		ondelete={(idx) => {
 			const [project] = projects.splice(idx, 1);
 			deleteProject(project!.id, { supabase });

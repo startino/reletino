@@ -4,4 +4,4 @@ import type { Database } from './database.types';
 export const deleteProject = async (
 	id: string,
 	{ supabase }: { supabase: SupabaseClient<Database> }
-) => await supabase.from('projects').delete().eq('id', id).select();
+) => await supabase.from('projects').delete().eq('id', id);
