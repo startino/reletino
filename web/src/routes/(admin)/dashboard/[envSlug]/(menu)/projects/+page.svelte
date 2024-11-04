@@ -4,19 +4,19 @@
 
 	import type { Tables } from '$lib/supabase';
 	import { EntityControlGrid } from '$lib/components/ui/entity-control-grid';
-	import { Pen } from 'lucide-svelte';
+	import { Pen, X } from 'lucide-svelte';
 	import { getEnvironmentState } from '$lib/states';
+	import { deleteProject } from '$lib/supabase/projects';
 
 	let { data } = $props();
 
-	let { session, projects: dataProjects } = data;
+	let { session, projects: dataProjects, supabase } = data;
 
 	const env = getEnvironmentState();
 
 	let projects: Tables<'projects'>[] = $state(dataProjects || []);
-	let selectedProjectId: string = $state('');
+	let entities = $derived(projects.map((p) => ({ ...p, name: p.title, description: p.title })));
 
-	let newProject: Tables<'projects'> | null = $state(null);
 	let baseURL = `/dashboard/${env.value?.name}/projects`;
 </script>
 
@@ -24,22 +24,15 @@
 	<Typography variant="display-lg">Projects</Typography>
 
 	<EntityControlGrid
-		entities={projects.map((p) => ({ ...p, name: p.title, description: p.title }))}
+		{entities}
 		name="Project"
-		oncreate={() => {
-			newProject = {
-				id: crypto.randomUUID(),
-				profile_id: session.user.id,
-				created_at: new Date().toISOString(),
-				title: 'Untitled Project',
-				prompt: '',
-				running: false,
-				subreddits: [],
-			};
-			selectedProjectId = newProject.id;
+		oncreate={() => {}}
+		ondelete={(idx) => {
+			const [project] = projects.splice(idx, 1);
+			deleteProject(project!.id, { supabase });
 		}}
 	>
-		{#snippet itemCell(project)}
+		{#snippet itemCell(project, { deleteEntity })}
 			<div class="bg-card relative grid gap-4">
 				<Button
 					class=" flex h-full w-full flex-col p-8 py-12 pb-10 pt-3"
@@ -61,14 +54,22 @@
 					<Typography variant="title-lg">{project.title}</Typography>
 				</Button>
 
-				<div class="absolute bottom-3 left-4 flex">
+				<div class="absolute bottom-3 left-4 flex gap-4">
 					<a
 						class="z-20 rounded-full"
 						href="{baseURL}/{project.id}/edit"
 						aria-label="Edit project"
 					>
-						<Pen size="20" class=" transition-all hover:scale-125" />
+						<Pen size="20" class="transition-all hover:scale-125" />
 					</a>
+
+					<button
+						onclick={() => {
+							deleteEntity();
+						}}
+					>
+						<X size="20" class="transition-all hover:scale-125" />
+					</button>
 				</div>
 			</div>
 		{/snippet}

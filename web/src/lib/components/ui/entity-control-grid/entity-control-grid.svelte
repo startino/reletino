@@ -10,23 +10,38 @@
 		name: string;
 		entities: T[];
 		itemCell?: Snippet<
-			[T, { onclick?: OnInteract; ondelete?: OnInteract; onedit?: OnInteract }]
+			[
+				T,
+				{
+					clickEntity: () => void;
+					deleteEntity: () => void;
+					editEntity: () => void;
+				},
+			]
 		>;
 		addCell?: Snippet<[]>;
 		oncreate?: () => void;
 		onclick?: OnInteract;
-		ondelete?: OnInteract;
+		ondelete?: (idx: number) => void;
 		onedit?: OnInteract;
 	};
 
-	let { name, entities, oncreate, ondelete, onclick, onedit, itemCell, addCell }: Props =
-		$props();
+	let {
+		name,
+		entities = $bindable(),
+		oncreate,
+		ondelete,
+		onclick,
+		onedit,
+		itemCell,
+		addCell,
+	}: Props = $props();
 
-	let deleteEntity: T | null = $state(null);
+	let deleteAtIdx: number = $state(-1);
 	let deleteOpen = $state(false);
 
 	type T = $$Generic<{ name: string; description: string }>;
-	type OnInteract = (entity: T) => void;
+	type OnInteract = (entity: T, index?: number) => void;
 </script>
 
 <ul
@@ -58,10 +73,17 @@
 			{/if}
 		</li>
 	{/if}
-	{#each entities as entity}
+	{#each entities as entity, idx}
 		<li>
 			{#if itemCell}
-				{@render itemCell(entity, { onclick, ondelete, onedit })}
+				{@render itemCell(entity, {
+					clickEntity: () => onclick && onclick(entity),
+					deleteEntity: () => {
+						deleteOpen = true;
+						deleteAtIdx = idx;
+					},
+					editEntity: () => onedit && onedit(entity),
+				})}
 			{:else}
 				<button onclick={() => onclick && onclick(entity)}>
 					<Card.Root
@@ -92,14 +114,14 @@
 									onclick={(event) => {
 										event.stopPropagation();
 										deleteOpen = true;
-										deleteEntity = entity;
+										deleteAtIdx = idx;
 									}}
 									onkeydown={(event) => {
 										if (event.key === 'Enter' || event.key === ' ') {
 											event.preventDefault();
 											event.stopPropagation();
 											deleteOpen = true;
-											deleteEntity = entity;
+											deleteAtIdx = idx;
 										}
 									}}
 								>
@@ -144,10 +166,10 @@
 	<Dialog.Content>
 		<Dialog.Header class="text-destructive gap-2">
 			<Dialog.Title>
-				Delete {deleteEntity!.name}?
+				Delete {entities[deleteAtIdx]!.name}?
 			</Dialog.Title>
 			<Dialog.Description>
-				<strong>{deleteEntity!.name}</strong>
+				<strong>{entities[deleteAtIdx]!.name}</strong>
 				will be deleted and unrecoverable.
 			</Dialog.Description>
 		</Dialog.Header>
@@ -155,7 +177,8 @@
 			<Button
 				variant="destructive"
 				on:click={() => {
-					ondelete && ondelete(deleteEntity!);
+					entities;
+					ondelete && ondelete(deleteAtIdx);
 					deleteOpen = false;
 				}}
 			>
