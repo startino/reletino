@@ -143,6 +143,7 @@ export type Database = {
           subreddits: string[]
           title: string
           use_case: string | null
+          website_url: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["categories"]
@@ -157,6 +158,7 @@ export type Database = {
           subreddits?: string[]
           title?: string
           use_case?: string | null
+          website_url?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["categories"]
@@ -171,6 +173,7 @@ export type Database = {
           subreddits?: string[]
           title?: string
           use_case?: string | null
+          website_url?: string | null
         }
         Relationships: [
           {

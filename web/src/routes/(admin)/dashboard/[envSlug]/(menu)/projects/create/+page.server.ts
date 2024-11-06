@@ -1,16 +1,15 @@
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate, fail, setError } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { projectFormSchema } from '$lib/schemas';
-import type { Actions } from './$types';
-import { fail } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 
 export const load = async () => {
 	const form = await superValidate(zod(projectFormSchema));
 	return { form };
 };
 
-export const actions: Actions = {
-	default: async ({ request }) => {
+export const actions = {
+	default: async ({ request, locals: { supabase, safeGetSession, environment } }) => {
 		const form = await superValidate(request, zod(projectFormSchema));
 
 		if (!form.valid) {
@@ -18,9 +17,32 @@ export const actions: Actions = {
 			return fail(400, { form });
 		}
 
-		// Handle the form submission here
-		console.log(form.data);
+		const session = await safeGetSession();
 
-		return { form };
+		const {
+			projectName,
+			websiteUrl,
+			context: { category, ...cleanContext },
+		} = form.data;
+
+		const { data, error } = await supabase
+			.from('projects')
+			.insert({
+				profile_id: session.user!.id,
+				title: projectName,
+				category,
+				context: cleanContext,
+				website_url: websiteUrl,
+				running: true,
+			})
+			.select()
+			.single();
+
+		if (error) {
+			console.error(error);
+			return setError(form, 'Something went wrong', { status: 500 });
+		}
+
+		redirect(302, `/dashboard/${environment!.slug}/projects/${data.id}/edit`);
 	},
 };

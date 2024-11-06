@@ -2,7 +2,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Form from '$lib/components/ui/form';
-	import * as Select from '$lib/components/ui/select';
 	import { Input } from '$lib/components/ui/input';
 	import { projectSchema, type ProjectSchema } from '$lib/schemas';
 	import { LoaderCircle, Loader, ExternalLink } from 'lucide-svelte';
@@ -12,7 +11,7 @@
 	import { X } from 'lucide-svelte';
 	import { Typography } from '$lib/components/ui/typography';
 	import { toast } from 'svelte-sonner';
-	import type { SupabaseClient, Session } from '@supabase/supabase-js';
+	import type { SupabaseClient } from '@supabase/supabase-js';
 	import { Switch } from '$lib/components/ui/switch';
 	import { PUBLIC_CRITINO_URL } from '$env/static/public';
 	import { TipTap } from '$lib/components/ui/tiptap';
@@ -290,11 +289,9 @@
 						No subreddits yet.
 					</Typography>
 				{:else}
-					<Select.Root {...attrs} multiple selected={subreddits}>
-						{#each $formData.subreddits as subreddits}
-							<input name={attrs.name} hidden value={subreddits} />
-						{/each}
-					</Select.Root>
+					{#each $formData.subreddits as subreddits}
+						<input name={attrs.name} hidden value={subreddits} />
+					{/each}
 
 					{#each $formData.subreddits as _, i}
 						<Button

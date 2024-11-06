@@ -118,7 +118,7 @@ export type ProjectSchema = typeof projectSchema;
 // Base project data
 const baseProjectSchema = z.object({
 	projectName: z.string().min(1, 'Project name is required'),
-	websiteUrl: z.string().url().optional(),
+	websiteUrl: z.string().url().optional().nullable(),
 });
 
 // Find Leads specific data

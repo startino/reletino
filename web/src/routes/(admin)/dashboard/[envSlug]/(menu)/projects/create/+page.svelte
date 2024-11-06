@@ -8,6 +8,8 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import { Badge } from '$lib/components/ui/badge';
 	import { X, Plus } from 'lucide-svelte';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { projectCreationSchema } from '$lib/schemas.js';
 
 	let currentStep: 1 | 2 | 3 | 4 | 5 = $state(1);
 	let selectedCategory = $state('');
@@ -27,8 +29,16 @@
 		5: 'Preview and confirm',
 	};
 
-	const next = () => {
+	const next = async () => {
 		if (currentStep === 5) return;
+		if (currentStep === 3 && websiteUrl) {
+			const result = await validate('websiteUrl');
+			if (result && result[0]) {
+				$errors.websiteUrl = result;
+				console.log($errors.websiteUrl);
+				return;
+			}
+		}
 		currentStep++;
 	};
 
@@ -39,10 +49,11 @@
 
 	let { data } = $props();
 
-	const { form, enhance } = superForm(data.form, {
+	const { form, enhance, errors, validate } = superForm(data.form, {
 		resetForm: false,
 		taintedMessage: null,
 		dataType: 'json',
+		validators: zod(projectCreationSchema),
 	});
 
 	let irrelevantPostExample = $state('');
@@ -51,7 +62,7 @@
 	$effect(() => {
 		$form.category = selectedCategory as 'find-leads' | 'find-competition';
 		$form.projectName = projectName;
-		$form.websiteUrl = websiteUrl;
+		$form.websiteUrl = websiteUrl === '' ? null : websiteUrl;
 
 		if (selectedCategory === 'find-leads') {
 			$form.context = {
@@ -110,7 +121,12 @@
 						type="url"
 						placeholder="https://example.com"
 						bind:value={websiteUrl}
+						class={$errors.websiteUrl ? 'border-destructive' : ''}
 					/>
+
+					{#if $errors.websiteUrl}
+						<p class="text-destructive text-sm">{$errors.websiteUrl}</p>
+					{/if}
 				</div>
 			{:else if currentStep === 4}
 				<form method="POST" use:enhance>
@@ -363,6 +379,10 @@
 						{/if}
 
 						<Button type="submit" class="w-full">Create Project</Button>
+
+						{#if $errors._errors}
+							<p class="text-destructive">{$errors._errors[0]}</p>
+						{/if}
 					</form>
 				</div>
 			{/if}
@@ -378,6 +398,7 @@
 				disabled={currentStep === 5 ||
 					(currentStep === 1 && !selectedCategory) ||
 					(currentStep === 2 && !projectName) ||
+					(currentStep === 3 && $errors.websiteUrl) ||
 					(currentStep === 4 &&
 						(($form.context.category === 'find-leads' &&
 							(!$form.context.product_name || !$form.context.icp)) ||
