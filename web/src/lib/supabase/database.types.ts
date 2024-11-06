@@ -131,31 +131,46 @@ export type Database = {
       }
       projects: {
         Row: {
+          category: Database["public"]["Enums"]["categories"]
+          comment_style_prompt: string
+          context: Json
           created_at: string
+          dm_style_prompt: string
           id: string
           profile_id: string
           prompt: string
           running: boolean
           subreddits: string[]
           title: string
+          use_case: string | null
         }
         Insert: {
+          category?: Database["public"]["Enums"]["categories"]
+          comment_style_prompt?: string
+          context?: Json
           created_at?: string
+          dm_style_prompt?: string
           id?: string
           profile_id: string
           prompt?: string
           running?: boolean
           subreddits?: string[]
           title?: string
+          use_case?: string | null
         }
         Update: {
+          category?: Database["public"]["Enums"]["categories"]
+          comment_style_prompt?: string
+          context?: Json
           created_at?: string
+          dm_style_prompt?: string
           id?: string
           profile_id?: string
           prompt?: string
           running?: boolean
           subreddits?: string[]
           title?: string
+          use_case?: string | null
         }
         Relationships: [
           {
@@ -282,7 +297,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      categories: "find-leads" | "find-competition"
     }
     CompositeTypes: {
       [_ in never]: never

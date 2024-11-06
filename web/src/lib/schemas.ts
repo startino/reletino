@@ -114,3 +114,36 @@ export const projectSchema = z.object({
 });
 
 export type ProjectSchema = typeof projectSchema;
+
+// Base project data
+const baseProjectSchema = z.object({
+	projectName: z.string().min(1, 'Project name is required'),
+	websiteUrl: z.string().url().optional(),
+});
+
+// Find Leads specific data
+const findLeadsDataSchema = z.object({
+	category: z.literal('find-leads'),
+	product_name: z.string().min(1, 'Product name is required'),
+	icp: z.string().min(1, 'ICP is required'),
+	irrelevant_post_examples: z.array(z.string()),
+});
+
+// Find Competition specific data
+const findCompetitionDataSchema = z.object({
+	category: z.literal('find-competition'),
+	name: z.string().min(1, 'Name is required'),
+	core_features: z.array(z.string()),
+});
+
+// Combined project schema using discriminated union
+export const projectCreationSchema = z.object({
+	...baseProjectSchema.shape,
+	category: z.enum(['find-leads', 'find-competition']),
+	context: z.discriminatedUnion('category', [findLeadsDataSchema, findCompetitionDataSchema]),
+});
+
+export type Project = z.infer<typeof projectSchema>;
+
+export const projectFormSchema = projectCreationSchema;
+export type ProjectForm = z.infer<typeof projectFormSchema>;

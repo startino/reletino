@@ -6,7 +6,7 @@
 
 	export let as: $$Props['as'] = 'p';
 	export let variant: $$Props['variant'] = 'body-md';
-	export let align: $$Props['align'] = 'center';
+	export let align: $$Props['align'] = 'left';
 	let className: $$Props['class'] = undefined;
 	export { className as class };
 </script>
