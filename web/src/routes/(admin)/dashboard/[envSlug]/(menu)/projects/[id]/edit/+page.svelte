@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
+	import { TagInput } from '$lib/components/ui/tag-input';
 	import { projectSchema } from '$lib/schemas';
-	import { LoaderCircle, Loader, ExternalLink, Plus } from 'lucide-svelte';
+	import { LoaderCircle, Loader, ExternalLink } from 'lucide-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { X } from 'lucide-svelte';
 	import { Typography } from '$lib/components/ui/typography';
 	import { toast } from 'svelte-sonner';
 	import { Switch } from '$lib/components/ui/switch';
@@ -19,9 +18,6 @@
 	let { data } = $props();
 
 	let { supabase, environment, project } = data;
-
-	let irrelevantPostExample = $state('');
-	let coreFeature = $state('');
 
 	const form = superForm(data.projectForm, {
 		dataType: 'json',
@@ -47,16 +43,6 @@
 		$formData = { ...project, context: project.context as any };
 	});
 
-	let newSubreddit: string = $state('');
-
-	const addSubreddit = () => {
-		if (newSubreddit != '') {
-			newSubreddit = newSubreddit.toLowerCase().trim().replace('r/', '');
-			$formData.subreddits = [...$formData.subreddits, newSubreddit];
-		}
-		newSubreddit = '';
-	};
-
 	const deleteProject = async () => {
 		const { error } = await deleteProjectById(project.id, { supabase });
 
@@ -79,7 +65,7 @@
 		<input type="hidden" name="profile_id" bind:value={$formData.profile_id} />
 		<!-- this button has to be here for disabling submit on enter when focusing on input fields-->
 		<!-- https://github.com/sveltejs/kit/discussions/8657 -->
-		<button type="submit" disabled style="display: none" />
+		<button type="submit" disabled style="display: none"></button>
 
 		<Form.Field {form} name="title">
 			<Form.Control let:attrs>
@@ -102,46 +88,12 @@
 						you add.
 					</Form.Description>
 				</div>
-				<div class="grid grid-cols-4 items-center gap-3 pt-4">
-					<Input
-						class="max-w-xs"
-						placeholder="Type a subreddit here..."
-						bind:value={newSubreddit}
-						on:keydown={(e) => {
-							if (e.key == 'Enter') {
-								addSubreddit();
-								newSubreddit = '';
-							}
-						}}
-						on:focusout={addSubreddit}
-					/>
-					{#if $formData.subreddits.length == 0}
-						<Typography variant="body-md" class="col-span-3s text-center">
-							No subreddits yet.
-						</Typography>
-					{:else}
-						{#each $formData.subreddits as subreddits}
-							<input name={attrs.name} hidden value={subreddits} />
-						{/each}
-
-						{#each $formData.subreddits as _, i}
-							<Button
-								variant="outline"
-								class="bg-card hover:bg-destructive/20 flex w-full flex-row justify-between rounded-md px-2 py-1"
-								on:click={() => {
-									$formData.subreddits = $formData.subreddits.filter(
-										(subreddit) => subreddit != $formData.subreddits[i]
-									);
-								}}
-							>
-								<Typography variant="body-md" class="font-semibold">
-									{$formData.subreddits[i]}
-								</Typography>
-								<X class="text-destructive" />
-							</Button>
-						{/each}
-					{/if}
-				</div>
+				<TagInput
+					bind:items={$formData.subreddits}
+					placeholder="Type a subreddit here..."
+					onNewItem={(newSubreddit) =>
+						newSubreddit.toLowerCase().trim().replace('r/', '')}
+				/>
 			</Form.Control>
 
 			<Form.FieldErrors />
@@ -171,63 +123,12 @@
 				<Form.Field {form} name="context.irrelevant_post_examples">
 					<Form.Control>
 						<Form.Label>Irrelevant Post Examples</Form.Label>
-						<div class="flex gap-2">
-							<Input
-								bind:value={irrelevantPostExample}
-								placeholder="Add example"
-								onkeydown={(e) => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										if (irrelevantPostExample) {
-											$formData.context.category === 'find-leads' &&
-												($formData.context.irrelevant_post_examples = [
-													...$formData.context.irrelevant_post_examples,
-													irrelevantPostExample,
-												]);
-											irrelevantPostExample = '';
-										}
-									}
-								}}
-							/>
-							<Button
-								type="button"
-								variant="outline"
-								onclick={() => {
-									if (irrelevantPostExample) {
-										$formData.context.category === 'find-leads' &&
-											($formData.context.irrelevant_post_examples = [
-												...$formData.context.irrelevant_post_examples,
-												irrelevantPostExample,
-											]);
-										irrelevantPostExample = '';
-									}
-								}}
-							>
-								<Plus />
-							</Button>
-						</div>
-						{#if $formData.context.irrelevant_post_examples.length > 0}
-							<div class="flex flex-wrap gap-2">
-								{#each $formData.context.irrelevant_post_examples as example, idx}
-									<Badge variant="outline" class="gap-1.5">
-										{example}
-										<button
-											type="button"
-											class="hover:text-destructive"
-											onclick={() => {
-												$formData.context.category === 'find-leads' &&
-													($formData.context.irrelevant_post_examples =
-														$formData.context.irrelevant_post_examples.filter(
-															(_, i) => i !== idx
-														));
-											}}
-										>
-											<X class="h-3 w-3" />
-										</button>
-									</Badge>
-								{/each}
-							</div>
-						{/if}
+
+						<TagInput
+							bind:items={$formData.context.irrelevant_post_examples}
+							placeholder="Add example"
+						/>
+
 						<Form.FieldErrors />
 					</Form.Control>
 				</Form.Field>
@@ -245,65 +146,14 @@
 				</Form.Field>
 
 				<Form.Field {form} name="context.core_features">
-					<Form.Control let:attrs>
+					<Form.Control>
 						<Form.Label>Core Features</Form.Label>
-						<div class="flex gap-2">
-							<Input
-								bind:value={coreFeature}
-								placeholder="Add feature"
-								onkeydown={(e) => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										if (coreFeature) {
-											$formData.context.category === 'find-competition' &&
-												($formData.context.core_features = [
-													...$formData.context.core_features,
-													coreFeature,
-												]);
-											coreFeature = '';
-										}
-									}
-								}}
-							/>
-							<Button
-								type="button"
-								variant="outline"
-								onclick={() => {
-									if (coreFeature) {
-										$formData.context.category === 'find-competition' &&
-											($formData.context.core_features = [
-												...$formData.context.core_features,
-												coreFeature,
-											]);
-										coreFeature = '';
-									}
-								}}
-							>
-								<Plus />
-							</Button>
-						</div>
-						{#if $formData.context.core_features.length > 0}
-							<div class="flex flex-wrap gap-2">
-								{#each $formData.context.core_features as feature, idx}
-									<Badge variant="outline" class="gap-1.5">
-										{feature}
-										<button
-											type="button"
-											class="hover:text-destructive"
-											onclick={() => {
-												$formData.context.category === 'find-leads' &&
-													($formData.context.irrelevant_post_examples =
-														$formData.context.irrelevant_post_examples.filter(
-															(_, i) => i !== idx
-														));
-											}}
-										>
-											<X class="h-3 w-3" />
-										</button>
-									</Badge>
-								{/each}
-							</div>
-						{/if}
+
+						<TagInput
+							bind:items={$formData.context.core_features}
+							placeholder="Add feature"
+						/>
+
 						<Form.FieldErrors />
 					</Form.Control>
 				</Form.Field>

@@ -7,6 +7,7 @@
 	import { Label } from '$lib/components/ui/label';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { Badge } from '$lib/components/ui/badge';
+	import { TagInput } from '$lib/components/ui/tag-input';
 	import { X, Plus } from 'lucide-svelte';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { projectCreationSchema } from '$lib/schemas.js';
@@ -150,64 +151,10 @@
 
 							<div class="space-y-2">
 								<Label>Irrelevant Post Examples</Label>
-								<div class="flex gap-2">
-									<Input
-										bind:value={irrelevantPostExample}
-										placeholder="Add example"
-										onkeydown={(e) => {
-											if (e.key === 'Enter') {
-												e.preventDefault();
-												if (irrelevantPostExample) {
-													$form.context.category === 'find-leads' &&
-														($form.context.irrelevant_post_examples = [
-															...$form.context
-																.irrelevant_post_examples,
-															irrelevantPostExample,
-														]);
-													irrelevantPostExample = '';
-												}
-											}
-										}}
-									/>
-									<Button
-										type="button"
-										variant="outline"
-										onclick={() => {
-											if (irrelevantPostExample) {
-												$form.context.category === 'find-leads' &&
-													($form.context.irrelevant_post_examples = [
-														...$form.context.irrelevant_post_examples,
-														irrelevantPostExample,
-													]);
-												irrelevantPostExample = '';
-											}
-										}}
-									>
-										<Plus />
-									</Button>
-								</div>
-								{#if $form.context.irrelevant_post_examples.length > 0}
-									<div class="flex flex-wrap gap-2">
-										{#each $form.context.irrelevant_post_examples as example}
-											<Badge variant="outline" class="gap-1.5">
-												{example}
-												<button
-													type="button"
-													class="hover:text-destructive"
-													onclick={() => {
-														$form.context.category === 'find-leads' &&
-															($form.context.irrelevant_post_examples =
-																$form.context.irrelevant_post_examples.filter(
-																	(r) => r !== example
-																));
-													}}
-												>
-													<X class="h-3 w-3" />
-												</button>
-											</Badge>
-										{/each}
-									</div>
-								{/if}
+								<TagInput
+									bind:items={$form.context.irrelevant_post_examples}
+									placeholder="Add example"
+								/>
 							</div>
 						</div>
 					{:else if $form.context.category === 'find-competition'}
@@ -219,64 +166,10 @@
 
 							<div class="space-y-2">
 								<Label>Core Features</Label>
-								<div class="flex gap-2">
-									<Input
-										bind:value={coreFeature}
-										placeholder="Add feature"
-										onkeydown={(e) => {
-											if (e.key === 'Enter') {
-												e.preventDefault();
-												if (coreFeature) {
-													$form.context.category === 'find-competition' &&
-														($form.context.core_features = [
-															...$form.context.core_features,
-															coreFeature,
-														]);
-													coreFeature = '';
-												}
-											}
-										}}
-									/>
-									<Button
-										type="button"
-										variant="outline"
-										onclick={() => {
-											if (coreFeature) {
-												$form.context.category === 'find-competition' &&
-													($form.context.core_features = [
-														...$form.context.core_features,
-														coreFeature,
-													]);
-												coreFeature = '';
-											}
-										}}
-									>
-										<Plus />
-									</Button>
-								</div>
-								{#if $form.context.core_features.length > 0}
-									<div class="flex flex-wrap gap-2">
-										{#each $form.context.core_features as feature}
-											<Badge variant="outline" class="gap-1.5">
-												{feature}
-												<button
-													type="button"
-													class="text-muted-foreground hover:text-foreground"
-													onclick={() => {
-														$form.context.category ===
-															'find-competition' &&
-															($form.context.core_features =
-																$form.context.core_features.filter(
-																	(r) => r !== feature
-																));
-													}}
-												>
-													<X class="h-3 w-3" />
-												</button>
-											</Badge>
-										{/each}
-									</div>
-								{/if}
+								<TagInput
+									bind:items={$form.context.core_features}
+									placeholder="Add feature"
+								/>
 							</div>
 						</div>
 					{/if}
@@ -398,7 +291,7 @@
 				disabled={currentStep === 5 ||
 					(currentStep === 1 && !selectedCategory) ||
 					(currentStep === 2 && !projectName) ||
-					(currentStep === 3 && $errors.websiteUrl) ||
+					(currentStep === 3 && Boolean($errors.websiteUrl?.[0])) ||
 					(currentStep === 4 &&
 						(($form.context.category === 'find-leads' &&
 							(!$form.context.product_name || !$form.context.icp)) ||

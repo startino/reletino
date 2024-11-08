@@ -31,12 +31,11 @@ const typographyVariants = tv({
 	},
 });
 
-type As = string;
 type Variant = VariantProps<typeof typographyVariants>['variant'];
 type Align = VariantProps<typeof typographyVariants>['align'];
 
 type Props = {
-	as?: As;
+	as?: string;
 	variant?: Variant;
 	align?: Align;
 	class?: HTMLParamAttributes['class'];
