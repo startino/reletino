@@ -101,26 +101,6 @@ export const profileSchema = z.object({
 
 export type ProfileSchema = typeof profileSchema;
 
-export const projectSchema = z.object({
-	id: z.string(),
-	profile_id: z.string(),
-	title: z.string().min(1, 'Title is required').max(30, 'Title too long'),
-	subreddits: z
-		.array(z.string())
-		.min(1, 'Must add at least one subreddit.')
-		.max(10, 'Max 10 subreddits'),
-	prompt: z.string().max(3000, 'Prompt too long'),
-	running: z.boolean(),
-});
-
-export type ProjectSchema = typeof projectSchema;
-
-// Base project data
-const baseProjectSchema = z.object({
-	projectName: z.string().min(1, 'Project name is required'),
-	websiteUrl: z.string().url().optional().nullable(),
-});
-
 // Find Leads specific data
 const findLeadsDataSchema = z.object({
 	category: z.literal('find-leads'),
@@ -134,6 +114,28 @@ const findCompetitionDataSchema = z.object({
 	category: z.literal('find-competition'),
 	name: z.string().min(1, 'Name is required'),
 	core_features: z.array(z.string()),
+});
+
+export const projectSchema = z.object({
+	id: z.string(),
+	profile_id: z.string(),
+	title: z.string().min(1, 'Title is required').max(30, 'Title too long'),
+	subreddits: z
+		.array(z.string())
+		.min(1, 'Must add at least one subreddit.')
+		.max(10, 'Max 10 subreddits'),
+	prompt: z.string().max(3000, 'Prompt too long'),
+	running: z.boolean(),
+	category: z.enum(['find-leads', 'find-competition']),
+	context: z.discriminatedUnion('category', [findLeadsDataSchema, findCompetitionDataSchema]),
+});
+
+export type ProjectSchema = typeof projectSchema;
+
+// Base project data
+const baseProjectSchema = z.object({
+	projectName: z.string().min(1, 'Project name is required'),
+	websiteUrl: z.string().url().optional().nullable(),
 });
 
 // Combined project schema using discriminated union

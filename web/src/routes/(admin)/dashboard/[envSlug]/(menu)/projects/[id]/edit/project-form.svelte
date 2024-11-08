@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
+	import { Badge } from '$lib/components/ui/badge';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { projectSchema, type ProjectSchema } from '$lib/schemas';
-	import { LoaderCircle, Loader, ExternalLink } from 'lucide-svelte';
+	import { LoaderCircle, Loader, ExternalLink, Plus } from 'lucide-svelte';
 	import type { Database, Tables } from '$lib/supabase';
 	import { superForm, type SuperValidated, type Infer } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -28,8 +29,11 @@
 	}
 
 	let { supabase, environment, projectForm, project = $bindable() }: Props = $props();
+	let irrelevantPostExample = $state('');
+	let coreFeature = $state('');
 
 	const form = superForm(projectForm, {
+		dataType: 'json',
 		delayMs: 400,
 		timeoutMs: 3000,
 		onSubmit: async () => {},
@@ -51,6 +55,8 @@
 	$effect(() => {
 		$formData = project;
 	});
+
+	$inspect($formData);
 
 	let subreddits: { label: string; value: string }[] = $derived(
 		$formData.subreddits.map((subreddit) => ({
@@ -315,37 +321,170 @@
 
 		<Form.FieldErrors />
 	</Form.Field>
-	<Form.Field {form} name="prompt">
-		<Form.Control let:attrs>
-			<Form.Label>Prompt</Form.Label>
-			<Form.Description>
-				Accurate results are achieved by providing a great prompt. <br />
-				Tell the AI exactly what to look for.
-			</Form.Description>
-			<input type="hidden" name="prompt" bind:value={$formData.prompt} />
-			<Dialog.Root>
-				<Dialog.Trigger>
-					<Button variant="secondary" class="">Open Prompt</Button>
-				</Dialog.Trigger>
-				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
-					<Button
-						onclick={fillPromptWithTemplate}
-						variant="outline"
-						class="right-2 top-2"
-					>
-						Insert Example Prompt (Reletino's)
-					</Button>
-					<div class="h-full min-h-96 w-full p-3">
-						<TipTap
-							class="h-full max-h-[700px] min-h-[500px] w-full overflow-y-scroll p-3"
-							bind:content={$formData.prompt}
+
+	<div>
+		{#if $formData.context.category == 'find-leads'}
+			<Typography as="h2" variant="body-md" class="font-bold">
+				Lead Finding Configuration
+			</Typography>
+			<Form.Field {form} name="context.product_name">
+				<Form.Control let:attrs>
+					<Form.Label>Project Name</Form.Label>
+					<Input {...attrs} bind:value={$formData.context.product_name} />
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+
+			<Form.Field {form} name="context.icp">
+				<Form.Control let:attrs>
+					<Form.Label>ICP</Form.Label>
+					<Input {...attrs} bind:value={$formData.context.icp} />
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+
+			<Form.Field {form} name="context.irrelevant_post_examples">
+				<Form.Control let:attrs>
+					<Form.Label>Irrelevant Post Examples</Form.Label>
+					<div class="flex gap-2">
+						<Input
+							bind:value={irrelevantPostExample}
+							placeholder="Add example"
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									if (irrelevantPostExample) {
+										$formData.context.category === 'find-leads' &&
+											($formData.context.irrelevant_post_examples = [
+												...$formData.context.irrelevant_post_examples,
+												irrelevantPostExample,
+											]);
+										irrelevantPostExample = '';
+									}
+								}
+							}}
 						/>
+						<Button
+							type="button"
+							variant="outline"
+							onclick={() => {
+								if (irrelevantPostExample) {
+									$formData.context.category === 'find-leads' &&
+										($formData.context.irrelevant_post_examples = [
+											...$formData.context.irrelevant_post_examples,
+											irrelevantPostExample,
+										]);
+									irrelevantPostExample = '';
+								}
+							}}
+						>
+							<Plus />
+						</Button>
 					</div>
-				</Dialog.Content>
-			</Dialog.Root>
-			<Form.FieldErrors />
-		</Form.Control>
-	</Form.Field>
+					{#if $formData.context.irrelevant_post_examples.length > 0}
+						<div class="flex flex-wrap gap-2">
+							{#each $formData.context.irrelevant_post_examples as example, idx}
+								<Badge variant="outline" class="gap-1.5">
+									{example}
+									<button
+										type="button"
+										class="hover:text-destructive"
+										onclick={() => {
+											$formData.context.category === 'find-leads' &&
+												($formData.context.irrelevant_post_examples =
+													$formData.context.irrelevant_post_examples.filter(
+														(_, i) => i !== idx
+													));
+										}}
+									>
+										<X class="h-3 w-3" />
+									</button>
+								</Badge>
+							{/each}
+						</div>
+					{/if}
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+		{:else if $formData.context.category == 'find-competition'}
+			<Typography as="h2" variant="body-md" class="font-bold">
+				Competition Finding Configuration
+			</Typography>
+
+			<Form.Field {form} name="context.product_name">
+				<Form.Control let:attrs>
+					<Form.Label>Name</Form.Label>
+					<Input {...attrs} bind:value={$formData.context.name} />
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+
+			<Form.Field {form} name="context.core_features">
+				<Form.Control let:attrs>
+					<Form.Label>Core Features</Form.Label>
+					<div class="flex gap-2">
+						<Input
+							bind:value={coreFeature}
+							placeholder="Add feature"
+							onkeydown={(e) => {
+								if (e.key === 'Enter') {
+									e.preventDefault();
+									if (coreFeature) {
+										$formData.context.category === 'find-competition' &&
+											($formData.context.core_features = [
+												...$formData.context.core_features,
+												coreFeature,
+											]);
+										coreFeature = '';
+									}
+								}
+							}}
+						/>
+						<Button
+							type="button"
+							variant="outline"
+							onclick={() => {
+								if (coreFeature) {
+									$formData.context.category === 'find-competition' &&
+										($formData.context.core_features = [
+											...$formData.context.core_features,
+											coreFeature,
+										]);
+									coreFeature = '';
+								}
+							}}
+						>
+							<Plus />
+						</Button>
+					</div>
+					{#if $formData.context.core_features.length > 0}
+						<div class="flex flex-wrap gap-2">
+							{#each $formData.context.core_features as feature, idx}
+								<Badge variant="outline" class="gap-1.5">
+									{feature}
+									<button
+										type="button"
+										class="hover:text-destructive"
+										onclick={() => {
+											$formData.context.category === 'find-leads' &&
+												($formData.context.irrelevant_post_examples =
+													$formData.context.irrelevant_post_examples.filter(
+														(_, i) => i !== idx
+													));
+										}}
+									>
+										<X class="h-3 w-3" />
+									</button>
+								</Badge>
+							{/each}
+						</div>
+					{/if}
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+		{/if}
+	</div>
+
 	<Form.Field
 		{form}
 		name="running"

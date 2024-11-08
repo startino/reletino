@@ -239,7 +239,7 @@
 									/>
 									<Button
 										type="button"
-										variant="icon"
+										variant="outline"
 										onclick={() => {
 											if (coreFeature) {
 												$form.context.category === 'find-competition' &&

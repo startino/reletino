@@ -19,11 +19,7 @@ export const actions = {
 
 		const session = await safeGetSession();
 
-		const {
-			projectName,
-			websiteUrl,
-			context: { category, ...cleanContext },
-		} = form.data;
+		const { projectName, websiteUrl, category, context } = form.data;
 
 		const { data, error } = await supabase
 			.from('projects')
@@ -31,7 +27,7 @@ export const actions = {
 				profile_id: session.user!.id,
 				title: projectName,
 				category,
-				context: cleanContext,
+				context,
 				website_url: websiteUrl,
 				running: true,
 			})
