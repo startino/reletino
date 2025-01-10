@@ -17,10 +17,12 @@
 	import type { SupabaseClient } from '@supabase/supabase-js';
 	import { CheckCheck, ExternalLink, LoaderCircle, Undo } from 'lucide-svelte';
 	import { PUBLIC_CRITINO_API_KEY } from '$env/static/public';
+	import ResponseGenerator from './response-generator.svelte';
 
 	interface Props {
 		supabase: SupabaseClient<any, 'public', any>;
 		submission: Tables<'submissions'>;
+		
 		projectName: string;
 	}
 
@@ -198,6 +200,13 @@
 						<Undo class="ml-2 w-5" />
 					{/if}
 				</Button>
+			</div>
+
+			<div class="mt-4">
+				<ResponseGenerator 
+					submission={submission} 
+					projectId={submission.project_id}
+				/>
 			</div>
 		</div>
 	{:else}

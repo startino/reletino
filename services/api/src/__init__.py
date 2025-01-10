@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from supabase import create_client
 
+from src.interfaces import db
 from src.models.project import Project
 from src.lib.reddit_worker import RedditStreamWorker
 from src.lib.autofill_project import autofill_form, FormField
@@ -28,9 +29,6 @@ load_dotenv()
 
 REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD")
 REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE = os.getenv("SUPABASE_SERVICE_ROLE")
 
 if REDDIT_PASSWORD is None:
     raise ValueError("REDDIT_PASSWORD is not set")
@@ -45,7 +43,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
+    supabase = db.client()
 
     # project_res = supabase.table("projects").select("*").eq("running", True).execute()
         
@@ -171,14 +169,16 @@ class GenerateResponseRequest(BaseModel):
 @app.post("/generate-response")
 def generate_project_response(q: GenerateResponseRequest):
     try:
+        logging.info(f"Generating response for project {q.project_id}, isDM: {q.is_dm}")
         submission = type('Submission', (), {
             'title': q.submission_title,
             'selftext': q.submission_selftext
         })
         response = generate_response(submission, q.project_id, q.is_dm)
+        logging.info("Response generated successfully")
         return {"status": "success", "response": response}
     except Exception as e:
-        logging.error(f"Error generating response: {e}")
+        logging.error(f"Error generating response: {e}", exc_info=True)  # Add full traceback
         return {"status": "error", "message": str(e)}
 
 
