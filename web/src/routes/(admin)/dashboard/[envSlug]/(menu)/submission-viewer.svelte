@@ -15,7 +15,7 @@
 	import { enhance } from '$app/forms';
 	import { Typography } from '$lib/components/ui/typography';
 	import type { SupabaseClient } from '@supabase/supabase-js';
-	import { CheckCheck, ExternalLink, LoaderCircle, Undo } from 'lucide-svelte';
+	import { CheckCheck, ExternalLink, LoaderCircle, Undo, ThumbsUp, ThumbsDown } from 'lucide-svelte';
 	import { PUBLIC_CRITINO_API_KEY, PUBLIC_OPENROUTER_API_KEY } from '$env/static/public';
 	import ResponseGenerator from './response-generator.svelte';
 	import { handleCritique } from '$lib/apis/critino';
@@ -32,6 +32,8 @@
 	// Reactive UI
 	let critinoLoading = $state(false);
 	let markingAsRead = $state(false);
+	let updatedReasoning = $state('');
+	let showUpdateDialog = $state(false);
 
 	// Function to copy to clipboard so I can easily copy this to my sales
 	// management Google Sheet :P
@@ -69,9 +71,23 @@
 		toast.success('Marked as read');
 	}
 
-	const handleCritiqueClick = async (submission: Tables<'submissions'>) => {
+	const handleCritiqueClick = async (submission: Tables<'submissions'>, isGood: boolean) => {
+		if (!isGood) {
+			showUpdateDialog = true;
+			updatedReasoning = submission.reasoning;
+			return;
+		}
+
 		critinoLoading = true;
-		const res = await handleCritique(submission, projectName, $page.data.environment.name);
+		const res = await handleCritique(
+			submission, 
+			projectName, 
+			$page.data.environment.name,
+			'', // context
+			isGood ? submission.reasoning : '', // if good, use existing reasoning as optimal
+			isGood ? '' : submission.reasoning, // if bad, use existing reasoning as example of what not to do
+			`This is an example of a ${isGood ? 'good' : 'bad'} response. ${isGood ? 'The reasoning is clear and accurate.' : 'The reasoning needs improvement.'}`
+		);
 		critinoLoading = false;
 
 		if (!res) return;
@@ -79,6 +95,47 @@
 		if (res.url) {
 			window.open(res.url + '?key=' + PUBLIC_CRITINO_API_KEY, '_blank');
 		}
+	};
+
+	const handleUpdateReasoning = async () => {
+		critinoLoading = true;
+		showUpdateDialog = false;
+
+		// First update the submission reasoning
+		const { error } = await supabase
+			.from('submissions')
+			.update({
+				reasoning: updatedReasoning
+			})
+			.eq('id', submission.id);
+
+		if (error) {
+			toast.error('Failed to update reasoning');
+			critinoLoading = false;
+			return;
+		}
+
+		// Then create the critique
+		const res = await handleCritique(
+			{ ...submission, reasoning: updatedReasoning },
+			projectName,
+			$page.data.environment.name,
+			'', // context
+			'', // not good, so no optimal
+			updatedReasoning, // use updated reasoning as example of what not to do
+			'This is an example of a bad response. The reasoning needs improvement.'
+		);
+		critinoLoading = false;
+
+		if (!res) return;
+
+		if (res.url) {
+			window.open(res.url + '?key=' + PUBLIC_CRITINO_API_KEY, '_blank');
+		}
+
+		// Update the local submission object to reflect changes
+		submission.reasoning = updatedReasoning;
+		toast.success('Reasoning updated');
 	};
 </script>
 
@@ -124,46 +181,77 @@
 			</div>
 
 			<Separator />
-			<!-- <div class="flex flex-col p-4 self-end">
-        <Typography variant="title-lg" class="text-left">
-          {submission.is_relevant ? "Relevant" : "Irrelevant"}
-        </Typography>
-        <Typography variant="title-md" class="text-left">Reasoning</Typography>
-        <Typography variant="body-md" class="text-left">
-          {submission.reasoning}
-        </Typography>
-      </div> -->
+			<div class="flex flex-col p-4">
+				<Typography variant="title-lg" class="text-left">
+					{submission.is_relevant ? "Relevant" : "Irrelevant"}
+				</Typography>
+				<Typography variant="title-md" class="text-left">Reasoning</Typography>
+				<Typography variant="body-md" class="text-left whitespace-pre-wrap">
+					{submission.reasoning}
+				</Typography>
+			</div>
 
 			<Separator />
 			<div class="grid w-full grid-cols-2 gap-6 p-4">
 				<Button
-					onclick={async () => await handleCritiqueClick(submission)}
+					onclick={async () => await handleCritiqueClick(submission, true)}
 					variant="secondary"
-					target="_blank"
 					disabled={critinoLoading}
+					class="flex items-center gap-2"
 				>
-					Create Critino Review
+					Good Response
 					{#if critinoLoading}
-						<LoaderCircle class="ml-2 w-5 animate-spin" />
+						<LoaderCircle class="w-5 animate-spin" />
 					{:else}
-						<ExternalLink class="ml-2 w-5" />
+						<ThumbsUp class="w-5" />
 					{/if}
 				</Button>
-				<Button onclick={() => markAsRead()} disabled={markingAsRead}>
-					{#if !submission.done}
-						Mark as Read
+				<Button
+					onclick={async () => await handleCritiqueClick(submission, false)}
+					variant="secondary"
+					disabled={critinoLoading}
+					class="flex items-center gap-2"
+				>
+					Bad Response
+					{#if critinoLoading}
+						<LoaderCircle class="w-5 animate-spin" />
 					{:else}
-						Mark as Unread
-					{/if}
-					{#if markingAsRead}
-						<LoaderCircle class="ml-2 w-5 animate-spin" />
-					{:else if !submission.done}
-						<CheckCheck class="ml-2 w-5" />
-					{:else}
-						<Undo class="ml-2 w-5" />
+						<ThumbsDown class="w-5" />
 					{/if}
 				</Button>
 			</div>
+
+			<Dialog.Root bind:open={showUpdateDialog}>
+				<Dialog.Content class="sm:max-w-[425px]">
+					<Dialog.Header>
+						<Dialog.Title>Update Reasoning</Dialog.Title>
+						<Dialog.Description>
+							Update the reasoning before marking it as a bad response.
+						</Dialog.Description>
+					</Dialog.Header>
+					<div class="grid gap-4 py-4">
+						<div class="grid gap-2">
+							<Textarea
+								bind:value={updatedReasoning}
+								placeholder="Enter the updated reasoning..."
+								class="min-h-[200px]"
+							/>
+						</div>
+					</div>
+					<Dialog.Footer>
+						<Button variant="outline" onclick={() => showUpdateDialog = false}>
+							Cancel
+						</Button>
+						<Button onclick={handleUpdateReasoning} disabled={critinoLoading}>
+							{#if critinoLoading}
+								<LoaderCircle class="w-5 animate-spin" />
+							{:else}
+								Update & Submit
+							{/if}
+						</Button>
+					</Dialog.Footer>
+				</Dialog.Content>
+			</Dialog.Root>
 
 			<div class="mt-4">
 				<ResponseGenerator 
