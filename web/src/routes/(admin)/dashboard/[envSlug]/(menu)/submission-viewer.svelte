@@ -16,8 +16,9 @@
 	import { Typography } from '$lib/components/ui/typography';
 	import type { SupabaseClient } from '@supabase/supabase-js';
 	import { CheckCheck, ExternalLink, LoaderCircle, Undo } from 'lucide-svelte';
-	import { PUBLIC_CRITINO_API_KEY } from '$env/static/public';
+	import { PUBLIC_CRITINO_API_KEY, PUBLIC_OPENROUTER_API_KEY } from '$env/static/public';
 	import ResponseGenerator from './response-generator.svelte';
+	import { handleCritique } from '$lib/apis/critino';
 
 	interface Props {
 		supabase: SupabaseClient<any, 'public', any>;
@@ -68,54 +69,16 @@
 		toast.success('Marked as read');
 	}
 
-	const handleCritique = async (submission: Tables<'submissions'>) => {
+	const handleCritiqueClick = async (submission: Tables<'submissions'>) => {
 		critinoLoading = true;
-
-		const context = '';
-		const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
-		const response = `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
-		const optimal = '';
-
-		const postObject = {
-			params: {
-				path: { id: submission.id },
-				query: {
-					team_name: 'startino',
-					environment_name: 'reletino/' + $page.data.environment.name + '/' + projectName,
-					workflow_name: projectName,
-					agent_name: 'main',
-				},
-				header: {
-					'x-critino-key': PUBLIC_CRITINO_API_KEY,
-				},
-			},
-			body: {
-				context,
-				query,
-				optimal,
-				response,
-			},
-		};
-		console.log(`Creating Critique with object: ${JSON.stringify(postObject, null, 2)}...`);
-
-		const res = await critino.POST('/critiques/{id}', postObject);
-
-		console.log(`Creating Critique with response: ${JSON.stringify(res, null, 2)}`);
-
-		if (res.data) {
-			critinoLoading = false;
-			console.log('Opening Critino');
-			window.open(res.data.url + '?key=' + $page.data.environment.critino_key, '_blank');
-			return;
-		}
-		if (res.error) {
-			console.dir(res);
-			console.error(
-				`Error:\nMessage: ${res.error.detail?.message}\n${res.error.detail?.traceback}`
-			);
-			toast.error(`Error sending message: ${res.error.detail?.message}`);
-		}
+		const res = await handleCritique(submission, projectName, $page.data.environment.name);
 		critinoLoading = false;
+
+		if (!res) return;
+
+		if (res.url) {
+			window.open(res.url + '?key=' + PUBLIC_CRITINO_API_KEY, '_blank');
+		}
 	};
 </script>
 
@@ -174,7 +137,7 @@
 			<Separator />
 			<div class="grid w-full grid-cols-2 gap-6 p-4">
 				<Button
-					onclick={async () => await handleCritique(submission)}
+					onclick={async () => await handleCritiqueClick(submission)}
 					variant="secondary"
 					target="_blank"
 					disabled={critinoLoading}
