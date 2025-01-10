@@ -17,14 +17,13 @@ def generate_response(submission: Submission, project_id: str, is_dm: bool) -> s
     if not style_prompt.data:
         raise Exception(f"Project not found: {project_id}")
     
-    style_prompt = style_prompt.data[0]
+    style_prompt = style_prompt.data
 
     llm = gpt_4o()
 
     response = llm.invoke(
         textwrap.dedent(
             f"""
-            You are an expert copywriter.
             Your job is to:
             {"write a DM" if is_dm else "write a comment"}
             for a Reddit post.
