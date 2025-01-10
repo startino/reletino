@@ -34,6 +34,7 @@ html2text = "^2024.2.26"
 langgraph = "*"
 playwright = "^1.48.0"
 bs4 = "^0.0.2"
+sse-starlette = "^2.2.1"
 
 [build-system]
 requires = ["poetry-core"]
