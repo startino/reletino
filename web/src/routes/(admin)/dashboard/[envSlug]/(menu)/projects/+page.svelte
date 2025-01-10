@@ -9,7 +9,7 @@
 	import ProjectForm from './project-form.svelte';
 	import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
-	type Props ={
+	type Props = {
 		data: {
 			supabase: SupabaseClient<any, 'public', any>;
 			environment: Tables<'environments'>;
