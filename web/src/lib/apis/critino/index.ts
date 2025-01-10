@@ -20,10 +20,12 @@ export const handleCritique = async (
     projectName: string, 
     environmentName: string,
     context: string = '',
+    optimal: string = '',
+    badExample: string = '',
+    instructions: string = '',
 ) => {
     const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
-    const response = `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
-    const optimal = '';
+    const response = badExample || `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
 
     const postObject = {
         params: {
@@ -44,6 +46,7 @@ export const handleCritique = async (
             query,
             optimal,
             response,
+            instructions,
         },
     };
     console.log(`Creating Critique with object: ${JSON.stringify(postObject, null, 2)}...`);
