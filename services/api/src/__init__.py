@@ -8,6 +8,7 @@ from time import sleep
 from dotenv import load_dotenv
 from fastapi.concurrency import asynccontextmanager
 from pydantic import BaseModel
+from typing import Literal
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
@@ -17,6 +18,11 @@ from supabase import create_client
 
 from src.models.project import Project
 from src.lib.reddit_worker import RedditStreamWorker
+from src.lib.autofill_project import autofill_form, FormField
+from src.lib.generate_response import generate_response
+from praw.models import Submission
+
+from sse_starlette import EventSourceResponse
 
 load_dotenv()
 
@@ -133,3 +139,46 @@ def stop_project_stream(q: StopStreamRequest):
     logging.info(f"Stopped project stream: {q.project_id}")
 
     return {"status": "success", "message": "Stream stopped"}
+
+
+class AutofillRequest(BaseModel):
+    url: str
+    use_case: Literal["leads", "competition_research", "other"]
+    form: dict
+
+@app.post("/autofill")
+async def autofill_project(q: AutofillRequest):
+    fields = [
+        FormField(label="business name", description="Company name"),
+        FormField(label="about", description="2-4 sentence description"),
+        FormField(label="subreddits", description="Relevant subreddits"),
+        FormField(label="ideal customer profile", description="Target audience"),
+        FormField(label="competitors", description="Main competitors"),
+        FormField(label="unique selling points", description="Differentiators"),
+    ]
+    
+    # Yields the fields one by one
+    autocompleted_field = autofill_form(q.use_case, q.url, fields)
+
+    return EventSourceResponse(autocompleted_field, media_type="text/event-stream")
+
+class GenerateResponseRequest(BaseModel):
+    project_id: str
+    submission_title: str
+    submission_selftext: str
+    is_dm: bool = False
+
+@app.post("/generate-response")
+def generate_project_response(q: GenerateResponseRequest):
+    try:
+        submission = type('Submission', (), {
+            'title': q.submission_title,
+            'selftext': q.submission_selftext
+        })
+        response = generate_response(submission, q.project_id, q.is_dm)
+        return {"status": "success", "response": response}
+    except Exception as e:
+        logging.error(f"Error generating response: {e}")
+        return {"status": "error", "message": str(e)}
+
+
