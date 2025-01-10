@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from langchain.prompts import FewShotPromptTemplate, PromptTemplate
@@ -5,6 +6,7 @@ from langchain_core.messages import BaseMessage
 import requests
 from html2text import html2text
 from dotenv import load_dotenv
+from fastapi import HTTPException
 
 from src.lib import xml_utils
 
@@ -39,19 +41,21 @@ def critino(
     agent_name: str,
     project_name: str,
     environment_name: str,
+    context: str = "",
+    timeout: int = 300,
 ) -> str:
     logging.info(f"critino: {agent_name}")
-    examples = "<examples></examples>"
+    examples = {}
     try:
-        logging.info(f"critino: {agent_name}: try")
+        logging.info(f"critino: {agent_name}: query: {query}")
 
         params = {
             "team_name": "startino",
             "environment_name": "reletino/" + environment_name + "/" + project_name,
-            "workflow_name": project_name,
-            "agent_name": "main",
+            "context": context,
             "query": query,
             "k": 5,
+            "similarity_key": "situation",
         }
 
         logging.info(f"critino: {agent_name}: params: {params}")
@@ -60,22 +64,37 @@ def critino(
 
         x_critino_key = os.getenv("PUBLIC_CRITINO_API_KEY")
         if not x_critino_key:
-            logging.error("critino: x_critino_key is empty")
-            return "<examples></examples>"
+            raise HTTPException(
+                status_code=500, detail="PUBLIC_CRITINO_API_KEY is empty"
+            )
+
+        x_openrouter_api_key = os.getenv("PUBLIC_OPENROUTER_API_KEY")
+        if not x_openrouter_api_key:
+            raise HTTPException(
+                status_code=500, detail="PUBLIC_OPENROUTER_API_KEY is empty"
+            )
 
         response = requests.get(
             url,
             params=params,
-            headers={"X-Critino-Key": x_critino_key},
-            timeout=10,
+            headers={
+                "X-Critino-Key": x_critino_key,
+                "X-OpenRouter-API-Key": x_openrouter_api_key,
+            },
+            timeout=timeout,
         )
         response_json = response.json()
 
-        examples = format_example_string(response_json.get("data", []))
+        examples = response_json.get("data", {})
         logging.info(f"critino: {agent_name}: examples: {examples}")
     except requests.exceptions.Timeout:
-        logging.error(f"critino: {agent_name}: Request timed out")
+        raise HTTPException(
+            status_code=504, detail=f"Request timed out after {timeout} seconds"
+        )
     except Exception as e:
-        logging.error(f"critino: {agent_name}: Error fetching examples: {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching examples: {e}")
 
-    return examples
+    if not examples:
+        logging.info(f"critino: {agent_name}: No critiques were fetched")
+
+    return json.dumps(examples, indent=2).replace("{", "{{").replace("}", "}}")
