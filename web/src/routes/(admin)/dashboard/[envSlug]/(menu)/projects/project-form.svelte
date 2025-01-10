@@ -278,6 +278,180 @@
 		);
 		$formData.prompt = defaultPrompt;
 	};
+
+	const fillCommentStyleWithTemplate = () => {
+		const defaultCommentStyle = generateHTML(
+			{
+				type: 'doc',
+				content: [
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Comment Style Guide' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Be friendly and professional when commenting on posts.',
+							},
+						],
+					},
+					{
+						type: 'bulletList',
+						content: [
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Always start with a greeting.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Acknowledge their specific situation or problem.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Explain how our product can help them.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'End with a clear call to action.',
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			[StarterKit]
+		);
+		$formData.comment_style_prompt = defaultCommentStyle;
+	};
+
+	const fillDMStyleWithTemplate = () => {
+		const defaultDMStyle = generateHTML(
+			{
+				type: 'doc',
+				content: [
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'DM Style Guide' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Be concise and professional when sending direct messages.',
+							},
+						],
+					},
+					{
+						type: 'bulletList',
+						content: [
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Introduce yourself and your role.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Reference their specific post or comment.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Explain why you think our product would be valuable to them.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Provide a clear next step or call to action.',
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			[StarterKit]
+		);
+		$formData.dm_style_prompt = defaultDMStyle;
+	};
 </script>
 
 <form method="POST" action="?/updateProject" class="flex flex-col gap-y-4" use:enhance>
@@ -374,6 +548,58 @@
 						<TipTap
 							class="h-full max-h-[700px] min-h-[500px] w-full overflow-y-scroll p-3"
 							bind:content={$formData.prompt}
+						/>
+					</div>
+				</Dialog.Content>
+			</Dialog.Root>
+			<Form.FieldErrors />
+		</Form.Control>
+	</Form.Field>
+	<Form.Field {form} name="comment_style_prompt">
+		<Form.Control let:attrs>
+			<Form.Label>Comment Style</Form.Label>
+			<Form.Description>
+				Define how the AI should style its comments when responding to relevant posts.
+			</Form.Description>
+			<input type="hidden" name="comment_style_prompt" bind:value={$formData.comment_style_prompt} />
+			<Dialog.Root>
+				<Dialog.Trigger>
+					<Button variant="secondary" class="">Open Comment Style</Button>
+				</Dialog.Trigger>
+				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
+					<Button onclick={fillCommentStyleWithTemplate} variant="outline" class="right-2 top-2">
+						Insert Example Comment Style
+					</Button>
+					<div class="h-full min-h-96 w-full p-3">
+						<TipTap
+							class="h-full max-h-[700px] min-h-[500px] w-full overflow-y-scroll p-3"
+							bind:content={$formData.comment_style_prompt}
+						/>
+					</div>
+				</Dialog.Content>
+			</Dialog.Root>
+			<Form.FieldErrors />
+		</Form.Control>
+	</Form.Field>
+	<Form.Field {form} name="dm_style_prompt">
+		<Form.Control let:attrs>
+			<Form.Label>DM Style</Form.Label>
+			<Form.Description>
+				Define how the AI should style its direct messages when reaching out to users.
+			</Form.Description>
+			<input type="hidden" name="dm_style_prompt" bind:value={$formData.dm_style_prompt} />
+			<Dialog.Root>
+				<Dialog.Trigger>
+					<Button variant="secondary" class="">Open DM Style</Button>
+				</Dialog.Trigger>
+				<Dialog.Content class="h-full min-h-96 w-full max-w-5xl place-items-center px-7">
+					<Button onclick={fillDMStyleWithTemplate} variant="outline" class="right-2 top-2">
+						Insert Example DM Style
+					</Button>
+					<div class="h-full min-h-96 w-full p-3">
+						<TipTap
+							class="h-full max-h-[700px] min-h-[500px] w-full overflow-y-scroll p-3"
+							bind:content={$formData.dm_style_prompt}
 						/>
 					</div>
 				</Dialog.Content>
