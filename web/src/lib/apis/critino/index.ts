@@ -62,7 +62,7 @@ export const handleCritique = async (
     return res.data;
 };
 
-export const getOrCreateEnvironment = async (environmentName: string, description: string) => {
+export const getOrCreateReletinoEnvironment = async (environmentName: string, description: string) => {
     console.log('environment key does not exist');
 
     const readResponse = await api.GET('/environments/{name}', {
@@ -137,56 +137,6 @@ export const getOrCreateEnvironment = async (environmentName: string, descriptio
     }
 
     return createResponse.data.key;
-};
-
-export const getOrCreateProject = async (projectName: string, environmentName: string, description: string) => {
-    console.log('getOrCreateCritinoProject');
-    const readResponse = await api.GET('/environments/{name}', {
-        params: {
-            query: {
-                team_name: 'startino',
-                parent_name: 'reletino/' + environmentName,
-            },
-            path: {
-                name: projectName,
-            },
-            header: {
-                'x-critino-key': PUBLIC_CRITINO_API_KEY,
-            },
-        },
-    });
-    console.log('readResponse', readResponse);
-
-    if (readResponse.error) {
-        console.log('getOrCreateCritinoProject error');
-        const createResponse = await api.POST('/environments/{name}', {
-            params: {
-                query: {
-                    team_name: 'startino',
-                    parent_name: 'reletino/' + environmentName,
-                },
-                path: {
-                    name: projectName,
-                },
-                header: {
-                    'x-critino-key': PUBLIC_CRITINO_API_KEY,
-                },
-            },
-            body: {
-                gen_key: false,
-                description,
-            },
-        });
-
-        if (!createResponse.data || createResponse.error) {
-            console.error(`Error creating project: ${JSON.stringify(createResponse.error, null, 2)}`);
-            return null;
-        }
-
-        return createResponse.data.key;
-    }
-
-    return null;
 };
 
 export default api;

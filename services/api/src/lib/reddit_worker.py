@@ -11,6 +11,7 @@ import logging
 
 from pathlib import Path
 
+from src.interfaces import db
 from supabase import Client, create_client
 
 from src.models.project import Project
@@ -20,9 +21,6 @@ from src.models import Evaluation
 from src.lib.reddit_utils import get_subreddits, get_reddit_instance
 
 load_dotenv()
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE = os.getenv("SUPABASE_SERVICE_ROLE")
 
 current_directory = Path(__file__).resolve().parent
 
@@ -41,7 +39,7 @@ class RedditStreamWorker:
         self.profile_id = project.profile_id
         self.project = project
         self.subreddits = get_subreddits(project.subreddits)
-        self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
+        self.supabase: Client = db.client()
         self.environment_name = environment_name
         logging.info(f"Initialized RedditStreamWorker for project: {self.project.id}")
 
