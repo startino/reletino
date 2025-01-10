@@ -9,7 +9,7 @@
 	import ProjectForm from './project-form.svelte';
 	import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
-	interface Props {
+	type Props ={
 		data: {
 			supabase: SupabaseClient<any, 'public', any>;
 			environment: Tables<'environments'>;
@@ -69,6 +69,9 @@
 						prompt: '',
 						running: false,
 						subreddits: [],
+						comment_style_prompt: '',
+						dm_style_prompt: '',
+						use_case: null,
 					};
 					selectedProjectId = newProject.id;
 				}}
