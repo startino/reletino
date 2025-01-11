@@ -9,6 +9,7 @@
 	import { Typography } from '$lib/components/ui/typography';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	type Props = {
 		data: {
@@ -21,11 +22,23 @@
 
 	const { supabase } = data;
 
-	let selectedProject: { label: string; value: string } | undefined = $state(
-		data.projects.length > 0
-			? { label: data.projects[0].title, value: data.projects[0].id }
-			: undefined
-	);
+	const STORAGE_KEY = 'selectedProjectId';
+
+	let selectedProject: { label: string; value: string } | undefined = $state(undefined);
+
+	// Initialize the selected project to be the selected project the last time the user was on the page
+	const initializeSelectedProject = () => {
+		if (!browser || data.projects.length === 0) return;
+
+		const storedId = localStorage.getItem(STORAGE_KEY);
+		const project = data.projects.find(p => p.id === storedId);
+
+		if (!project || !data.projects[0]) return;
+
+		selectedProject = project 
+			? { label: project.title, value: project.id }
+			: { label: data.projects[0].title, value: data.projects[0].id };
+	};
 
 	let submissions: Tables<'submissions'>[] = $state([]);
 
@@ -101,8 +114,9 @@
 	});
 
 	onMount(() => {
-		if (data.projects.length > 0) {
-			getSubmissionsFromDB(data.projects[0].id);
+		initializeSelectedProject();
+		if (selectedProject) {
+			getSubmissionsFromDB(selectedProject.value);
 		}
 	});
 </script>
@@ -142,6 +156,7 @@
 										value={project.id}
 										label={project.title}
 										class="text-primary"
+										on:click={() => browser && localStorage.setItem(STORAGE_KEY, project.id)}
 									>
 										{project.title}
 									</Select.Item>
