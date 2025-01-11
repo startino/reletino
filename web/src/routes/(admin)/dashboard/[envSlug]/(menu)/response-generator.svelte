@@ -18,6 +18,7 @@
     let isDM = $state(false);
 
     async function generateResponse() {
+
         generating = true;
         try {        
             console.log("Generating response with:", {
@@ -97,6 +98,7 @@
             Generate {isDM ? 'DM' : 'Comment'}
         {/if}
     </Button>
+
 
     {#if generatedResponse}
         <div class="flex flex-col gap-2">
