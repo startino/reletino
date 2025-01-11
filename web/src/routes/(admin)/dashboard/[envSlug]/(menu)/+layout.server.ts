@@ -48,6 +48,12 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 	}
 
 	const getOrCreateTeamEnv = async () => {
+		if (environment.critino_key) {
+		  console.log('environment key already exists');
+		  return;
+		}
+		console.log('environment', environment);
+
 		// Reletino hiearchy:
 		// environment (team) -> environment_profile (relationship) -> profile (user) -> project
 		// but environment 1:1 with profile 
@@ -140,17 +146,6 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 
 		if (eTeamEnv) {
 			console.error(`Error updating environment: ${JSON.stringify(eTeamEnv, null, 2)}`);
-			throw error(500, 'Failed to update environment');
-		}
- 
-		// Update teamEnvironment in DB
-		const { error: eTeamEnvUpdate } = await supabase
-			.from('environments')
-			.update({ critino_key: newCritinoTeamEnv.data.key })
-			.eq('name', environment.name);
-
-		if (eTeamEnvUpdate) {
-			console.error(`Error updating environment: ${JSON.stringify(eTeamEnvUpdate, null, 2)}`);
 			throw error(500, 'Failed to update environment');
 		}
 
