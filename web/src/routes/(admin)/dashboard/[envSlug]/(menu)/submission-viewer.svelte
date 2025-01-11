@@ -251,7 +251,7 @@
 				</Dialog.Content>
 			</Dialog.Root>
 
-			<div class="mt-4">
+			<div class="mt-2">
 				<ResponseGenerator 
 					submission={submission} 
 					projectId={submission.project_id}

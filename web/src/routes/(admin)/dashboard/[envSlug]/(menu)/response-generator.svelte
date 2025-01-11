@@ -4,7 +4,7 @@
     import { toast } from 'svelte-sonner';
     import type { Tables } from '$lib/supabase';
 	import { PUBLIC_API_URL } from '$env/static/public';
-    import { LoaderCircle } from 'lucide-svelte';
+    import { Copy, LoaderCircle } from 'lucide-svelte';
 
     type Props = {
         submission: Tables<'submissions'>;
@@ -15,10 +15,8 @@
 
     let generating = $state(false);
     let generatedResponse = $state('');
-    let isDM = $state(false);
 
-    async function generateResponse() {
-
+    async function generateResponse(isDM: boolean) {
         generating = true;
         try {        
             console.log("Generating response with:", {
@@ -66,61 +64,56 @@
     }
 </script>
 
-<div class="flex flex-col gap-4 p-4">
-    <div class="flex items-center gap-2">
+<div class="flex flex-col gap-4">
+    <div class="flex gap-2">
         <Button 
-            variant="outline" 
             class="w-full" 
-            on:click={() => isDM = false} 
-            data-active={!isDM}
+            on:click={() => generateResponse(false)} 
+            disabled={generating}
         >
-            Generate Comment
+            {#if generating}
+                <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+                Generating
+            {:else}
+                Generate Comment
+            {/if}
         </Button>
         <Button 
-            variant="outline" 
             class="w-full" 
-            on:click={() => isDM = true} 
-            data-active={isDM}
+            on:click={() => generateResponse(true)} 
+            disabled={generating}
         >
-            Generate DM
+            {#if generating}
+                <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+                Generating
+            {:else}
+                Generate DM
+            {/if}
         </Button>
     </div>
 
-    <Button 
-        class="w-full" 
-        on:click={generateResponse} 
-        disabled={generating}
-    >
-        {#if generating}
-            <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-            Generating
-        {:else}
-            Generate {isDM ? 'DM' : 'Comment'}
-        {/if}
-    </Button>
-
-
     {#if generatedResponse}
-        <div class="flex flex-col gap-2">
-            <label for="response" class="text-sm font-medium">Generated Response:</label>
-            <Textarea
-                id="response"
-                bind:value={generatedResponse}
-                rows={6}
-                class="w-full"
-            />
-            <div class="flex gap-2">
+        <div class="flex flex-col">
+            <div class="flex flex-row gap-x-4">
+                <label for="response" class="text-sm font-medium">Generated Response:</label>
                 <Button 
-                    variant="outline"
-                    class="w-full"
-                    on:click={() => {
-                        navigator.clipboard.writeText(generatedResponse);
-                        toast.success('Response copied to clipboard');
+                variant="outline"
+                size="icon"
+                class="w-fit h-fit p-1"
+                on:click={() => {
+                    navigator.clipboard.writeText(generatedResponse);
+                    toast.success('Response copied to clipboard');
                     }}
                 >
-                    Copy to Clipboard
+                    <Copy class="w-4 h-4" />
                 </Button>
             </div>
+                <Textarea
+                    id="response"
+                    bind:value={generatedResponse}
+                    rows={6}
+                    class="w-full"
+            />
         </div>
     {/if}
 </div>
