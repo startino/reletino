@@ -12,6 +12,8 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		redirect(303, '/login');
 	}
 
+	console.log("PUBLIC_CRITINO_API_KEY", PUBLIC_CRITINO_API_KEY);
+
 	const { data, error: err } = await supabase
 		.from('environments')
 		.select('id')
@@ -45,21 +47,25 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		return { status: 500, error: new Error('Failed to load credits') };
 	}
 
-	const getOrCreateEnvironment = async (env: Tables<'environments'>) => {
+	const getOrCreateTeamEnv = async () => {
 		if (environment.critino_key) {
 		  console.log('environment key already exists');
 		  return;
 		}
 		console.log('environment', environment);
+
+		// Reletino hiearchy:
+		// environment (team) -> environment_profile (relationship) -> profile (user) -> project
+		// but environment 1:1 with profile 
 	  
-		const reletinoEnvironment = await critino.GET('/environments/{name}', {
+		const critinoTeamEnv = await critino.GET('/environments/{name}', {
 		  params: {
 			query: {
 			  team_name: 'startino',
 			  parent_name: 'reletino'
 			},
 			path: {
-			  name: env.name
+			  name: environment.name
 			},
 			header: {
 			  'x-critino-key': PUBLIC_CRITINO_API_KEY,
@@ -67,9 +73,9 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		  },
 		});
 
-		console.log('reletinoEnvironment', reletinoEnvironment);
+		console.log('reletinoEnvironment', environment);
 	  
-		if (!reletinoEnvironment.error) {
+		if (!critinoTeamEnv.error) {
 		  const updateKeyResponse = await critino.PATCH('/environments/{name}/key', {
 			params: {
 			  query: {
@@ -77,7 +83,7 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 				parent_name: 'reletino'
 			  },
 			  path: {
-				name: env.name
+				name: environment.name
 			  },
 			  header: {
 				'x-critino-key': PUBLIC_CRITINO_API_KEY,
@@ -95,55 +101,59 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		  const { error: eEnvironment } = await supabase
 			.from('environments')
 			.update({ critino_key: updateKeyResponse.data.key })
-			.eq('name', env.name);
+			.eq('name', environment.name);
 	  
-		  console.log('error env', env.name, eEnvironment);
+		  console.log('error env', environment.name, eEnvironment);
 		  environment.critino_key = updateKeyResponse.data.key;
+
 		  return;
 		}
+
+		console.log('create new critino team env');
 	  
-		const newEnvironment = await critino.POST('/environments/{name}', {
+		const newCritinoTeamEnv = await critino.POST('/environments/{name}', {
 			params: {
 				query: {
 					team_name: 'startino',
 					parent_name: 'reletino',
 				},
 				path: {
-					name: env.name,
+					name: environment.name,
 				},
 				header: {
 					'x-critino-key': PUBLIC_CRITINO_API_KEY,
 				},
 			},
 			body: {
-				description: `env name: ${env.name}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`,
+				description: `env name: ${environment.name}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`,
 				gen_key: false
 			},
 		});
 
-		console.log('newEnvironment', newEnvironment);
+		console.log('newCritinoEnv', newCritinoTeamEnv);
 
-		if (!newEnvironment.data || newEnvironment.error) {
+		if (!newCritinoTeamEnv.data || newCritinoTeamEnv.error) {
 			console.error(
-				`Error creating environment: ${JSON.stringify(newEnvironment.error, null, 2)}`
+				`Error creating environment: ${JSON.stringify(newCritinoTeamEnv.error, null, 2)}`
 			);
 			throw error(500, 'Failed to update environment key');
 		}
 
-		const { error: eEnvironment } = await supabase
+		const { error: eTeamEnv } = await supabase
 			.from('environments')
-			.update({ critino_key: newEnvironment.data.key })
-			.eq('name', env.name);
+			.update({ critino_key: newCritinoTeamEnv.data.key })
+			.eq('name', environment.name);
 
-		if (eEnvironment) {
-			console.error(`Error updating environment: ${JSON.stringify(eEnvironment, null, 2)}`);
+		if (eTeamEnv) {
+			console.error(`Error updating environment: ${JSON.stringify(eTeamEnv, null, 2)}`);
 			throw error(500, 'Failed to update environment');
 		}
 
-		environment.critino_key = newEnvironment.data.key;
+		environment.critino_key = newCritinoTeamEnv.data.key;
 	};
 
-	await getOrCreateEnvironment(environment);
+	console.log('environment', environment);
+	await getOrCreateTeamEnv();
 
 	const { data: projects, error: eProjects } = await supabase
 		.from('projects')
@@ -155,13 +165,13 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		throw error(500, 'Failed to load leads');
 	}
 
-	const getOrCreateCritinoProject = async (project: Tables<'projects'>) => {
+	const getOrCreateCritinoProjectEnv = async (project: Tables<'projects'>) => {
 		console.log('getOrCreateCritinoProject');
-		const reletinoEnvironment = await critino.GET('/environments/{name}', {
+		const critinoProjectEnv = await critino.GET('/environments/{name}', {
 			params: {
 				query: {
 					team_name: 'startino',
-					parent_name: 'reletino/' + environment?.name,
+					parent_name: 'reletino/' + environment?.name, // TODO: rename environment to teamEnv
 				},
 				path: {
 					name: project.title, // TODO: rename project title to project name
@@ -171,11 +181,11 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 				},
 			},
 		});
-		console.log('reletinoEnvironment', reletinoEnvironment);
+		console.log('critinoProjectEnv', critinoProjectEnv);
 
-		if (reletinoEnvironment.error) {
+		if (critinoProjectEnv.error) {
 			console.log('getOrCreateCritinoProject error');
-			const createProject = await critino.POST('/environments/{name}', {
+			const createCritinoProjectEnv = await critino.POST('/environments/{name}', {
 				params: {
 					query: {
 						team_name: 'startino',
@@ -190,26 +200,28 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 				},
 				body: {
 					gen_key: false,
-					description: `proj name: ${project.title}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`, // TODO: rename project title to project name
+					description: `project name: ${project.title}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`, // TODO: rename project title to project name
 				},
 			});
 
-			if (!createProject.data?.key || createProject.error) {
-				console.error('Error creating project:', createProject.error);
+			if (!createCritinoProjectEnv.data?.key || createCritinoProjectEnv.error) {
+				console.error('Error creating project:', createCritinoProjectEnv.error);
 				throw error(500, 'Failed to create project');
 			}
 
-			environment.critino_key = createProject.data?.key;
-			console.log('createProject', createProject);
+			environment.critino_key = createCritinoProjectEnv.data?.key;
+			console.log('createCritinoProjectEnv', createCritinoProjectEnv);
 		}
 	};
 
 	for (const project of projects) {
-		await getOrCreateCritinoProject(project);
+		getOrCreateCritinoProjectEnv(project).catch((e) => {
+			throw e;
+		});
 	}
 
 	return {
 		projects,
-		usage,
+		usage,	
 	};
 };
