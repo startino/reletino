@@ -142,9 +142,8 @@
 	{#if submission}
 		<div class="flex h-full flex-col gap-y-2">
 			<div class="flex flex-row place-items-center justify-between">
-				<Typography variant="headline-md" class="p-4 text-left">Post</Typography>
-				<Typography variant="title-lg" class="text-left {submission.is_relevant ? 'text-green-600' : 'text-red-600'}">
-					{submission.is_relevant ? "Relevant" : "Irrelevant"}
+				<Typography variant="headline-md" class="text-left {submission.is_relevant ? 'text-green-600' : 'text-red-600'}">
+					{submission.is_relevant ? "Relevant" : "Irrelevant"} Post
 				</Typography>
 				<Button
 					href={submission.url.includes('http')
@@ -158,7 +157,7 @@
 				</Button>
 			</div>
 
-			<div class="flex flex-row justify-between p-4 text-left">
+			<div class="flex flex-row justify-between text-left">
 				<div>
 					<Typography variant="title-md" class="text-left">
 						Title: {submission.title}
@@ -178,14 +177,14 @@
 			</div>
 
 			<Separator />
-			<div class="flex-1 overflow-y-auto whitespace-pre-wrap p-4 text-left text-sm">
+			<div class="flex-1 overflow-y-auto whitespace-pre-wrap pr-4 text-left text-sm">
 				<Typography variant="body-md" class="text-left">{submission.selftext}</Typography>
 			</div>
 
 			<Separator />
 
 			<div class="flex flex-row gap-x-2">
-				<div class="flex flex-col gap-y-2 justify-between py-2">
+				<div class="flex flex-col gap-y-2 justify-center">
 					<Button
 						onclick={async () => await handleCritiqueClick(submission, true)}
 						disabled={critinoLoading}
