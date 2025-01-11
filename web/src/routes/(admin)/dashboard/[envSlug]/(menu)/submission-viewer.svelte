@@ -128,10 +128,6 @@
 
 		if (!res) return;
 
-		if (res.url) {
-			window.open(res.url + '?key=' + PUBLIC_CRITINO_API_KEY, '_blank');
-		}
-
 		// Update the local submission object to reflect changes
 		submission.reasoning = updatedReasoning;
 		toast.success('Reasoning updated');
@@ -184,7 +180,7 @@
 			<Separator />
 
 			<div class="flex flex-row gap-x-2">
-				<div class="flex flex-col gap-y-2 justify-center">
+				<div class="flex flex-col gap-y-2 pt-2 justify-start">
 					<Button
 						onclick={async () => await handleCritiqueClick(submission, true)}
 						disabled={critinoLoading}
