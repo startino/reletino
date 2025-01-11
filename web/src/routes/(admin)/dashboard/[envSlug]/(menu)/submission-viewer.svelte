@@ -20,10 +20,9 @@
 	import ResponseGenerator from './response-generator.svelte';
 	import { handleCritique } from '$lib/apis/critino';
 
-	interface Props {
+	type Props = {
 		supabase: SupabaseClient<any, 'public', any>;
 		submission: Tables<'submissions'>;
-		
 		projectName: string;
 	}
 
@@ -141,9 +140,12 @@
 
 <div class="flex h-full flex-col">
 	{#if submission}
-		<div class="flex h-full flex-col">
+		<div class="flex h-full flex-col gap-y-2">
 			<div class="flex flex-row place-items-center justify-between">
 				<Typography variant="headline-md" class="p-4 text-left">Post</Typography>
+				<Typography variant="title-lg" class="text-left {submission.is_relevant ? 'text-green-600' : 'text-red-600'}">
+					{submission.is_relevant ? "Relevant" : "Irrelevant"}
+				</Typography>
 				<Button
 					href={submission.url.includes('http')
 						? submission.url
@@ -181,52 +183,53 @@
 			</div>
 
 			<Separator />
-			<div class="flex flex-col p-4">
-				<Typography variant="title-lg" class="text-left">
-					{submission.is_relevant ? "Relevant" : "Irrelevant"}
-				</Typography>
-				<Typography variant="title-md" class="text-left">Reasoning</Typography>
-				<Typography variant="body-md" class="text-left whitespace-pre-wrap">
-					{submission.reasoning}
-				</Typography>
+
+			<div class="flex flex-row gap-x-2">
+				<div class="flex flex-col gap-y-2 justify-between py-2">
+					<Button
+						onclick={async () => await handleCritiqueClick(submission, true)}
+						disabled={critinoLoading}
+						size="icon"
+						variant="outline"
+						class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
+					>
+						{#if critinoLoading}
+							<LoaderCircle class="w-5 animate-spin" />
+						{:else}
+							<ThumbsUp class="w-5" />
+						{/if}
+					</Button>
+					<Button
+						onclick={async () => await handleCritiqueClick(submission, false)}
+						disabled={critinoLoading}
+						size="icon"
+						variant="outline"
+						class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
+					>
+						{#if critinoLoading}
+							<LoaderCircle class="w-5 animate-spin" />
+						{:else}
+							<ThumbsDown class="w-5" />
+						{/if}
+					</Button>
+					</div>
+				<div class="flex flex-col max-w-3xl">
+					<Typography variant="title-md" class="text-left ">Reasoning</Typography>
+					<Typography variant="body-md" class="text-left">
+						{submission.reasoning}
+					</Typography>
+				</div>
 			</div>
 
 			<Separator />
-			<div class="grid w-full grid-cols-2 gap-6 p-4">
-				<Button
-					onclick={async () => await handleCritiqueClick(submission, true)}
-					variant="secondary"
-					disabled={critinoLoading}
-					class="flex items-center gap-2"
-				>
-					Good Response
-					{#if critinoLoading}
-						<LoaderCircle class="w-5 animate-spin" />
-					{:else}
-						<ThumbsUp class="w-5" />
-					{/if}
-				</Button>
-				<Button
-					onclick={async () => await handleCritiqueClick(submission, false)}
-					variant="secondary"
-					disabled={critinoLoading}
-					class="flex items-center gap-2"
-				>
-					Bad Response
-					{#if critinoLoading}
-						<LoaderCircle class="w-5 animate-spin" />
-					{:else}
-						<ThumbsDown class="w-5" />
-					{/if}
-				</Button>
-			</div>
+			
 
 			<Dialog.Root bind:open={showUpdateDialog}>
-				<Dialog.Content class="sm:max-w-[425px]">
+				<Dialog.Content class="sm:max-w-3xl">
 					<Dialog.Header>
-						<Dialog.Title>Update Reasoning</Dialog.Title>
+						<Dialog.Title>Correct the reasoning</Dialog.Title>
 						<Dialog.Description>
-							Update the reasoning before marking it as a bad response.
+							Rewrite the reasoning to be an optimal response.
 						</Dialog.Description>
 					</Dialog.Header>
 					<div class="grid gap-4 py-4">
