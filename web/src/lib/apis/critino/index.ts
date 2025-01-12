@@ -15,17 +15,16 @@ type pathItems = components['pathItems'];
 
 export type { paths, schemas, headers, responses, parameters, requestBodies, pathItems };
 
-export const handleCritique = async (
+export const handleSubmissionCritique = async (
     submission: Tables<'submissions'>, 
-    projectName: string, 
+    projectName: string,
     environmentName: string,
-    context: string = '',
-    optimal: string = '',
-    badExample: string = '',
-    instructions: string = '',
+    context: string,
+    response: string | undefined,
+    optimal: string,
+    instructions: string,
 ) => {
     const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
-    const response = badExample || `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
 
     const postObject = {
         params: {
@@ -34,7 +33,7 @@ export const handleCritique = async (
                 team_name: 'startino',
                 environment_name: 'reletino/' + environmentName + '/' + projectName,
                 populate_missing: true,
-                similarity_key: 'situation' as const,
+                similarity_key: 'query' as const,
             },
             header: {
                 'x-critino-key': PUBLIC_CRITINO_API_KEY,
@@ -60,6 +59,47 @@ export const handleCritique = async (
     }
 
     return res.data;
+};
+
+// Critique the DM/comment that the AI generated
+export const handleCommentOrDmCritique = async (
+    submission: Tables<'submissions'>,
+    response: string,
+    optimal: string,
+    instructions: string,
+    projectName: string,
+    environmentName: string,
+    context: string,
+) => {
+    // Give the submission as context
+    const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
+
+    const postObject = {
+        params: {
+            path: { id: submission.id },
+            query: {
+                team_name: 'startino',
+                environment_name: 'reletino/' + environmentName + '/' + projectName,
+                populate_missing: true,
+                similarity_key: 'situation' as const,
+            },
+        },
+        body: {
+            context,
+            query,
+            optimal,
+            response,
+            instructions,
+        },
+    };
+    
+    const res = await api.POST('/critiques/{id}', postObject);
+    console.log(`Creating Critique with response: ${JSON.stringify(res, null, 2)}`);
+
+    if (!res.data || res.error) {
+        console.error(`Error creating critique: ${JSON.stringify(res.error, null, 2)}`);
+        return null;
+    }
 };
 
 export default api;

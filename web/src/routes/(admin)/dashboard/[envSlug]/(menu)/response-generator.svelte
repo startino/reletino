@@ -1,10 +1,11 @@
 <script lang="ts">
-    import { Button } from '$lib/components/ui/button';
     import { Textarea } from '$lib/components/ui/textarea';
     import { toast } from 'svelte-sonner';
     import type { Tables } from '$lib/supabase';
 	import { PUBLIC_API_URL } from '$env/static/public';
-    import { Copy, LoaderCircle } from 'lucide-svelte';
+    import { Copy, LoaderCircle, ThumbsUp, ThumbsDown } from 'lucide-svelte';
+    import { handleCommentOrDmCritique } from '$lib/apis/critino';
+    import { page } from '$app/stores';
 
     type Props = {
         submission: Tables<'submissions'>;
@@ -15,6 +16,40 @@
 
     let generating = $state(false);
     let generatedResponse = $state('');
+    let feedbackLoading = $state(false);
+
+    let updatedResponse = $state('');
+
+    const handleApprove = async () => {
+        await handleCommentOrDmCritique(
+            submission,
+            generatedResponse,
+            generatedResponse,
+            '', // instructions
+            submission.project_name,
+            $page.data.environment.name,
+            ''
+        );
+    }
+
+    const handleFeedback = async (isGood: boolean) => {
+        feedbackLoading = true;
+        const res = await handleCommentOrDmCritique(
+            submission,
+            generatedResponse,
+            updatedResponse,
+            '', // instructions
+            submission.project_name,
+            $page.data.environment.name,
+            ''
+        );
+
+        feedbackLoading = false;
+
+        if (!res) return;
+
+        toast.success('Feedback submitted');
+    }
 
     async function generateResponse(isDM: boolean) {
         generating = true;
@@ -93,26 +128,56 @@
     </div>
 
     {#if generatedResponse}
-        <div class="flex flex-col">
-            <div class="flex flex-row gap-x-4">
-                <label for="response" class="text-sm font-medium">Generated Response:</label>
-                <Button 
-                variant="outline"
-                size="icon"
-                class="w-fit h-fit p-1"
-                on:click={() => {
-                    navigator.clipboard.writeText(generatedResponse);
-                    toast.success('Response copied to clipboard');
-                    }}
-                >
-                    <Copy class="w-4 h-4" />
-                </Button>
+        <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+                <div class="flex flex-row gap-x-4 items-center">
+                    <label for="response" class="text-sm font-medium">Generated Response:</label>
+                    <Button 
+                        variant="outline"
+                        size="icon"
+                        class="w-fit h-fit p-1"
+                        on:click={() => {
+                            navigator.clipboard.writeText(generatedResponse);
+                            toast.success('Response copied to clipboard');
+                        }}
+                    >
+                        <Copy class="w-4 h-4" />
+                    </Button>
+                </div>
+                <div class="flex gap-2">
+                    <Button
+                        onclick={() => handleFeedback(true)}
+                        disabled={feedbackLoading}
+                        size="icon"
+                        variant="outline"
+                        class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
+                    >
+                        {#if feedbackLoading}
+                            <LoaderCircle class="w-4 h-4 animate-spin" />
+                        {:else}
+                            <ThumbsUp class="w-4 h-4" />
+                        {/if}
+                    </Button>
+                    <Button
+                        onclick={() => handleFeedback(false)}
+                        disabled={feedbackLoading}
+                        size="icon"
+                        variant="outline"
+                        class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
+                    >
+                        {#if feedbackLoading}
+                            <LoaderCircle class="w-4 h-4 animate-spin" />
+                        {:else}
+                            <ThumbsDown class="w-4 h-4" />
+                        {/if}
+                    </Button>
+                </div>
             </div>
-                <Textarea
-                    id="response"
-                    bind:value={generatedResponse}
-                    rows={6}
-                    class="w-full"
+            <Textarea
+                id="response"
+                bind:value={generatedResponse}
+                rows={6}
+                class="w-full"
             />
         </div>
     {/if}

@@ -18,7 +18,7 @@
 	import { CheckCheck, ExternalLink, LoaderCircle, Undo, ThumbsUp, ThumbsDown } from 'lucide-svelte';
 	import { PUBLIC_CRITINO_API_KEY, PUBLIC_OPENROUTER_API_KEY } from '$env/static/public';
 	import ResponseGenerator from './response-generator.svelte';
-	import { handleCritique } from '$lib/apis/critino';
+	import { handleSubmissionCritique } from '$lib/apis/critino';
 
 	type Props = {
 		supabase: SupabaseClient<any, 'public', any>;
@@ -70,68 +70,62 @@
 		toast.success('Marked as read');
 	}
 
-	const handleCritiqueClick = async (submission: Tables<'submissions'>, isGood: boolean) => {
-		if (!isGood) {
-			showUpdateDialog = true;
-			updatedReasoning = submission.reasoning;
-			return;
-		}
+	const handleRewriteReasoning = async (submission: Tables<'submissions'>) => {
+		showUpdateDialog = true;
+		updatedReasoning = submission.reasoning;
+	}
 
+	const handleApprove = async () => {
 		critinoLoading = true;
-		const res = await handleCritique(
+		const res = await handleSubmissionCritique(
 			submission, 
-			projectName, 
+			projectName,
 			$page.data.environment.name,
-			'', // context
-			isGood ? submission.reasoning : '', // if good, use existing reasoning as optimal
-			isGood ? '' : submission.reasoning, // if bad, use existing reasoning as example of what not to do
-			`This is an example of a ${isGood ? 'good' : 'bad'} response. ${isGood ? 'The reasoning is clear and accurate.' : 'The reasoning needs improvement.'}`
+			"",
+			submission.reasoning,
+			submission.reasoning,
+			"",
 		);
+
 		critinoLoading = false;
 
 		if (!res) return;
-
-		if (res.url) {
-			window.open(res.url + '?key=' + PUBLIC_CRITINO_API_KEY, '_blank');
-		}
 	};
+
+	const handleFeedback = async () => {
+		critinoLoading = true;
+		const res = await handleSubmissionCritique(
+			submission, 
+			projectName,
+			$page.data.environment.name,
+			"",
+			submission.reasoning,
+			updatedReasoning,
+			"",
+		);
+		critinoLoading = false;
+		if (!res) return;
+	}
 
 	const handleUpdateReasoning = async () => {
 		critinoLoading = true;
-		showUpdateDialog = false;
-
-		// First update the submission reasoning
-		const { error } = await supabase
-			.from('submissions')
-			.update({
-				reasoning: updatedReasoning
-			})
-			.eq('id', submission.id);
-
-		if (error) {
-			toast.error('Failed to update reasoning');
-			critinoLoading = false;
-			return;
-		}
-
-		// Then create the critique
-		const res = await handleCritique(
-			{ ...submission, reasoning: updatedReasoning },
+		const res = await handleSubmissionCritique(
+			submission, 
 			projectName,
 			$page.data.environment.name,
-			'', // context
-			'', // not good, so no optimal
-			updatedReasoning, // use updated reasoning as example of what not to do
-			'This is an example of a bad response. The reasoning needs improvement.'
+			"",
+			submission.reasoning,
+			updatedReasoning,
+			"",
 		);
 		critinoLoading = false;
-
-		if (!res) return;
-
-		// Update the local submission object to reflect changes
-		submission.reasoning = updatedReasoning;
+		if (!res) {
+			toast.error('Failed to update reasoning');
+			return;
+		}
+		showUpdateDialog = false;
 		toast.success('Reasoning updated');
-	};
+	}
 </script>
 
 <div class="flex h-full flex-col">
@@ -182,7 +176,7 @@
 			<div class="flex flex-row gap-x-2">
 				<div class="flex flex-col gap-y-2 pt-2 justify-start">
 					<Button
-						onclick={async () => await handleCritiqueClick(submission, true)}
+						onclick={async () => await handleApprove()}
 						disabled={critinoLoading}
 						size="icon"
 						variant="outline"
@@ -194,19 +188,16 @@
 							<ThumbsUp class="w-5" />
 						{/if}
 					</Button>
-					<Button
-						onclick={async () => await handleCritiqueClick(submission, false)}
-						disabled={critinoLoading}
-						size="icon"
-						variant="outline"
-						class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
-					>
-						{#if critinoLoading}
-							<LoaderCircle class="w-5 animate-spin" />
-						{:else}
+
+					<Dialog.Trigger asChild>
+						<Button
+							size="icon"
+							variant="outline"
+							class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
+						>
 							<ThumbsDown class="w-5" />
-						{/if}
-					</Button>
+						</Button>
+					</Dialog.Trigger>
 					</div>
 				<div class="flex flex-col max-w-3xl">
 					<Typography variant="title-md" class="text-left ">Reasoning</Typography>
