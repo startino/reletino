@@ -68,10 +68,10 @@ def critino(
                 status_code=500, detail="PUBLIC_CRITINO_API_KEY is empty"
             )
 
-        x_openrouter_api_key = os.getenv("PUBLIC_OPENROUTER_API_KEY")
+        x_openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         if not x_openrouter_api_key:
             raise HTTPException(
-                status_code=500, detail="PUBLIC_OPENROUTER_API_KEY is empty"
+                status_code=500, detail="OPENROUTER_API_KEY is empty"
             )
 
         response = requests.get(
