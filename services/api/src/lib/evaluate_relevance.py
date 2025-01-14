@@ -181,16 +181,8 @@ def evaluate_submission(
     if junior_evaluation.is_relevant is False:
         return junior_evaluation
     
-    # Attempt to load profile from a previous attempt
-    with open(f"labeled_insights/{submission.author.name}.txt", "r", encoding="utf-8") as f:
-        profile_insights = f.read()
-    
     # Do further research before making a final decision
-    if profile_insights == "":
-        profile_insights = asyncio.run(analyze_reddit_user(submission.author.name))
-
-        with open(f"labeled_insights/{submission.author.name}.txt", "w", encoding="utf-8") as f:
-            f.write(profile_insights)
+    profile_insights = analyze_reddit_user(submission.author.name)
 
     @traceable
     def senior_evaluation() -> Evaluation:

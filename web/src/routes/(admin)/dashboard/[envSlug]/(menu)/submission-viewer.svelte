@@ -92,6 +92,11 @@
 		if (!res) return;
 	};
 
+	const handleFeedbackButtonClick = () => {
+		showUpdateDialog = true;
+		updatedReasoning = submission.reasoning;
+	}
+
 	const handleFeedback = async () => {
 		critinoLoading = true;
 		const res = await handleSubmissionCritique(
@@ -176,7 +181,7 @@
 			<div class="flex flex-row gap-x-2">
 				<div class="flex flex-col gap-y-2 pt-2 justify-start">
 					<Button
-						onclick={async () => await handleApprove()}
+						onclick={() => handleApprove()}
 						disabled={critinoLoading}
 						size="icon"
 						variant="outline"
@@ -189,32 +194,31 @@
 						{/if}
 					</Button>
 
-			<Dialog.Root bind:open={showUpdateDialog}>
-				<Dialog.Trigger asChild>
+		
 					<Button
 						size="icon"
 						variant="outline"
 						class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
+						onclick={() => handleFeedbackButtonClick()}
 					>
 						<ThumbsDown class="w-5" />
 					</Button>
-				</Dialog.Trigger>
-				<Dialog.Content class="sm:max-w-3xl">
-					<Dialog.Header>
-						<Dialog.Title>Correct the reasoning</Dialog.Title>
-						<Dialog.Description>
-							Rewrite the reasoning to be an optimal response.
-						</Dialog.Description>
-					</Dialog.Header>
-					<div class="grid gap-4 py-4">
-						<div class="grid gap-2">
+				</div>
+				<Dialog.Root bind:open={showUpdateDialog}>
+					<Dialog.Trigger />
+					<Dialog.Content class="sm:max-w-3xl">
+						<Dialog.Header>
+							<Dialog.Title>Correct the reasoning</Dialog.Title>
+							<Dialog.Description>
+								Rewrite the reasoning to be an optimal response.
+							</Dialog.Description>
+						</Dialog.Header>
 							<Textarea
 								bind:value={updatedReasoning}
 								placeholder="Enter the updated reasoning..."
 								class="min-h-[200px]"
 							/>
-						</div>
-					</div>
+					
 					<Dialog.Footer>
 						<Button variant="outline" onclick={() => showUpdateDialog = false}>
 							Cancel
@@ -228,9 +232,9 @@
 						</Button>
 					</Dialog.Footer>
 				</Dialog.Content>
-			</Dialog.Root>
+				</Dialog.Root>
 
-					</div>
+
 				<div class="flex flex-col max-w-3xl">
 					<Typography variant="title-md" class="text-left ">Reasoning</Typography>
 					<Typography variant="body-md" class="text-left">
@@ -238,10 +242,7 @@
 					</Typography>
 				</div>
 			</div>
-
 			<Separator />
-			
-
 
 			<div class="mt-2">
 				<ResponseGenerator 

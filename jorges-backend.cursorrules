@@ -1,0 +1,4 @@
+In Python, use `|` operator instead of Union.
+In Python, use ` | None` instead of `Optional[]`.
+
+Use inline code instead of one-time use internal functions like `def __my_small_function()`.

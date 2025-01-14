@@ -86,7 +86,10 @@ def make_profile_human_readable(profile: RedditUserProfile) -> str:
     
     return "\n".join(output)
 
-def scrape_reddit_profile(username: str) -> RedditUserProfile:
+def get_reddit_profile(username: str) -> RedditUserProfile:
+    """
+    Retrieves a Reddit user's profile from a file or scrapes it from Reddit if not found.
+    """
 
     # Atempt to load from file in .profiles/
     filename = f"./.profiles/{username}.json"
@@ -144,7 +147,7 @@ def scrape_reddit_profile(username: str) -> RedditUserProfile:
         })
 
     os.makedirs("./.profiles", exist_ok=True)
-    filename = f"./.profiles/{profile.username}.json"
+    filename = f"./.profiles/{profile.username}/profile_data.json"
     with open(filename, "w", encoding="utf-8") as f:
         f.write(profile.model_dump_json())
         
@@ -153,7 +156,7 @@ def scrape_reddit_profile(username: str) -> RedditUserProfile:
     return profile
 
 if __name__ == "__main__":
-    profile = scrape_reddit_profile("PastelGripPump")
+    profile = get_reddit_profile("PastelGripPump")
     print(profile)
 
 

@@ -1,4 +1,5 @@
 import asyncio
+import os
 from typing import Annotated, List
 from pydantic import BaseModel
 from langgraph.graph import END, StateGraph
@@ -6,7 +7,7 @@ from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from src.interfaces.llm import gpt_4o, gpt_4o_mini
-from src.lib.scrape_reddit_profile import format_profile_for_llm, scrape_reddit_profile, RedditUserProfile
+from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile, RedditUserProfile
 
 
 class State(BaseModel):
@@ -138,9 +139,17 @@ def create_reflection_agent():
     
     return workflow.compile()
 
-async def analyze_reddit_user(username: str) -> str:
-    profile = scrape_reddit_profile(username)
+def analyze_reddit_user(username: str) -> str:
+
+    if os.path.exists(f"./.profiles/{username}/profile_insights.txt"):
+        with open(f"./.profiles/{username}/profile_insights.txt", "r", encoding="utf-8") as f:
+            insights = f.read()
+        
+    if insights is not "":
+        return insights
     
+    profile = get_reddit_profile(username)
+
     agent = create_reflection_agent()
     initial_state = State(
         messages=[],
@@ -148,7 +157,7 @@ async def analyze_reddit_user(username: str) -> str:
         profile_insights=None
     )
     
-    final_state = await agent.ainvoke(initial_state)
+    final_state = agent.invoke(initial_state)
     
     return final_state["profile_insights"]
 
@@ -156,9 +165,9 @@ if __name__ == "__main__":
     
     username = "PastelGripPump"
     
-    insights = asyncio.run(analyze_reddit_user(username))
+    insights = analyze_reddit_user(username)
 
-    with open(f"labeled_insights/{username}.txt", "w", encoding="utf-8") as f:
+    with open(f"./.profiles/{username}/profile_insights.txt", "w", encoding="utf-8") as f:
         f.write(insights)
     
     print(insights)
