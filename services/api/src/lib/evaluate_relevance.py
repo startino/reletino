@@ -95,7 +95,7 @@ def evaluate_submission(
     project_prompt: str,
     environment_name: str,
     project_name: str,
-) -> tuple[Evaluation, str] | None:
+) -> tuple[Evaluation | None, str | None]:
     """
     Evaluates the relevance of a submission using LLMs.
 
@@ -180,7 +180,7 @@ def evaluate_submission(
     junior_evaluation = junior_evaluation()
 
     if junior_evaluation.is_relevant is False:
-        return junior_evaluation
+        return junior_evaluation, None # Don't research profiles of irrelevant posts
     
     # Do further research before making a final decision
     profile_insights = analyze_reddit_user(submission.author.name)
