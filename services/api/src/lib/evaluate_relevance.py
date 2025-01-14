@@ -127,7 +127,7 @@ def evaluate_submission(
         environment_name=environment_name,
     )
 
-    @traceable
+    @traceable(name="Junior Evaluation")
     def junior_evaluation() -> Evaluation:
         llm = AzureChatOpenAI(
             api_key=AZURE_API_KEY,
@@ -184,7 +184,7 @@ def evaluate_submission(
     # Do further research before making a final decision
     profile_insights = analyze_reddit_user(submission.author.name)
 
-    @traceable
+    @traceable(name="Senior Evaluation")
     def senior_evaluation() -> Evaluation:
         llm = AzureChatOpenAI(
             api_key=AZURE_API_KEY,

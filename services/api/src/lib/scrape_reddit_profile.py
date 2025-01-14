@@ -92,7 +92,7 @@ def get_reddit_profile(username: str) -> RedditUserProfile:
     """
 
     # Atempt to load from file in .profiles/
-    filename = f"./.profiles/{username}.json"
+    filename = f"./.profiles/{username}/profile_data.json"
     if os.path.exists(filename):
         try:
             with open(filename, "r", encoding="utf-8") as f:
@@ -120,7 +120,7 @@ def get_reddit_profile(username: str) -> RedditUserProfile:
     
     # Get all posts
     profile.posts = []
-    for submission in user.submissions.new(limit=None):
+    for submission in user.submissions.new(limit=100):
         profile.posts.append({
             "title": submission.title,
             "selftext": submission.selftext,
@@ -132,7 +132,7 @@ def get_reddit_profile(username: str) -> RedditUserProfile:
     
     # Get all comments
     profile.comments = []
-    for comment in user.comments.new(limit=None):
+    for comment in user.comments.new(limit=100):
         submission = comment.submission
         profile.comments.append({
             "body": comment.body,
@@ -146,8 +146,7 @@ def get_reddit_profile(username: str) -> RedditUserProfile:
             }
         })
 
-    os.makedirs("./.profiles", exist_ok=True)
-    filename = f"./.profiles/{profile.username}/profile_data.json"
+    os.makedirs(f"./.profiles/{profile.username}", exist_ok=True)
     with open(filename, "w", encoding="utf-8") as f:
         f.write(profile.model_dump_json())
         

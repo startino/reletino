@@ -1,6 +1,7 @@
 import asyncio
 import os
 from typing import Annotated, List
+from langsmith import traceable
 from pydantic import BaseModel
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
@@ -68,8 +69,9 @@ You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzi
 - Identify further online research that could be done to get more information about the user.
 """
 
-async def generate_insights(state: State):
-    llm = gpt_4o()
+@traceable(name="Generate Insights")
+def generate_insights(state: State):
+    llm = gpt_4o_mini()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", f"Profile Data:\n{format_profile_for_llm(state.profile)}"),
@@ -78,14 +80,15 @@ async def generate_insights(state: State):
     
     chain = prompt | llm
     
-    response = await chain.ainvoke({"messages": state.messages})
+    response = chain.invoke({"messages": state.messages})
     
     return {
         "messages": [response],
     }
 
-async def reflect(state: State):
-    llm = gpt_4o()
+@traceable(name="Reflect Insights")
+def reflect(state: State):
+    llm = gpt_4o_mini()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", "Review the previous analysis and provide critique and additional insights."),
@@ -96,13 +99,14 @@ async def reflect(state: State):
     
     chain = prompt | llm
     
-    response = await chain.ainvoke({"messages": state.messages})
+    response = chain.invoke({"messages": state.messages})
     
     return {
         "messages": [response],
     }
 
-async def summarize(state: State):
+@traceable(name="Summarize Insights")
+def summarize(state: State):
     llm = gpt_4o_mini()
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Based on the analysis, create a final summary of insights about the user."),
@@ -111,7 +115,7 @@ async def summarize(state: State):
     
     chain = prompt | llm
     
-    response = await chain.ainvoke({})
+    response = chain.invoke({})
     
     return {
         "profile_insights": response.content
@@ -129,17 +133,22 @@ def create_reflection_agent():
     workflow.add_edge("generate", "reflect")
     workflow.add_conditional_edges(
         "reflect",
-        lambda x: "summarize" if len(x.messages) >= 7 else "generate"
+        lambda x: "summarize" if len(x.messages) >= 5 else "generate"
     )
     workflow.add_conditional_edges(
         "generate",
-        lambda x: "summarize" if len(x.messages) >= 7 else "reflect"
+        lambda x: "summarize" if len(x.messages) >= 5 else "reflect"
     )
     workflow.set_finish_point("summarize")
     
     return workflow.compile()
 
 def analyze_reddit_user(username: str) -> str:
+    """
+    Use a Reddit user's profile_data that we got with get_reddit_profile to extract insights a Reflection Agent.
+    """
+    
+    insights = ""
 
     if os.path.exists(f"./.profiles/{username}/profile_insights.txt"):
         with open(f"./.profiles/{username}/profile_insights.txt", "r", encoding="utf-8") as f:
