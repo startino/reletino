@@ -19,6 +19,8 @@
 	import { PUBLIC_CRITINO_API_KEY, PUBLIC_OPENROUTER_API_KEY } from '$env/static/public';
 	import ResponseGenerator from './response-generator.svelte';
 	import { handleSubmissionCritique } from '$lib/apis/critino';
+	import { TipTap } from '$lib/components/ui/tiptap';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	type Props = {
 		supabase: SupabaseClient<any, 'public', any>;
@@ -166,12 +168,20 @@
 					<Typography variant="title-md" class="text-left">
 						Author: {submission.author}
 						<Dialog.Root bind:open={showAuthorDialog}>
-					
 								<Button onclick={() => showAuthorDialog = true} variant="outline" size="icon">
 									<Info class="w-5" />
 								</Button>
-							<Dialog.Content>
-								<Dialog.Title>Author: {submission.profile_insights}</Dialog.Title>
+							<Dialog.Content class="max-w-3xl w-full">
+								<Dialog.Title>Author: {submission.author}</Dialog.Title>
+								<Dialog.Description class="max-w-3xl w-full">
+									<ScrollArea class="max-w-3xl w-full h-96">
+										<TipTap
+											editable={false}
+											class="text-white"
+											content={submission.profile_insights}
+										/>
+									</ScrollArea>
+								</Dialog.Description>
 							</Dialog.Content>
 						</Dialog.Root>
 					</Typography>

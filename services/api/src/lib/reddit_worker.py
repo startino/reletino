@@ -62,7 +62,7 @@ class RedditStreamWorker:
                     logging.info(f"Skipping cached submission: {submission.id}")
                     continue
             
-                (evaluation, profile_insights) = evaluate_submission(
+                evaluation, profile_insights = evaluate_submission(
                     submission=submission,
                     project_prompt=self.project.prompt,
                     environment_name=self.environment_name,

@@ -113,6 +113,7 @@ def summarize(state: State):
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Based on the analysis, create a final summary of insights about the user."),
         ("system", f"Last analysis: {state.messages[-1].content}"),
+        ("system", "You should format your response as HTML, not markdown.")
     ])
     
     chain = prompt | llm
