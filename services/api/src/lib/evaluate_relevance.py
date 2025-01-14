@@ -11,6 +11,7 @@ from langchain_community.callbacks import get_openai_callback
 
 from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models import Evaluation, project
+from src.models.profile import RedditUserProfile
 from src.prompts import context as company_context, purpose
 
 from src.lib.critino import critino
@@ -93,9 +94,8 @@ def evaluate_submission(
     submission: Submission,
     project_prompt: str,
     environment_name: str,
-    workflow_name: str,
     project_name: str,
-) -> Evaluation | None:
+) -> tuple[Evaluation, str] | None:
     """
     Evaluates the relevance of a submission using LLMs.
 
@@ -105,6 +105,7 @@ def evaluate_submission(
 
     Returns:
     - evaluation: The evaluation object containing the relevance score and the reasoning.
+    - profile_insights: The profile insights object containing the profile of the author of the submission.
     """
 
     total_cost = 0
@@ -225,4 +226,4 @@ def evaluate_submission(
 
     senior_evaluation = senior_evaluation()
 
-    return senior_evaluation
+    return senior_evaluation, profile_insights

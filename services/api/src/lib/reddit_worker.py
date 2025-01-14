@@ -18,7 +18,7 @@ from src.models.project import Project
 from src.models import SavedSubmission
 from src.lib.evaluate_relevance import evaluate_submission
 from src.models import Evaluation
-from src.lib.reddit_utils import get_subreddits, get_reddit_instance
+from src.interfaces.reddit import get_subreddits
 
 load_dotenv()
 
@@ -62,10 +62,9 @@ class RedditStreamWorker:
                     logging.info(f"Skipping cached submission: {submission.id}")
                     continue
             
-                evaluation: Evaluation | None = evaluate_submission(
+                (evaluation, profile_insights) = evaluate_submission(
                     submission=submission,
                     project_prompt=self.project.prompt,
-                    workflow_name=self.project.title,
                     environment_name=self.environment_name,
                     project_name=self.project.title,
                 )
@@ -84,6 +83,7 @@ class RedditStreamWorker:
                     url=submission.url,
                     is_relevant=evaluation.is_relevant,
                     reasoning=evaluation.reasoning,
+                    profile_insights=profile_insights,
                 )
                 
                 # Check if submission already exists

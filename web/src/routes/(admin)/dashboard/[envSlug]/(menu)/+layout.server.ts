@@ -171,7 +171,7 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		console.log('critinoProjectEnv', critinoProjectEnv);
 
 		if (critinoProjectEnv.error) {
-			console.log('getOrCreateCritinoProject error');
+			console.log('Error getting Critino Project:', critinoProjectEnv.error);
 			const createCritinoProjectEnv = await critino.POST('/environments/{name}', {
 				params: {
 					query: {

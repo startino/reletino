@@ -5,16 +5,9 @@ from datetime import datetime
 import json
 import os
 
-class RedditUserProfile(BaseModel):
-    username: str
-    comment_karma: int
-    link_karma: int
-    total_karma: int
-    created_utc: float
-    is_mod: bool
-    is_gold: bool
-    posts: list[dict]
-    comments: list[dict]
+from src.models.profile import RedditUserProfile
+
+
 
 def format_timestamp(timestamp: float) -> str:
     return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
@@ -120,7 +113,7 @@ def get_reddit_profile(username: str) -> RedditUserProfile:
     
     # Get all posts
     profile.posts = []
-    for submission in user.submissions.new(limit=100):
+    for submission in user.submissions.new(limit=50):
         profile.posts.append({
             "title": submission.title,
             "selftext": submission.selftext,
@@ -132,7 +125,7 @@ def get_reddit_profile(username: str) -> RedditUserProfile:
     
     # Get all comments
     profile.comments = []
-    for comment in user.comments.new(limit=100):
+    for comment in user.comments.new(limit=50):
         submission = comment.submission
         profile.comments.append({
             "body": comment.body,

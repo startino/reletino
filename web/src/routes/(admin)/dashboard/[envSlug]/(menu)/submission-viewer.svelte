@@ -15,7 +15,7 @@
 	import { enhance } from '$app/forms';
 	import { Typography } from '$lib/components/ui/typography';
 	import type { SupabaseClient } from '@supabase/supabase-js';
-	import { CheckCheck, ExternalLink, LoaderCircle, Undo, ThumbsUp, ThumbsDown } from 'lucide-svelte';
+	import { CheckCheck, ExternalLink, LoaderCircle, Undo, ThumbsUp, ThumbsDown, Info } from 'lucide-svelte';
 	import { PUBLIC_CRITINO_API_KEY, PUBLIC_OPENROUTER_API_KEY } from '$env/static/public';
 	import ResponseGenerator from './response-generator.svelte';
 	import { handleSubmissionCritique } from '$lib/apis/critino';
@@ -33,6 +33,7 @@
 	let markingAsRead = $state(false);
 	let updatedReasoning = $state('');
 	let showUpdateDialog = $state(false);
+	let showAuthorDialog = $state(false);
 
 	// Function to copy to clipboard so I can easily copy this to my sales
 	// management Google Sheet :P
@@ -164,6 +165,15 @@
 					</Typography>
 					<Typography variant="title-md" class="text-left">
 						Author: {submission.author}
+						<Dialog.Root bind:open={showAuthorDialog}>
+					
+								<Button onclick={() => showAuthorDialog = true} variant="outline" size="icon">
+									<Info class="w-5" />
+								</Button>
+							<Dialog.Content>
+								<Dialog.Title>Author: {submission.profile_insights}</Dialog.Title>
+							</Dialog.Content>
+						</Dialog.Root>
 					</Typography>
 					<Typography variant="title-md" class="text-left">
 						Subredit: {submission.subreddit}

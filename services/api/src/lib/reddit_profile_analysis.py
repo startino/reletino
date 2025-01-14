@@ -8,7 +8,9 @@ from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from src.interfaces.llm import gpt_4o, gpt_4o_mini
-from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile, RedditUserProfile
+from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile
+from src.models.profile import RedditUserProfile
+
 
 
 class State(BaseModel):
