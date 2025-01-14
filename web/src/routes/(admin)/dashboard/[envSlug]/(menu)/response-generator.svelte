@@ -6,6 +6,7 @@
     import { Copy, LoaderCircle, ThumbsUp, ThumbsDown } from 'lucide-svelte';
     import { handleCommentOrDmCritique } from '$lib/apis/critino';
     import { page } from '$app/stores';
+    import { Button } from '$lib/components/ui/button';
 
     type Props = {
         submission: Tables<'submissions'>;

@@ -1,3 +1,4 @@
+import asyncio
 import textwrap
 import time
 import os
@@ -8,6 +9,7 @@ from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
 from langchain_community.callbacks import get_openai_callback
 
+from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models import Evaluation, project
 from src.prompts import context as company_context, purpose
 
@@ -178,6 +180,17 @@ def evaluate_submission(
 
     if junior_evaluation.is_relevant is False:
         return junior_evaluation
+    
+    # Attempt to load profile from a previous attempt
+    with open(f"labeled_insights/{submission.author.name}.txt", "r", encoding="utf-8") as f:
+        profile_insights = f.read()
+    
+    # Do further research before making a final decision
+    if profile_insights == "":
+        profile_insights = asyncio.run(analyze_reddit_user(submission.author.name))
+
+        with open(f"labeled_insights/{submission.author.name}.txt", "w", encoding="utf-8") as f:
+            f.write(profile_insights)
 
     @traceable
     def senior_evaluation() -> Evaluation:
@@ -195,24 +208,22 @@ def evaluate_submission(
         senior_evaluation: Evaluation = structured_llm.invoke(
             textwrap.dedent(
                 f"""
-            <format-instructions>
-                {{
-                    "reasoning": "... ...",
-                    "is_relevant": "..."
-                }}
-            </format-instructions>
-            <context>
-                You are a very intelligent senior assistant that filters Reddit posts for your boss.
-                You have the duty of going through the Reddit posts and determining if they are relevant to look into for your boss.
-            </context>
-            <personality-and-style>
-                You are a very intelligent assistant, almost like a mathematician. 
-                You have a very logical approach to concluding whether a post is relevant to your boss.
-                You don't like repeating yourself and redundant text.
-            </personality-and-style>
-            <project>
-                {project_prompt}
-            </project>
+            # Context
+            You are a very intelligent senior assistant that filters Reddit posts for your boss.
+            You have the duty of going through the Reddit posts and determining if they are relevant to look into for your boss.
+
+            # Personality and Style
+            You are a very intelligent assistant, almost like a mathematician. 
+            You have a very logical approach to concluding whether a post is relevant to your boss.
+            You don't like repeating yourself and redundant text.
+
+            # Profile Insights
+            These are the insights we have about the author of the post based on researching his Reddit profile.
+            {profile_insights}
+
+            # Project
+            {project_prompt}
+
             {post_query}
             {examples}
             """

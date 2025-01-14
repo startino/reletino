@@ -189,28 +189,16 @@
 						{/if}
 					</Button>
 
-					<Dialog.Trigger asChild>
-						<Button
-							size="icon"
-							variant="outline"
-							class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
-						>
-							<ThumbsDown class="w-5" />
-						</Button>
-					</Dialog.Trigger>
-					</div>
-				<div class="flex flex-col max-w-3xl">
-					<Typography variant="title-md" class="text-left ">Reasoning</Typography>
-					<Typography variant="body-md" class="text-left">
-						{submission.reasoning}
-					</Typography>
-				</div>
-			</div>
-
-			<Separator />
-			
-
 			<Dialog.Root bind:open={showUpdateDialog}>
+				<Dialog.Trigger asChild>
+					<Button
+						size="icon"
+						variant="outline"
+						class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
+					>
+						<ThumbsDown class="w-5" />
+					</Button>
+				</Dialog.Trigger>
 				<Dialog.Content class="sm:max-w-3xl">
 					<Dialog.Header>
 						<Dialog.Title>Correct the reasoning</Dialog.Title>
@@ -241,6 +229,19 @@
 					</Dialog.Footer>
 				</Dialog.Content>
 			</Dialog.Root>
+
+					</div>
+				<div class="flex flex-col max-w-3xl">
+					<Typography variant="title-md" class="text-left ">Reasoning</Typography>
+					<Typography variant="body-md" class="text-left">
+						{submission.reasoning}
+					</Typography>
+				</div>
+			</div>
+
+			<Separator />
+			
+
 
 			<div class="mt-2">
 				<ResponseGenerator 
