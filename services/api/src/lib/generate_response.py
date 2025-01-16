@@ -51,7 +51,10 @@ def generate_response(submission: Submission, team_name: str, project_id: str, i
             
             ####################
             
-            Only respond with the response text, no other text or formatting. Don't use markdown or HTML- just plain text.
+            ### Examples ###
+            These are semantically similar examples of comments/dms that we have evaluated in the past and has been verified to be a good comment/dm by a human.
+            The `query` is the post and the `optimal` is the optimal response given by a human.
+            {examples}
             """
         )
     )

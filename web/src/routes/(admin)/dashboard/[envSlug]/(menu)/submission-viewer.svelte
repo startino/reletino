@@ -8,14 +8,14 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
-	import type { Tables } from '$lib/supabase';
+	import type { Tables, Json } from '$lib/supabase';
 
 	import { toast } from 'svelte-sonner';
 
 	import { enhance } from '$app/forms';
 	import { Typography } from '$lib/components/ui/typography';
 	import type { SupabaseClient } from '@supabase/supabase-js';
-	import { CheckCheck, ExternalLink, LoaderCircle, Undo, ThumbsUp, ThumbsDown, Info } from 'lucide-svelte';
+	import { CheckCheck, ExternalLink, LoaderCircle, Undo, ThumbsUp, ThumbsDown, Info, Copy } from 'lucide-svelte';
 	import { PUBLIC_CRITINO_API_KEY, PUBLIC_OPENROUTER_API_KEY } from '$env/static/public';
 	import ResponseGenerator from './response-generator.svelte';
 	import { handleSubmissionCritique } from '$lib/apis/critino';
@@ -48,10 +48,17 @@
 	async function copyToClipboard(submission: Tables<'submissions'>) {
 		try {
 			const currentDate = new Date();
-			const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}`;
-			const cells = [submission.author, submission.url, '', formattedDate];
+			// Date has to be MM/DD/YYYY
+			const formattedDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}/${currentDate.getFullYear()}`;
+			const cells = [
+				submission.author, 
+				submission.url, 
+				(submission.approved_dm || '').replace(/\n/g, ' '), 
+				submission.approved_comment || '', 
+				formattedDate
+			];
 			// "	" is the special key that Google sheets uses to separate cells.
-			// Select the text to actually see the character s`in`ce my theme can't see
+			// Select the text to actually see the character since my theme can't see
 			// it by default lol
 			await navigator.clipboard.writeText(cells.join('	'));
 			toast.success('submission Copied', {
@@ -81,7 +88,7 @@
 
 	const handleApprove = async () => {
 		critinoLoading = true;
-		const res = await handleSubmissionCritique({
+		await handleSubmissionCritique({
 			submission,
 			projectName,
 			teamName: $page.data.environment.name,
@@ -89,9 +96,17 @@
 			optimal: {reasoning: submission.reasoning, isRelevant: submission.is_relevant},
 		});
 
+		const {data, error} = await supabase.from('submissions').update({
+			approved_evaluation: {reasoning: submission.reasoning, isRelevant: submission.is_relevant} satisfies Json,
+		}).eq('id', submission.id).select('*');
+
+		if (error || !data) {
+			toast.error('Failed to approve evaluation');
+		}
+
 		critinoLoading = false;
 
-		if (!res) return;
+		toast.success('Evaluation Critiqued');
 	};
 
 	const handleFeedbackButtonClick = () => {
@@ -110,11 +125,22 @@
 			optimal: {reasoning: updatedReasoning, isRelevant: updatedIsRelevant},
 		});
 
-		critinoLoading = false;
 		if (!res) return;
 
+		const {data, error} = await supabase.from('submissions').update({
+			approved_evaluation: {reasoning: updatedReasoning, isRelevant: updatedIsRelevant} satisfies Json,
+		}).eq('id', submission.id).select('*');
+
+		submission.approved_evaluation = {reasoning: updatedReasoning, isRelevant: updatedIsRelevant} satisfies Json;
+
+		if (error || !data) {
+			toast.error('Failed to update evaluation');
+		}
+
+		critinoLoading = false;
 		showUpdateDialog = false;
-		toast.success('Reasoning updated');
+
+		toast.success('Evaluation Critiqued');
 	}
 </script>
 
@@ -125,7 +151,8 @@
 				<Typography variant="headline-md" class="text-left {submission.is_relevant ? 'text-green-600' : 'text-red-600'}">
 					{submission.is_relevant ? "Relevant" : "Irrelevant"} Post
 				</Typography>
-				<Button
+				<div class="flex flex-row gap-4">
+					<Button
 					href={submission.url.includes('http')
 						? submission.url
 						: 'https://reddit.com/' + submission.url}
@@ -133,8 +160,26 @@
 					variant="default"
 					class=""
 				>
-					Visit Post <ExternalLink class="ml-2 w-5" />
+					Visit <ExternalLink class="ml-2 w-5" />
 				</Button>
+				<Button onclick={() => markAsRead()} disabled={markingAsRead}>
+					{#if !submission.done}
+						Read it
+					{:else}
+						Unread it
+					{/if}
+					{#if markingAsRead}
+						<LoaderCircle class="animate-spin ml-2 w-5" />
+					{:else if !submission.done}
+						<CheckCheck class="ml-2 w-5" />
+					{:else}
+						<Undo class="ml-2 w-5" />
+					{/if}
+				</Button>
+				<Button onclick={() => copyToClipboard(submission)}>
+					Copy Lead <Copy class="ml-2 w-5" />
+				</Button>
+				</div>
 			</div>
 
 			<div class="flex flex-row justify-between text-left">
@@ -186,7 +231,7 @@
 				<div class="flex flex-col gap-y-2 pt-2 justify-start">
 					<Button
 						onclick={() => handleApprove()}
-						disabled={critinoLoading}
+						disabled={critinoLoading || submission.approved_evaluation}
 						size="icon"
 						variant="outline"
 						class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
@@ -204,6 +249,7 @@
 						variant="outline"
 						class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
 						onclick={() => handleFeedbackButtonClick()}
+						disabled={critinoLoading || submission.approved_evaluation}
 					>
 						<ThumbsDown class="w-5" />
 					</Button>
@@ -263,12 +309,15 @@
 
 			<div class="mt-2">
 				<ResponseGenerator
-					submission={submission} 
+					{supabase}
+					bind:submission 
 					projectId={submission.project_id}
 					{projectName}
 				/>
 			</div>
+
 		</div>
+		
 	{:else}
 		<div class="p-8 text-center text-muted-foreground">No submission selected</div>
 	{/if}
