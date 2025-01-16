@@ -7,17 +7,18 @@ from src.interfaces.llm import gpt_4o
 from src.lib.xml_utils import submission_to_xml
 load_dotenv()
 
-def generate_response(submission: Submission, team_name: str, project_name: str, project_id: str, is_dm: bool) -> str:
+def generate_response(submission: Submission, team_name: str, project_id: str, is_dm: bool) -> str:
     supabase = client()
     if is_dm:
-        style_prompt = supabase.table("projects").select("dm_style_prompt").eq("id", project_id).single().execute()
+        project = supabase.table("projects").select("*").eq("id", project_id).single().execute()
     else:
-        style_prompt = supabase.table("projects").select("comment_style_prompt").eq("id", project_id).single().execute()
+        project = supabase.table("projects").select("*").eq("id", project_id).single().execute()
     
-    if not style_prompt.data:
+    if not project.data:
         raise Exception(f"Project not found: {project_id}")
     
-    style_prompt = style_prompt.data
+    project_name = project.data["title"]
+    style_prompt = project.data["dm_style_prompt"] if is_dm else project.data["comment_style_prompt"]
 
     llm = gpt_4o()
 
@@ -50,7 +51,7 @@ def generate_response(submission: Submission, team_name: str, project_name: str,
             
             ####################
             
-            Only respond with the response text, no other text or formatting.
+            Only respond with the response text, no other text or formatting. Don't use markdown or HTML- just plain text.
             """
         )
     )

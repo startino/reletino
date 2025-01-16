@@ -11,9 +11,10 @@
     type Props = {
         submission: Tables<'submissions'>;
         projectId: string;
+        projectName: string;
     }
 
-    let { submission, projectId } = $props();
+    let { submission, projectId, projectName }: Props = $props();
 
     let generating = $state(false);
     let generatedResponse = $state('');
@@ -21,28 +22,33 @@
 
     let updatedResponse = $state('');
 
+    // Set when generating a response
+    let isDm = $state(false);
+
     const handleApprove = async () => {
         await handleCommentOrDmCritique(
+           {
             submission,
-            generatedResponse,
-            generatedResponse,
-            '', // instructions
-            submission.project_name,
-            $page.data.environment.name,
-            ''
+            response: generatedResponse,
+            optimal: generatedResponse,
+            projectName: projectName,
+            teamName: $page.data.environment.name,
+            isDm: false
+           }
         );
     }
 
-    const handleFeedback = async (isGood: boolean) => {
+    const handleFeedback = async () => {
         feedbackLoading = true;
         const res = await handleCommentOrDmCritique(
-            submission,
-            generatedResponse,
-            updatedResponse,
-            '', // instructions
-            submission.project_name,
-            $page.data.environment.name,
-            ''
+            {
+                submission,
+                response: generatedResponse,
+                optimal: updatedResponse,
+                projectName: projectName,
+                teamName: $page.data.environment.name,
+                isDm: isDm
+            }
         );
 
         feedbackLoading = false;
@@ -52,14 +58,14 @@
         toast.success('Feedback submitted');
     }
 
-    async function generateResponse(isDM: boolean) {
+    async function generateResponse() {
         generating = true;
         try {        
             console.log("Generating response with:", {
                 project_id: projectId,
                 submission_title: submission.title,
                 submission_selftext: submission.selftext,
-                is_dm: isDM
+                is_dm: isDm
             });
             const response = await fetch(`${PUBLIC_API_URL}/generate-response`, {
                 method: 'POST',
@@ -70,7 +76,8 @@
                     project_id: projectId,
                     submission_title: submission.title,
                     submission_selftext: submission.selftext,
-                    is_dm: isDM
+                    team_name: $page.data.environment.name,
+                    is_dm: isDm
                 })
             });
 
@@ -104,7 +111,10 @@
     <div class="flex gap-2">
         <Button 
             class="w-full" 
-            on:click={() => generateResponse(false)} 
+            on:click={() => {
+                isDm = false;
+                generateResponse();
+            }} 
             disabled={generating}
         >
             {#if generating}
@@ -116,7 +126,10 @@
         </Button>
         <Button 
             class="w-full" 
-            on:click={() => generateResponse(true)} 
+            on:click={() => {
+                isDm = true;
+                generateResponse();
+            }} 
             disabled={generating}
         >
             {#if generating}
@@ -147,7 +160,7 @@
                 </div>
                 <div class="flex gap-2">
                     <Button
-                        onclick={() => handleFeedback(true)}
+                        onclick={() => handleFeedback()}
                         disabled={feedbackLoading}
                         size="icon"
                         variant="outline"
@@ -160,7 +173,7 @@
                         {/if}
                     </Button>
                     <Button
-                        onclick={() => handleFeedback(false)}
+                        onclick={() => handleFeedback()}
                         disabled={feedbackLoading}
                         size="icon"
                         variant="outline"
@@ -183,10 +196,3 @@
         </div>
     {/if}
 </div>
-
-<style>
-    [data-active="true"] {
-        background-color: hsl(var(--primary));
-        color: hsl(var(--primary-foreground));
-    }
-</style> 

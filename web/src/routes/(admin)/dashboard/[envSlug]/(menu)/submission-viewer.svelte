@@ -174,9 +174,11 @@
 			</div>
 
 			<Separator />
-			<div class="flex-1 overflow-y-auto whitespace-pre-wrap pr-4 text-left text-sm">
-				<Typography variant="body-md" class="text-left">{submission.selftext}</Typography>
-			</div>
+
+				<ScrollArea class="max-w-3xl w-full h-[700px]">
+					<Typography variant="body-md" class="text-left">{submission.selftext}</Typography>
+				</ScrollArea>
+		
 
 			<Separator />
 
@@ -250,17 +252,20 @@
 
 				<div class="flex flex-col max-w-3xl">
 					<Typography variant="title-md" class="text-left ">Reasoning</Typography>
-					<Typography variant="body-md" class="text-left">
-						{submission.reasoning}
-					</Typography>
+					<ScrollArea class="max-w-3xl w-full h-[200px]">
+						<Typography variant="body-md" class="text-left">
+							{submission.reasoning}
+						</Typography>
+					</ScrollArea>
 				</div>
 			</div>
 			<Separator />
 
 			<div class="mt-2">
-				<ResponseGenerator 
+				<ResponseGenerator
 					submission={submission} 
 					projectId={submission.project_id}
+					{projectName}
 				/>
 			</div>
 		</div>
