@@ -16,21 +16,25 @@ load_dotenv()
 
 REDDIT_USERNAME_STARTINO = os.getenv("REDDIT_USERNAME_STARTINO")
 REDDIT_PASSWORD_STARTINO = os.getenv("REDDIT_PASSWORD_STARTINO")
+STEEL_API_KEY = os.getenv("STEEL_API_KEY")
 
 # Initialize controller
 controller = Controller()
 
 browser = Browser(
     config=BrowserConfig(
+        wss_url=f"wss://connect.steel.dev?apiKey={STEEL_API_KEY}",
         #chrome_instance_path="C:\Program Files\Google\Chrome\Application\chrome.exe",
         headless=False,
         disable_security=True,
         new_context_config=BrowserContextConfig(
+
             minimum_wait_page_load_time=3,
             maximum_wait_page_load_time=15,
             wait_between_actions=2,
             cookies_file="cookies.json",
-            save_recording_path="tmp/recordings"
+            save_recording_path="tmp/recordings",
+            browser_window_size={'width': 720, 'height': 720}
         )
     )
 )
