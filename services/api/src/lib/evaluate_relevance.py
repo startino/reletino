@@ -1,99 +1,26 @@
-import asyncio
 import textwrap
-import time
 import os
 from dotenv import load_dotenv
 from langsmith import traceable
 
 from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
-from langchain_community.callbacks import get_openai_callback
 
 from src.lib.reddit_profile_analysis import analyze_reddit_user
-from src.models import Evaluation, project
-from src.models.profile import RedditUserProfile
-from src.prompts import context as company_context, purpose
+from src.models import Evaluation
 
-from src.lib.critino import critino
+from src.lib.critino import get_critiques
+from src.lib.xml_utils import submission_to_xml
 
-# Load Enviornment variables
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
-
-
-def summarize_submission(submission: Submission) -> Submission:
-    """
-    Summarizes the content of a submission using LLMs.
-    Uses a soft summarizing strength and only summarises each paragraph.
-    It aims to reduce the token count of the submission content by 50%.
-
-    Parameters:
-    - submission (Submission): The submission object to be summarized.
-
-    Returns:
-    - The submission object with the selftext replaced with a shorter version (the summary).
-    """
-    llm = AzureChatOpenAI(
-        azure_deployment="gpt-4-turbo",
-        temperature=0,
-    )
-
-    selftext = submission.selftext
-
-    # Short submissions are not summarized
-    if llm.get_num_tokens(selftext) < 150:
-        return submission
-
-    template = f"""
-    # Welcome Summary Writer!
-    Your job is to help a Virtual Assistant in filtering Reddit posts.
-    You'll help by summarizing the content of a Reddit post to remove any useless parts.
-
-    # Guidelines
-    - Extract information from each sentence and include it in the summary.
-    - Use bullet points to list the main points.
-    - DO NOT remove any crucial information.
-    - IF PRESENT, you must include information about the author such as his profession(or student) and if he knows how to code.
-    - DO NOT make up any information that was not present in the original text.
-    - Commendations and encouragements should be removed.
-    # Body Text To Summarize
-    ```
-    {selftext}
-    ```
-
-
-    # Here is more information for context
-
-    {company_context}
-
-    ## Purpose of this process
-    {purpose}
-
-    """
-
-    summary = llm.invoke(template)
-    summarized_selftext = summary.content
-
-    # Calculate token reduction
-    pre_token_count = llm.get_num_tokens(selftext)
-    post_token_count = llm.get_num_tokens(str(summarized_selftext))
-    reduction = (pre_token_count - post_token_count) / pre_token_count * 100
-
-    # Print the token reduction
-    print(f"Token reduction : {reduction:.3f}%")
-
-    # Update the submission object with the summarized content
-    submission.selftext = summarized_selftext
-
-    return submission
-
 
 @traceable(run_type="chain", name="Evaluate Submission", output_type=Evaluation)
 def evaluate_submission(
     submission: Submission,
     project_prompt: str,
-    environment_name: str,
+    team_name: str,
     project_name: str,
 ) -> tuple[Evaluation | None, str | None]:
     """
@@ -108,24 +35,11 @@ def evaluate_submission(
     - profile_insights: The profile insights object containing the profile of the author of the submission.
     """
 
-    total_cost = 0
-
-    post_query = f"""
-    <post>
-        <title>
-            {submission.title}
-        </title>
-        <selftext>
-            {submission.selftext}
-        </selftext>
-    </post>
-    """
-
-    examples = critino(
-        query=post_query,
-        agent_name="main",
+    examples = get_critiques(
+        query=submission_to_xml(submission),
+        agent_name="evaluator",
         project_name=project_name,
-        environment_name=environment_name,
+        team_name=team_name,
     )
 
     @traceable(name="Junior Evaluation")
@@ -144,32 +58,36 @@ def evaluate_submission(
         junior_evaluation: Evaluation = structured_llm.invoke(
             textwrap.dedent(
                 f"""
-            <format-instructions>
-                {{
-                    "reasoning": "... ...",
-                    "is_relevant": "..."
-                }}
-            </format-instructions>
-            <context>
-                You are a super intelligent junior assistant that helps the senior assistant in filtering Reddit posts for the Boss.
-                You and the senior assistant have the duty of going through Reddit posts and determining if they are relevant to look into for the Boss.
-                You are the first line of defense in filtering out irrelevant posts,
-                with the goal of saving time for the senior assistant,
-                since there are too many posts that are clearly and blatantly irrelevant.
-                It is important to note that because you are a junior assistant,
-                you are expected to make mistakes, and because of this and because we do not want to miss any relevant posts,
-                you will mark only the most obvious irrelevant posts as irrelevant.
-                This means that you should be biased towards marking posts as relevant.
-            </context>
-            <personality-and-style>
-                You are a very intelligent junior assistant, almost like a mathematician. 
-                You have a very logical approach to concluding whether a post is relevant to the senior assistant.
-                You don't like repeating yourself and redundant text.
-            </personality-and-style>
-            <project-instructions>
-                {project_prompt}
-            </project-instructions>
-            {post_query}
+            # Format Instructions
+            You should format your response as JSON, not markdown.
+
+            # Context
+            You are a super intelligent junior assistant that helps the senior assistant in filtering Reddit posts for the Boss.
+            You and the senior assistant have the duty of going through Reddit posts and determining if they are relevant to look into for the Boss.
+            You are the first line of defense in filtering out irrelevant posts,
+            with the goal of saving time for the senior assistant,
+            since there are too many posts that are clearly and blatantly irrelevant.
+            It is important to note that because you are a junior assistant,
+            you are expected to make mistakes, and because of this and because we do not want to miss any relevant posts,
+            you will mark only the most obvious irrelevant posts as irrelevant.
+            This means that you should be biased towards marking posts as relevant.
+
+            # Personality and Style
+            You are a very intelligent junior assistant, almost like a mathematician. 
+            You have a very logical approach to concluding whether a post is relevant to the senior assistant.
+            You don't like repeating yourself and redundant text.
+
+            # Project
+            Use the context of the project provided to determine if the post is relevant to the project.
+            {project_prompt}
+
+            # Post
+            This is the post we are evaluating.
+            {submission_to_xml(submission)}
+
+            # Examples
+            These are semantically similar examples of posts that we have evaluated in the past and has been verified to be relevant by a human.
+            The `query` is the post and the `optimal` is the optimal evaluation given by a human.
             {examples}
             """
             )
@@ -215,9 +133,16 @@ def evaluate_submission(
             {profile_insights}
 
             # Project
+            Use the context of the project provided to determine if the post is relevant to the project.
             {project_prompt}
 
-            {post_query}
+            # Post
+            This is the post we are evaluating.
+            {submission_to_xml(submission)}
+
+            # Examples
+            These are semantically similar examples of posts that we have evaluated in the past and has been verified to be relevant by a human.
+            The `query` is the post and the `optimal` is the optimal evaluation given by a human.
             {examples}
             """
             )

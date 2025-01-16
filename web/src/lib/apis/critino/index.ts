@@ -15,23 +15,27 @@ type pathItems = components['pathItems'];
 
 export type { paths, schemas, headers, responses, parameters, requestBodies, pathItems };
 
-export const handleSubmissionCritique = async (
-    submission: Tables<'submissions'>, 
+export const handleSubmissionCritique = async ({
+    submission,
+    projectName,
+    teamName,
+    response,
+    optimal,
+}: {
+    submission: Tables<'submissions'>,
     projectName: string,
-    environmentName: string,
-    context: string,
+    teamName: string,
     response: string | undefined,
-    optimal: string,
-    instructions: string,
-) => {
+    optimal: {reasoning: string, isRelevant: boolean},
+}) => {
     const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
 
     const postObject = {
         params: {
             path: { id: submission.id },
             query: {
-                team_name: 'startino',
-                environment_name: 'reletino/' + environmentName + '/' + projectName,
+                team_name: 'startino', // Critino team is different from a team on Reletino.
+                environment_name: 'reletino/' + teamName + '/' + projectName + '/evaluator',
                 populate_missing: true,
                 similarity_key: 'query' as const,
             },
@@ -41,11 +45,11 @@ export const handleSubmissionCritique = async (
             },
         },
         body: {
-            context,
+            context: "",
             query,
-            optimal,
+            optimal: JSON.stringify(optimal),
             response,
-            instructions,
+            instructions: "",
         },
     };
     console.log(`Creating Critique with object: ${JSON.stringify(postObject, null, 2)}...`);
@@ -62,15 +66,21 @@ export const handleSubmissionCritique = async (
 };
 
 // Critique the DM/comment that the AI generated
-export const handleCommentOrDmCritique = async (
+export const handleCommentOrDmCritique = async ({
+    submission,
+    response,
+    optimal,
+    projectName,
+    teamName,
+    isDm,
+}: {
     submission: Tables<'submissions'>,
     response: string,
     optimal: string,
-    instructions: string,
     projectName: string,
-    environmentName: string,
-    context: string,
-) => {
+    teamName: string,
+    isDm: boolean,
+}) => {
     // Give the submission as context
     const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
 
@@ -79,17 +89,21 @@ export const handleCommentOrDmCritique = async (
             path: { id: submission.id },
             query: {
                 team_name: 'startino',
-                environment_name: 'reletino/' + environmentName + '/' + projectName,
+                environment_name: 'reletino/' + teamName + '/' + projectName + (isDm ? '/dm-generator' : '/comment-generator'),
                 populate_missing: true,
                 similarity_key: 'situation' as const,
             },
+            header: {
+                'x-critino-key': PUBLIC_CRITINO_API_KEY,
+                'x-openrouter-api-key': PUBLIC_OPENROUTER_API_KEY
+            },
         },
         body: {
-            context,
+            context: "",
             query,
             optimal,
             response,
-            instructions,
+            instructions: "",
         },
     };
     

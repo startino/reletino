@@ -66,7 +66,7 @@ export const actions = {
 				},
 				body: JSON.stringify({
 					project: { ...form.data },
-					environment_name: env.name,
+					team_name: env.name,
 				}),
 			})
 				.then((res) => res.json())

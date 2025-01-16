@@ -34,13 +34,13 @@ cache = dc.Cache(cache_filepath)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RedditStreamWorker:
-    def __init__(self, project: Project, environment_name: str):
+    def __init__(self, project: Project, team_name: str):
         self._running = False
         self.profile_id = project.profile_id
         self.project = project
         self.subreddits = get_subreddits(project.subreddits)
         self.supabase: Client = db.client()
-        self.environment_name = environment_name
+        self.team_name = team_name
         logging.info(f"Initialized RedditStreamWorker for project: {self.project.id}")
 
     def start(self):
@@ -65,7 +65,7 @@ class RedditStreamWorker:
                 evaluation, profile_insights = evaluate_submission(
                     submission=submission,
                     project_prompt=self.project.prompt,
-                    environment_name=self.environment_name,
+                    team_name=self.team_name,
                     project_name=self.project.title,
                 )
 
@@ -99,6 +99,7 @@ class RedditStreamWorker:
                         "project_id": self.project.id,
                         **saved_submission.dict(),
                         **evaluation.dict(),
+                        "profile_insights": profile_insights or "",
                     }
                 ).execute()
                 

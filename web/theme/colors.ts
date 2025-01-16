@@ -124,10 +124,10 @@ const colors = {
 
 	// shadcn aliases
 	foreground: withOpacity('--color-background-on'),
-	accent: withOpacity('--color-primary-container'),
-	border: withOpacity('--color-outline'),
-	input: withOpacity('--color-outline'),
-	ring: withOpacity('--color-primary-container'),
+	accent: withOpacity('--color-tertiary-on'),
+	border: withOpacity('--color-primary'),
+	input: withOpacity('--color-primary'),
+	ring: withOpacity('--color-primary'),
 
 	destructive: {
 		DEFAULT: withOpacity('--color-error'),

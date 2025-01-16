@@ -21,6 +21,8 @@
 	import { handleSubmissionCritique } from '$lib/apis/critino';
 	import { TipTap } from '$lib/components/ui/tiptap';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import { Toggle } from '$lib/components/ui/toggle';
+	import { Switch } from '$lib/components/ui/switch';
 
 	type Props = {
 		supabase: SupabaseClient<any, 'public', any>;
@@ -33,9 +35,13 @@
 	// Reactive UI
 	let critinoLoading = $state(false);
 	let markingAsRead = $state(false);
-	let updatedReasoning = $state('');
+
 	let showUpdateDialog = $state(false);
 	let showAuthorDialog = $state(false);
+
+	// Critino variables
+	let updatedReasoning = $state('');
+	let updatedIsRelevant = $state(false);
 
 	// Function to copy to clipboard so I can easily copy this to my sales
 	// management Google Sheet :P
@@ -73,22 +79,15 @@
 		toast.success('Marked as read');
 	}
 
-	const handleRewriteReasoning = async (submission: Tables<'submissions'>) => {
-		showUpdateDialog = true;
-		updatedReasoning = submission.reasoning;
-	}
-
 	const handleApprove = async () => {
 		critinoLoading = true;
-		const res = await handleSubmissionCritique(
-			submission, 
+		const res = await handleSubmissionCritique({
+			submission,
 			projectName,
-			$page.data.environment.name,
-			"",
-			submission.reasoning,
-			submission.reasoning,
-			"",
-		);
+			teamName: $page.data.environment.name,
+			response: submission.reasoning,
+			optimal: {reasoning: submission.reasoning, isRelevant: submission.is_relevant},
+		});
 
 		critinoLoading = false;
 
@@ -98,39 +97,22 @@
 	const handleFeedbackButtonClick = () => {
 		showUpdateDialog = true;
 		updatedReasoning = submission.reasoning;
+		updatedIsRelevant = submission.is_relevant;
 	}
 
 	const handleFeedback = async () => {
 		critinoLoading = true;
-		const res = await handleSubmissionCritique(
-			submission, 
+		const res = await handleSubmissionCritique({
+			submission,
 			projectName,
-			$page.data.environment.name,
-			"",
-			submission.reasoning,
-			updatedReasoning,
-			"",
-		);
+			teamName: $page.data.environment.name,
+			response: submission.reasoning,
+			optimal: {reasoning: updatedReasoning, isRelevant: updatedIsRelevant},
+		});
+
 		critinoLoading = false;
 		if (!res) return;
-	}
 
-	const handleUpdateReasoning = async () => {
-		critinoLoading = true;
-		const res = await handleSubmissionCritique(
-			submission, 
-			projectName,
-			$page.data.environment.name,
-			"",
-			submission.reasoning,
-			updatedReasoning,
-			"",
-		);
-		critinoLoading = false;
-		if (!res) {
-			toast.error('Failed to update reasoning');
-			return;
-		}
 		showUpdateDialog = false;
 		toast.success('Reasoning updated');
 	}
@@ -174,7 +156,7 @@
 							<Dialog.Content class="max-w-3xl w-full">
 								<Dialog.Title>Author: {submission.author}</Dialog.Title>
 								<Dialog.Description class="max-w-3xl w-full">
-									<ScrollArea class="max-w-3xl w-full h-96">
+									<ScrollArea class="max-w-3xl w-full h-[600px]">
 										<TipTap
 											editable={false}
 											class="text-white"
@@ -228,22 +210,33 @@
 					<Dialog.Trigger />
 					<Dialog.Content class="sm:max-w-3xl">
 						<Dialog.Header>
-							<Dialog.Title>Correct the reasoning</Dialog.Title>
+							<Dialog.Title>Update the Evaluation</Dialog.Title>
 							<Dialog.Description>
-								Rewrite the reasoning to be an optimal response.
+								What's the final verdict and reasoning?
 							</Dialog.Description>
 						</Dialog.Header>
+						<div class="flex flex-col gap-y-2">
+							<div class="flex items-center flex-row gap-4">
+								<Typography variant="title-md" class="text-left">Final Verdict:</Typography>
+								<Switch
+									bind:checked={updatedIsRelevant}
+									aria-label="Toggle relevance"
+								>
+									<span class="sr-only">Toggle relevance</span>
+								</Switch>
+								<Typography variant="body-lg" class="text-sm">{updatedIsRelevant ? "Relevant" : "Irrelevant"}</Typography>
+							</div>
 							<Textarea
 								bind:value={updatedReasoning}
 								placeholder="Enter the updated reasoning..."
-								class="min-h-[200px]"
+								class="min-h-[300px]"
 							/>
-					
+						</div>
 					<Dialog.Footer>
 						<Button variant="outline" onclick={() => showUpdateDialog = false}>
 							Cancel
 						</Button>
-						<Button onclick={handleUpdateReasoning} disabled={critinoLoading}>
+						<Button onclick={handleFeedback} disabled={critinoLoading}>
 							{#if critinoLoading}
 								<LoaderCircle class="w-5 animate-spin" />
 							{:else}

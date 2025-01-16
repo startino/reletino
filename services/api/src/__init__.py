@@ -98,7 +98,7 @@ def redirect_to_docs():
 
 class StartStreamRequest(BaseModel):
     project: Project
-    environment_name: str
+    team_name: str
 
 
 @app.post("/start")
@@ -107,7 +107,7 @@ def start_project_stream(q: StartStreamRequest):
         logging.info(f"Restarting project stream for project: {q.project.id}")
         stop_project_stream(StopStreamRequest(project_id=q.project.id))
 
-    worker = RedditStreamWorker(project=q.project, environment_name=q.environment_name)
+    worker = RedditStreamWorker(project=q.project, team_name=q.team_name)
     thread = threading.Thread(target=worker.start)
     workers[q.project.id] = (worker, thread)
     thread.start()

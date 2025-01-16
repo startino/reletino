@@ -90,7 +90,7 @@ def generate_insights(state: State):
 
 @traceable(name="Reflect Insights")
 def reflect(state: State):
-    llm = gpt_4o_mini()
+    llm = gpt_4o()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", "Review the previous analysis and provide critique and additional insights."),
@@ -113,7 +113,17 @@ def summarize(state: State):
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Based on the analysis, create a final summary of insights about the user."),
         ("system", f"Last analysis: {state.messages[-1].content}"),
-        ("system", "You should format your response as HTML, not markdown.")
+        ("system", """
+         You should format your response as HTML, not markdown.
+         Your response might look like this:
+         <h1>Profile Insights</h1>
+         <h2>Basic Information</h2>
+         <ul>
+            <li><strong>Username:</strong> DesignTechAI</li>
+            <li><strong>Karma:</strong> 42 (Comment Karma: 12, Post Karma: 30)</li>
+            <li><strong>Account Creation:</strong> March 2023</li>
+         </ul>
+         """)
     ])
     
     chain = prompt | llm
@@ -136,11 +146,11 @@ def create_reflection_agent():
     workflow.add_edge("generate", "reflect")
     workflow.add_conditional_edges(
         "reflect",
-        lambda x: "summarize" if len(x.messages) >= 5 else "generate"
+        lambda x: "summarize" if len(x.messages) >= 3 else "generate"
     )
     workflow.add_conditional_edges(
         "generate",
-        lambda x: "summarize" if len(x.messages) >= 5 else "reflect"
+        lambda x: "summarize" if len(x.messages) >= 3 else "reflect"
     )
     workflow.set_finish_point("summarize")
     

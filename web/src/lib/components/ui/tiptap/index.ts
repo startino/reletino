@@ -3,7 +3,7 @@ import Root from './tiptap.svelte';
 import type { HTMLParamAttributes } from 'svelte/elements';
 
 const variants = tv({
-	base: 'min-w-[1.5rem] max-w-none w-full block prose prose-sm prose-main relative',
+	base: 'min-w-[1.5rem] max-w-none w-full block text-white relative',
 });
 
 type Content = string;

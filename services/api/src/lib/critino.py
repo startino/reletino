@@ -15,7 +15,6 @@ load_dotenv()
 # Access environment variables
 PUBLIC_CRITINO_API_URL = os.getenv("PUBLIC_CRITINO_API_URL")
 
-
 def normalize(text: str) -> str:
     return html2text(text).replace("\n", "").replace(" ", "").replace("\\", "").lower()
 
@@ -36,11 +35,11 @@ def format_example_string(critiques: list[dict]) -> str:
     return xml_utils.trim_xml(few_shot)
 
 
-def critino(
+def get_critiques(
     query: str,
     agent_name: str,
     project_name: str,
-    environment_name: str,
+    team_name: str,
     context: str = "",
     timeout: int = 300,
 ) -> str:
@@ -51,10 +50,9 @@ def critino(
 
         params = {
             "team_name": "startino",
-            "environment_name": "reletino/" + environment_name + "/" + project_name,
-            "context": context,
+            "environment_name": "reletino/" + team_name + "/" + project_name + "/" + agent_name,
             "query": query,
-            "k": 5,
+            "k": 3,
             "similarity_key": "situation",
         }
 
