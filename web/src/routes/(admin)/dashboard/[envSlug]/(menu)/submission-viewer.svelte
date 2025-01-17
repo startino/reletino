@@ -184,18 +184,19 @@
 
 			<div class="flex flex-row justify-between text-left">
 				<div>
-					<Typography variant="title-md" class="text-left">
-						Title: {submission.title}
+					<Typography variant="title-sm" class="text-left">
+						<strong>Title:</strong> {submission.title}
 					</Typography>
-					<Typography variant="title-md" class="text-left">
-						Posted: {formatDistanceToNowStrict(submission.submission_created_utc, {
+					<Typography variant="title-sm" class="text-left">
+						<strong>Posted:</strong>
+						{formatDistanceToNowStrict(submission.submission_created_utc, {
 							addSuffix: false,
 						})} ago, on {format(submission.submission_created_utc, 'dd/MM')}
 					</Typography>
-					<Typography variant="title-md" class="text-left">
-						Author: {submission.author}
+					<Typography variant="title-sm" class="text-left flex flex-row gap-x-2">
+						<strong>Author:</strong> {submission.author}
 						<Dialog.Root bind:open={showAuthorDialog}>
-								<Button onclick={() => showAuthorDialog = true} variant="outline" size="icon">
+								<Button onclick={() => showAuthorDialog = true} variant="ghost" class="w-6 h-6" size="icon">
 									<Info class="w-5" />
 								</Button>
 							<Dialog.Content class="max-w-3xl w-full">
@@ -212,19 +213,21 @@
 							</Dialog.Content>
 						</Dialog.Root>
 					</Typography>
-					<Typography variant="title-md" class="text-left">
-						Subredit: {submission.subreddit}
+					<Typography variant="title-sm" class="text-left">
+						<strong>Subreddit:</strong> {submission.subreddit}
 					</Typography>
 				</div>
 			</div>
 
+			
 			<Separator />
 
-				<ScrollArea class="max-w-3xl w-full h-[700px]">
-					<Typography variant="body-md" class="text-left">{submission.selftext}</Typography>
+				<ScrollArea class="max-w-4xl w-full min-h-44 h-[700px]">
+					<Typography variant="body-md" class="w-full pr-4 text-left">
+						{submission.selftext}
+					</Typography>
 				</ScrollArea>
-		
-
+			
 			<Separator />
 
 			<div class="flex flex-row gap-x-2">
@@ -296,9 +299,9 @@
 				</Dialog.Root>
 
 
-				<div class="flex flex-col max-w-3xl">
-					<Typography variant="title-md" class="text-left ">Reasoning</Typography>
-					<ScrollArea class="max-w-3xl w-full h-[200px]">
+				<div class="flex flex-col max-w-4xl w-full">
+					<Typography variant="title-sm" class="text-left ">Reasoning</Typography>
+					<ScrollArea class="min-h-24 w-full max-h-[100px]">
 						<Typography variant="body-md" class="text-left">
 							{submission.reasoning}
 						</Typography>

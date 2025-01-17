@@ -129,7 +129,7 @@
 		</Button>
 	</div>
 {:else}
-	<div class="grid grid-cols-6 grid-rows-5 gap-6 h-full">
+	<div class="grid grid-cols-7 grid-rows-5 gap-6 h-full">
 		<div class="flex flex-col p-2 col-span-2 row-span-5">
 			<div class="flex flex-col place-items-start w-full justify-between mb-4">
 				<Select.Root
@@ -208,7 +208,7 @@
 			</div>
 		</div>
 
-		<div class="col-span-4 row-span-5">
+		<div class="col-span-5 row-span-5">
 			{#if selectedSubmission}
 				<SubmissionViewer
 					{supabase}
