@@ -9,6 +9,8 @@
     import { Button } from '$lib/components/ui/button';
     import type { SupabaseClient } from '@supabase/supabase-js';
     import * as Tabs from '$lib/components/ui/tabs';
+	import { Switch } from '$lib/components/ui/switch';
+	import { Typography } from '$lib/components/ui/typography';
 
     type Props = {
         supabase: SupabaseClient<any, 'public', any>;
@@ -23,11 +25,10 @@
     let commentResponse = $state(submission.approved_comment || '');
     let dmResponse = $state(submission.approved_dm || '');
     let feedbackLoading = $state(false);
-    let currentTab = $state<'comment' | 'dm'>('comment');
+    let isDmSelected = $state(false);
 
     const handleApprove = async () => {
-        const response = currentTab === 'comment' ? commentResponse : dmResponse;
-        const isDm = currentTab === 'dm';
+        const response = isDmSelected ? dmResponse : commentResponse;
 
         await handleCommentOrDmCritique(
             {
@@ -36,14 +37,14 @@
                 optimal: response,
                 projectName: projectName,
                 teamName: $page.data.environment.name,
-                isDm: isDm
+                isDm: isDmSelected
             }
         );
 
         const {data, error} = await supabase.from('submissions').update(
             {
-                approved_dm: isDm ? response : submission.approved_dm,
-                approved_comment: !isDm ? response : submission.approved_comment,
+                approved_dm: isDmSelected ? response : submission.approved_dm,
+                approved_comment: !isDmSelected ? response : submission.approved_comment,
             }
         ).eq('id', submission.id).select('*');
 
@@ -52,7 +53,7 @@
             return;
         }
 
-        if (isDm) {
+        if (isDmSelected) {
             submission.approved_dm = response;
         } else {
             submission.approved_comment = response;
@@ -61,14 +62,14 @@
         toast.success('Response approved');
     }
 
-    async function generateResponse(isDm: boolean) {
+    async function generateResponse() {
         generating = true;
         try {        
             console.log("Generating response with:", {
                 project_id: projectId,
                 submission_title: submission.title,
                 submission_selftext: submission.selftext,
-                is_dm: isDm
+                is_dm: isDmSelected
             });
             const res = await fetch(`${PUBLIC_API_URL}/generate-response`, {
                 method: 'POST',
@@ -80,7 +81,7 @@
                     submission_title: submission.title,
                     submission_selftext: submission.selftext,
                     team_name: $page.data.environment.name,
-                    is_dm: isDm
+                    is_dm: isDmSelected
                 })
             });
 
@@ -94,7 +95,7 @@
             console.log("Response data:", data);
             
             if (data.status === 'success') {
-                if (isDm) {
+                if (isDmSelected) {
                     dmResponse = data.response;
                 } else {
                     commentResponse = data.response;
@@ -114,126 +115,73 @@
     }
 </script>
 
-<div class="flex flex-col gap-4">
-    <Tabs.Root value={currentTab} onValueChange={(value) => currentTab = value as 'comment' | 'dm'} class="w-full">
-        <Tabs.List class="grid grid-cols-2">
-            <Tabs.Trigger value="comment">Comment</Tabs.Trigger>
-            <Tabs.Trigger value="dm">Direct Message</Tabs.Trigger>
-        </Tabs.List>
-        <Tabs.Content value="comment" class="mt-4">
-            <div class="flex flex-col gap-4">
+<div class="flex flex-row gap-4">
+        <div class="flex flex-col gap-4 items-center">
+            <div class="flex flex-row gap-x-2">
                 <Button
-                    class="w-full" 
-                    disabled={generating}
-                    on:click={() => generateResponse(false)} 
-                >
-                    {#if generating}
-                        <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-                        Generating
-                    {:else}
-                        Generate Comment
-                    {/if}
-                </Button>
-
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <div class="flex flex-row gap-x-4 items-center">
-                                <label for="comment-response" class="text-sm font-medium">Generated Comment:</label>
-                                <Button 
-                                    variant="outline"
-                                    size="icon"
-                                    class="w-fit h-fit p-1"
-                                    on:click={() => {
-                                        navigator.clipboard.writeText(commentResponse);
-                                        toast.success('Response copied to clipboard');
-                                    }}
-                                >
-                                    <Copy class="w-4 h-4" />
-                                </Button>
-                            </div>
-                            <div class="flex gap-2">
-                                <Button
-                                    on:click={() => handleApprove()}
-                                    disabled={feedbackLoading || submission.approved_comment}
-                                    size="icon"
-                                    variant="outline"
-                                    class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
-                                >
-                                    {#if feedbackLoading}
-                                        <LoaderCircle class="w-4 h-4 animate-spin" />
-                                    {:else}
-                                        <ThumbsUp class="w-4 h-4" />
-                                    {/if}
-                                </Button>
-                            </div>
-                        </div>
-                        {submission.approved_comment}
-                        <Textarea
-                            id="comment-response"
-                            bind:value={commentResponse}
-                            rows={6}
-                            disabled={submission.approved_comment}
-                            class="w-full"
-                        />
-                    </div>
+            on:click={() => handleApprove()}
+            disabled={feedbackLoading || submission.approved_dm}
+            size="icon"
+            variant="outline"
+            class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
+        >
+            {#if feedbackLoading}
+                <LoaderCircle class="w-5 h-5 animate-spin" />
+            {:else}
+                <ThumbsUp class="w-5 h-5" />
+            {/if}
+        </Button>
+            <Button 
+                            variant="outline"
+                            size="icon"
+                            class=""
+                            disabled={dmResponse === '' && commentResponse === ''}
+                            on:click={() => {
+                                navigator.clipboard.writeText(dmResponse);
+                                toast.success('Response copied to clipboard');
+                            }}
+                        >
+                            <Copy class="w-5 h-5" />
+                        </Button>
             </div>
-        </Tabs.Content>
-        <Tabs.Content value="dm" class="mt-4">
-            <div class="flex flex-col gap-4">
-                <Button
-                    class="w-full" 
-                    disabled={generating}
-                    on:click={() => generateResponse(true)} 
-                >
-                    {#if generating}
-                        <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-                        Generating
-                    {:else}
-                        Generate DM
-                    {/if}
-                </Button>
-
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-between items-center">
-                            <div class="flex flex-row gap-x-4 items-center">
-                                <label for="dm-response" class="text-sm font-medium">Generated DM:</label>
-                                <Button 
-                                    variant="outline"
-                                    size="icon"
-                                    class="w-fit h-fit p-1"
-                                    on:click={() => {
-                                        navigator.clipboard.writeText(dmResponse);
-                                        toast.success('Response copied to clipboard');
-                                    }}
-                                >
-                                    <Copy class="w-4 h-4" />
-                                </Button>
-                            </div>
-                            <div class="flex gap-2">
-                                <Button
-                                    on:click={() => handleApprove()}
-                                    disabled={feedbackLoading || submission.approved_dm}
-                                    size="icon"
-                                    variant="outline"
-                                    class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
-                                >
-                                    {#if feedbackLoading}
-                                        <LoaderCircle class="w-4 h-4 animate-spin" />
-                                    {:else}
-                                        <ThumbsUp class="w-4 h-4" />
-                                    {/if}
-                                </Button>
-                            </div>
-                        </div>
-                        <Textarea
-                            id="dm-response"
-                            bind:value={dmResponse}
-                            disabled={submission.approved_dm}
-                            rows={8}
-                            class="w-full"
-                    />
-                </div>
+            <div class="flex flex-col">
+                <Switch
+                bind:checked={isDmSelected}
+                />
+                <Typography variant="body-sm" class="text-center">{isDmSelected ? 'DM' : 'Comment'}</Typography>
             </div>
-        </Tabs.Content>
-    </Tabs.Root>
+            <Button
+                class="" 
+                disabled={generating}
+                on:click={() => generateResponse()} 
+    >
+        {#if generating}
+            <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+            Generating
+        {:else}
+            Generate
+        {/if}
+        </Button>
+
+
+
+        </div>
+{#if isDmSelected}
+    <Textarea
+        id="comment-response"
+        bind:value={dmResponse}
+        rows={6}
+        disabled={submission.approved_dm}
+        class="w-full"
+    />
+{:else}
+    <Textarea
+        id="comment-response"
+        bind:value={commentResponse}
+        rows={6}
+        disabled={submission.approved_comment}
+        class="w-full"
+    />
+{/if}
+
 </div>
