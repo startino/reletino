@@ -172,6 +172,9 @@ def analyze_reddit_user(username: str) -> str:
     
     profile = get_reddit_profile(username)
 
+    if profile is None:
+        return "Profile has been suspended or deleted."
+
     agent = create_reflection_agent()
     initial_state = State(
         messages=[],

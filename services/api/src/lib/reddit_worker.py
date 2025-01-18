@@ -98,7 +98,7 @@ class RedditStreamWorker:
                         "profile_id": self.profile_id,
                         "project_id": self.project.id,
                         **saved_submission.dict(),
-                        **evaluation.dict(),
+                        "is_relevant": evaluation.is_relevant,
                         "profile_insights": profile_insights or "",
                     }
                 ).execute()

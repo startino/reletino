@@ -79,7 +79,7 @@ def make_profile_human_readable(profile: RedditUserProfile) -> str:
     
     return "\n".join(output)
 
-def get_reddit_profile(username: str) -> RedditUserProfile:
+def get_reddit_profile(username: str) -> RedditUserProfile | None:
     """
     Retrieves a Reddit user's profile from a file or scrapes it from Reddit if not found.
     """
@@ -96,6 +96,12 @@ def get_reddit_profile(username: str) -> RedditUserProfile:
     
     reddit = get_reddit_instance()
     user: Redditor = reddit.redditor(username)
+
+    if user is None or hasattr(user, "error"):
+        return None
+    
+    if user.is_suspended:
+        return None
     
     print(f"Scraping profile for u/{username}")
     

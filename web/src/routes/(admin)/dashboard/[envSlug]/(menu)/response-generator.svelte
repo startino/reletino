@@ -123,7 +123,7 @@
             <div class="flex flex-row gap-x-2">
                 <Button
             on:click={() => handleApprove()}
-            disabled={feedbackLoading || submission.approved_dm}
+            disabled={feedbackLoading || (isDmSelected ? submission.approved_dm : submission.approved_comment)}
             size="icon"
             variant="outline"
             class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
