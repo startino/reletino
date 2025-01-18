@@ -1,6 +1,6 @@
 import textwrap
 from dotenv import load_dotenv
-from src.lib.critino import get_critiques
+from src.lib.critino import critino_prompt, get_critiques
 from src.interfaces.db import client
 from src.interfaces.llm import gpt_4o
 from src.lib.reddit_profile_analysis import analyze_reddit_user
@@ -8,7 +8,7 @@ from src.lib.xml_utils import submission_to_xml
 from src.models.simple_submission import SimpleSubmission
 load_dotenv()
 
-def generate_response(submission: SimpleSubmission, team_name: str, project_id: str, is_dm: bool) -> str:
+def generate_response(submission: SimpleSubmission, team_name: str, project_id: str, is_dm: bool, feedback: str) -> str:
     supabase = client()
     if is_dm:
         project = supabase.table("projects").select("*").eq("id", project_id).single().execute()
@@ -32,6 +32,14 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
     
     profile_insights = analyze_reddit_user(submission.author_name)
 
+    feedback_section = f"""
+    ### Feedback ###
+    Please incorporate this feedback into your response:
+    {feedback}
+    
+    ####################
+    """
+
     response = llm.invoke(
         textwrap.dedent(
             f"""
@@ -47,10 +55,7 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
             ####################
             
             ### Post ###
-            
-            Title: {submission.title}
-            
-            Selftext: {submission.selftext}
+            {submission_to_xml(submission)}
 
             ####################
             
@@ -59,11 +64,9 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
             {profile_insights}
             
             ####################
-            
+            {feedback_section}
             ### Examples ###
-            These are semantically similar examples of comments/dms that we have evaluated in the past and has been verified to be a good comment/dm by a human.
-            The `query` is the post and the `optimal` is the optimal response given by a human.
-            {examples}
+            {critino_prompt(examples)}
             """
         )
     )

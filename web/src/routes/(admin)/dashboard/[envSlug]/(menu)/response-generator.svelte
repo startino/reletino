@@ -26,6 +26,7 @@
     let dmResponse = $state(submission.approved_dm || '');
     let feedbackLoading = $state(false);
     let isDmSelected = $state(false);
+    let feedback = $state('');
 
     const handleApprove = async () => {
         const response = isDmSelected ? dmResponse : commentResponse;
@@ -82,7 +83,8 @@
                     submission_title: submission.title,
                     submission_selftext: submission.selftext,
                     team_name: $page.data.environment.name,
-                    is_dm: isDmSelected
+                    is_dm: isDmSelected,
+                    feedback: `Feedback: \n ${feedback} \n\n This was the previous generated response: \n ${isDmSelected ? dmResponse : commentResponse}`
                 })
             });
 
@@ -166,6 +168,14 @@
 
 
 
+        </div>
+        <div class="flex flex-col gap-4 items-center">
+            <Textarea
+                id="response-feedback"
+                bind:value={feedback}
+                rows={3}
+                class="h-full"
+            />
         </div>
 {#if isDmSelected}
     <Textarea

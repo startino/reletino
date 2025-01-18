@@ -168,6 +168,7 @@ class GenerateResponseRequest(BaseModel):
     submission_selftext: str
     team_name: str
     is_dm: bool = False
+    feedback: str = ""
 
 @app.post("/generate-response")
 def generate_project_response(q: GenerateResponseRequest):
@@ -178,7 +179,13 @@ def generate_project_response(q: GenerateResponseRequest):
             selftext=q.submission_selftext,
             author_name=q.author_name
         )
-        response = generate_response(simple_submission, team_name=q.team_name, project_id=q.project_id, is_dm=q.is_dm)
+        response = generate_response(
+            simple_submission, 
+            team_name=q.team_name, 
+            project_id=q.project_id, 
+            is_dm=q.is_dm,
+            feedback=q.feedback
+        )
         logging.info("Response generated successfully")
         return {"status": "success", "response": response}
     except Exception as e:

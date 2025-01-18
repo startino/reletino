@@ -34,7 +34,21 @@ def format_example_string(critiques: list[dict]) -> str:
 
     return xml_utils.trim_xml(few_shot)
 
+def critino_prompt(examples: str) -> str:
+    return f"""
+    # Auto generated message sent to you by Critino so you can refer to the examples to emulate their optimal answers
+    <critino>
+    {examples}
 
+    > NOTE: Make sure you very strongly consider and emulate the optimal answers along with the length, consiseness, etc from them accurately.
+    > They represent previous generations of responses that were absolutely amazing!
+    > This does not mean that you should copy paste the answers from them, but rather emulate them as closely as possible.
+    > Make sure to seriously consider them in your chain of thoughts and use them as a reference to answer the question.
+    > Make sure to reason about how the answer is derived and how it fits into the larger context of the conversation.
+    > Keep in mind! No matter how similar the conversation may seem to the examples, none of the facts or information in the examples about who you are speaking to are are related to your current conversation, if they are the same it's pure happenstance.
+    </critino>
+    """.strip()
+    
 def get_critiques(
     query: str,
     agent_name: str,
