@@ -54,7 +54,7 @@
 				submission.author, 
 				submission.url, 
 				(submission.approved_dm || '').replace(/\n/g, ' '), 
-				submission.approved_comment || '', 
+				(submission.approved_comment || '').replace(/\n/g, ' '), 
 				formattedDate
 			];
 			// "	" is the special key that Google sheets uses to separate cells.
