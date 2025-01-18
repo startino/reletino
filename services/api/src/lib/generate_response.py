@@ -1,13 +1,14 @@
-from praw.models import Submission
 import textwrap
 from dotenv import load_dotenv
 from src.lib.critino import get_critiques
 from src.interfaces.db import client
 from src.interfaces.llm import gpt_4o
+from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.lib.xml_utils import submission_to_xml
+from src.models.simple_submission import SimpleSubmission
 load_dotenv()
 
-def generate_response(submission: Submission, team_name: str, project_id: str, is_dm: bool) -> str:
+def generate_response(submission: SimpleSubmission, team_name: str, project_id: str, is_dm: bool) -> str:
     supabase = client()
     if is_dm:
         project = supabase.table("projects").select("*").eq("id", project_id).single().execute()
@@ -28,6 +29,8 @@ def generate_response(submission: Submission, team_name: str, project_id: str, i
         agent_name="dm-generator" if is_dm else "comment-generator",
         query=submission_to_xml(submission),
         )
+    
+    profile_insights = analyze_reddit_user(submission.author_name)
 
     response = llm.invoke(
         textwrap.dedent(
@@ -48,6 +51,12 @@ def generate_response(submission: Submission, team_name: str, project_id: str, i
             Title: {submission.title}
             
             Selftext: {submission.selftext}
+
+            ####################
+            
+            ### Profile Insights ###
+            These are the insights we have about the author of the post based on researching his Reddit profile.
+            {profile_insights}
             
             ####################
             

@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.models.simple_submission import SimpleSubmission
 from supabase import create_client
 
 from src.interfaces import db
@@ -161,6 +162,7 @@ async def autofill_project(q: AutofillRequest):
     return EventSourceResponse(autocompleted_field, media_type="text/event-stream")
 
 class GenerateResponseRequest(BaseModel):
+    author_name: str
     project_id: str
     submission_title: str
     submission_selftext: str
@@ -171,11 +173,12 @@ class GenerateResponseRequest(BaseModel):
 def generate_project_response(q: GenerateResponseRequest):
     try:
         logging.info(f"Generating response for project {q.project_id}, isDM: {q.is_dm}")
-        submission = type('Submission', (), {
-            'title': q.submission_title,
-            'selftext': q.submission_selftext
-        })
-        response = generate_response(submission, team_name=q.team_name, project_id=q.project_id, is_dm=q.is_dm)
+        simple_submission = SimpleSubmission(
+            title=q.submission_title,
+            selftext=q.submission_selftext,
+            author_name=q.author_name
+        )
+        response = generate_response(simple_submission, team_name=q.team_name, project_id=q.project_id, is_dm=q.is_dm)
         logging.info("Response generated successfully")
         return {"status": "success", "response": response}
     except Exception as e:

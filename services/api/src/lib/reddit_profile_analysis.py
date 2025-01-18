@@ -180,6 +180,9 @@ def analyze_reddit_user(username: str) -> str:
     )
     
     final_state = agent.invoke(initial_state)
+
+    with open(f"./.profiles/{username}/profile_insights.txt", "w", encoding="utf-8") as f:
+        f.write(final_state["profile_insights"])
     
     return final_state["profile_insights"]
 

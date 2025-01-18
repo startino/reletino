@@ -77,6 +77,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    author_name: submission.author,
                     project_id: projectId,
                     submission_title: submission.title,
                     submission_selftext: submission.selftext,
