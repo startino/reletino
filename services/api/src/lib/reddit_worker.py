@@ -82,7 +82,7 @@ class RedditStreamWorker:
                     selftext=submission.selftext,
                     url=submission.url,
                     is_relevant=evaluation.is_relevant,
-                    reasoning=evaluation.reasoning,
+                    reasoning=evaluation.chain_of_thought,
                     profile_insights=profile_insights,
                 )
                 

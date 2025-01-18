@@ -1,5 +1,6 @@
 import textwrap
 from dotenv import load_dotenv
+from pydantic import BaseModel
 from src.lib.critino import critino_prompt, get_critiques
 from src.interfaces.db import client
 from src.interfaces.llm import gpt_4o
@@ -7,6 +8,10 @@ from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.lib.xml_utils import submission_to_xml
 from src.models.simple_submission import SimpleSubmission
 load_dotenv()
+
+class CotResponse(BaseModel):
+    chain_of_thought: str
+    response: str
 
 def generate_response(submission: SimpleSubmission, team_name: str, project_id: str, is_dm: bool, feedback: str) -> str:
     supabase = client()
@@ -40,7 +45,7 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
     ####################
     """
 
-    response = llm.invoke(
+    structured_response = llm.invoke(
         textwrap.dedent(
             f"""
             Your job is to:
@@ -67,7 +72,10 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
             {feedback_section}
             ### Examples ###
             {critino_prompt(examples)}
+
+            First, think through your approach step by step, analyzing the post, profile insights, and how to best craft your response.
+            Then provide your final response.
             """
-        )
-    )
-    return response.content
+        )).with_structured_output(CotResponse)
+    
+    return structured_response.response

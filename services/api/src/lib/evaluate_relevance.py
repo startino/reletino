@@ -9,12 +9,20 @@ from langchain_openai import AzureChatOpenAI
 from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models import Evaluation
 
-from src.lib.critino import get_critiques
+from src.lib.critino import critino_prompt, get_critiques
 from src.lib.xml_utils import submission_to_xml
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+
+REASONING_PROMPT = """
+ALWAYS start your reasoning with:
+Let's think step by step.
+The current situation looking at the submission [...].
+The current project is looking for [...]. Lets evaluate them individually.
+[Perform individual reasoning (1. Considering that [...], therefore the status is [...]. 2. Consi...) on the desired outcome of the project evaluationg their status of fulfillment individually...].
+"""
 
 @traceable(run_type="chain", name="Evaluate Submission", output_type=Evaluation)
 def evaluate_submission(
@@ -58,9 +66,8 @@ def evaluate_submission(
         junior_evaluation: Evaluation = structured_llm.invoke(
             textwrap.dedent(
                 f"""
-            # Format Instructions
-            You should format your response as JSON, not markdown.
-
+            {REASONING_PROMPT}
+            
             # Context
             You are a super intelligent junior assistant that helps the senior assistant in filtering Reddit posts for the Boss.
             You and the senior assistant have the duty of going through Reddit posts and determining if they are relevant to look into for the Boss.
@@ -85,10 +92,7 @@ def evaluate_submission(
             This is the post we are evaluating.
             {submission_to_xml(submission)}
 
-            # Examples
-            These are semantically similar examples of posts that we have evaluated in the past and has been verified to be relevant by a human.
-            The `query` is the post and the `optimal` is the optimal evaluation given by a human.
-            {examples}
+            {critino_prompt(examples)}
             """
             )
         )
@@ -123,6 +127,8 @@ def evaluate_submission(
             You are a very intelligent senior assistant that filters Reddit posts for your boss.
             You have the duty of going through the Reddit posts and determining if they are relevant to look into for your boss.
 
+            {REASONING_PROMPT}
+            
             # Personality and Style
             You are a very intelligent assistant, almost like a mathematician. 
             You have a very logical approach to concluding whether a post is relevant to your boss.
@@ -140,10 +146,7 @@ def evaluate_submission(
             This is the post we are evaluating.
             {submission_to_xml(submission)}
 
-            # Examples
-            These are semantically similar examples of posts that we have evaluated in the past and has been verified to be relevant by a human.
-            The `query` is the post and the `optimal` is the optimal evaluation given by a human.
-            {examples}
+            {critino_prompt(examples)}
             """
             )
         )
