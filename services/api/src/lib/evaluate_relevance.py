@@ -19,7 +19,7 @@ AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 REASONING_PROMPT = """
 ALWAYS start your reasoning with:
 Let's think step by step.
-The current situation looking at the submission [...].
+The current situation looking at the submission [...], along with their profile [...].
 The current project is looking for [...]. Lets evaluate them individually.
 [Perform individual reasoning (1. Considering that [...], therefore the status is [...]. 2. Consi...) on the desired outcome of the project evaluationg their status of fulfillment individually...].
 """
@@ -105,7 +105,7 @@ def evaluate_submission(
         return junior_evaluation, None # Don't research profiles of irrelevant posts
     
     # Do further research before making a final decision
-    profile_insights = analyze_reddit_user(submission.author.name)
+    profile_insights = analyze_reddit_user(submission.author.name, project_prompt)
 
     @traceable(name="Senior Evaluation")
     def senior_evaluation() -> Evaluation:

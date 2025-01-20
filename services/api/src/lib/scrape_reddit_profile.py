@@ -97,10 +97,7 @@ def get_reddit_profile(username: str) -> RedditUserProfile | None:
     reddit = get_reddit_instance()
     user: Redditor = reddit.redditor(username)
 
-    if user is None or hasattr(user, "error"):
-        return None
-    
-    if user.is_suspended:
+    if user is None or not hasattr(user, "comment_karma"):
         return None
     
     print(f"Scraping profile for u/{username}")

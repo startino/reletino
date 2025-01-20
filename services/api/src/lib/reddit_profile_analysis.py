@@ -17,7 +17,7 @@ class State(BaseModel):
     messages: Annotated[List[BaseMessage], add_messages] = []
     profile: RedditUserProfile
     profile_insights: str | None = None
-
+    project: str
 
 osint_agent_prompt = """
 Below is a revised version of your prompt that clarifies the task, emphasizes evidence-based analysis, and provides a clear, structured output format. Feel free to adapt it further to your specific needs.
@@ -54,7 +54,7 @@ You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzi
 
 **Interests and Hobbies**  
 - Identify top subreddits frequented or commonly referenced topics.  
-- Pinpoint recurring themes or niche activities that may signal strong interests.
+- Pinpoint recurring themes or niche activities.
 
 **Professional Life**  
 - Note any discussions related to career goals, industry jargon, or professional affiliations.  
@@ -68,7 +68,6 @@ You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzi
 - Highlight explicit brand preferences, purchasing behavior, or lifestyle choices.  
 - Comment on posting frequency, tone, and engagement style (e.g., helpful, confrontational, informative).  
 - Identify any other patterns that could inform user profiling for sales or marketing.
-- Identify further online research that could be done to get more information about the user.
 """
 
 @traceable(name="Generate Insights")
@@ -77,6 +76,7 @@ def generate_insights(state: State):
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", f"Profile Data:\n{format_profile_for_llm(state.profile)}"),
+        ("system", f"# Project\n Use the project's information to guide your analysis.\n{state.project}"),
         MessagesPlaceholder(variable_name="messages")
     ])
     
@@ -96,6 +96,7 @@ def reflect(state: State):
         ("system", "Review the previous analysis and provide critique and additional insights."),
         ("system", f"Last analysis: {state.messages[-1].content}"),
         ("system", f"Profile Data: {format_profile_for_llm(state.profile)}"),
+        ("system", f"Project: {state.project}"),
         MessagesPlaceholder(variable_name="messages")
     ])
     
@@ -156,7 +157,7 @@ def create_reflection_agent():
     
     return workflow.compile()
 
-def analyze_reddit_user(username: str) -> str:
+def analyze_reddit_user(username: str, project: str) -> str:
     """
     Use a Reddit user's profile_data that we got with get_reddit_profile to extract insights a Reflection Agent.
     """
@@ -179,7 +180,8 @@ def analyze_reddit_user(username: str) -> str:
     initial_state = State(
         messages=[],
         profile=profile,
-        profile_insights=None
+        profile_insights=None,
+        project=project
     )
     
     final_state = agent.invoke(initial_state)
@@ -192,8 +194,95 @@ def analyze_reddit_user(username: str) -> str:
 if __name__ == "__main__":
     
     username = "PastelGripPump"
+    project = """
+## Objective
+
+Find potential clients and leads for Startino.
+
+## Ideal Customer Profile
+
+A non-technical person with a software/app idea that requires software development.  
+
+They should:
+
+- Not know how to code or have previous experience working in software development.
+
+- Be looking for a technical co-founder or a software development agency to help them build their idea.
+
+## Guidance
+
+### Relevant Posts
+
+A relevant post could be:
+
+- Seeking technical co-founders for startups.
+
+- Looking for technical personnel to join a startup team.
+
+- In search of software development agencies or technical consultancy services.
+
+- Sharing an idea for a software business/startup.
+
+### Irrelevant Posts
+
+An irrelevant post could be:
+
+- Authored by a technical individual (e.g., tech founder, software developer, or other roles in the software field).
+
+- Showing off existing products or projects.
+
+- Focused on physical/in-person business ventures.
+
+- From businesses already established.
+
+- From individuals seeking employment.
+
+- Related to projects or products that have already begun development.
+
+- From people or agencies offering their own development/coding services.
+
+- Seeking ONLY design services.
+
+- Seeking ONLY to make a simple website (and not an app/project).
+
+- Related to HOW to do something using a website builder or no-code platform (e.g., Airtable, Bubble, Webflow).
+
+## Company Info
+
+### Name
+
+Startino
+
+### Tagline
+
+Building Ideas Into Life.
+
+### Description
+
+Software Development Firm – the best of both worlds to help industry experts with entrepreneurial spirits succeed.
+
+### More
+
+- We specialize in generative AI development.
+
+- We're not fans of: crypto development, payment processor development.
+
+- We're not interested in working for Indian clients.
+
+## Offer
+
+Benefit from a partnership that offers the long-term dedication and passion of a co-founder, enhanced by the professional execution of a seasoned development agency.  
+
+By taking a piece of the pie through equity or revenue share, we ensure our goals align with yours. We'll be at your side to provide strategic insights and ongoing support to ensure your product not only reaches the market but thrives.
+
+## Services
+
+- End-to-end software development to get your MVP running and iterating on its road to product-market fit.
+
+- Machine Learning, AI, MVP Development, SaaS Development, UI/UX Design, System Design, Data-Heavy Applications.    
+"""
     
-    insights = analyze_reddit_user(username)
+    insights = analyze_reddit_user(username, project)
 
     with open(f"./.profiles/{username}/profile_insights.txt", "w", encoding="utf-8") as f:
         f.write(insights)

@@ -22,6 +22,7 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
     
     project_name = project.data["title"]
     style_prompt = project.data["dm_style_prompt"] if is_dm else project.data["comment_style_prompt"]
+    project_prompt = project.data["prompt"]
 
     llm = gpt_4o()
 
@@ -32,7 +33,7 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
         query=submission_to_xml(submission),
         )
     
-    profile_insights = analyze_reddit_user(submission.author_name)
+    profile_insights = analyze_reddit_user(submission.author_name, project_prompt)
 
     feedback_section = f"""
     ### Feedback ###
