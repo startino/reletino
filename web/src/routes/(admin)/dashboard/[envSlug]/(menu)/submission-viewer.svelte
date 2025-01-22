@@ -222,7 +222,7 @@
 			
 			<Separator />
 
-				<ScrollArea class="max-w-4xl w-full min-h-44 h-[700px]">
+				<ScrollArea class=" w-full min-h-44 h-[700px]">
 					<Typography variant="body-md" class="w-full pr-4 text-left">
 						{submission.selftext}
 					</Typography>
@@ -299,7 +299,7 @@
 				</Dialog.Root>
 
 
-				<div class="flex flex-col max-w-4xl w-full">
+				<div class="flex flex-col w-full">
 					<Typography variant="title-sm" class="text-left ">Reasoning</Typography>
 					<ScrollArea class="min-h-24 w-full max-h-[100px]">
 						<Typography variant="body-md" class="text-left">

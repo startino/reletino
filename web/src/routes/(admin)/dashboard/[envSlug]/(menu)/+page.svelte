@@ -10,6 +10,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	type Props = {
 		data: {
@@ -175,7 +176,8 @@
 				</div>
 			</div>
 
-			<div class="h-fit mt-4 overflow-y-scroll flex flex-col gap-y-4">
+			<ScrollArea class="h-fit mt-2 px-4">
+				<div class="flex flex-col gap-y-2">
 				<Typography variant="headline-md" class="text-left">
 					Submissions {!projectLoading ? '(' + displaySubmissions.length + ')' : ''}
 					{#if projectLoading}
@@ -185,7 +187,7 @@
 
 				{#each displaySubmissions as submission}
 					<Button
-						class="text-wrap text-left h-fit mx-2 grid grid-cols-7 {selectedSubmission ==
+						class="text-wrap text-left h-fit w-full grid grid-cols-7 {selectedSubmission ==
 						submission
 							? 'bg-accent'
 							: ''}"
@@ -201,11 +203,12 @@
 							{/if}
 							{#if !submission.is_relevant}
 								<LocateOff class="w-5 " />
-							{/if}
-						</div>
-					</Button>
-				{/each}
-			</div>
+								{/if}
+							</div>
+						</Button>
+					{/each}
+				</div>
+			</ScrollArea>
 		</div>
 
 		<div class="col-span-5 row-span-5">

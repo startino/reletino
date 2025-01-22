@@ -20,8 +20,12 @@ REASONING_PROMPT = """
 ALWAYS start your reasoning with:
 Let's think step by step.
 The current situation looking at the submission [...], along with their profile [...].
-The current project is looking for [...]. Lets evaluate them individually.
-[Perform individual reasoning (1. Considering that [...], therefore the status is [...]. 2. Consi...) on the desired outcome of the project evaluationg their status of fulfillment individually...].
+I am working for a project that is looking for [...].
+Perform individual reasoning:
+1. Considering the submission, [...], therefore this aspect is [...].
+2. Considering the profile, [...], therefore this aspect is [...].
+(if any examples from Critino) 3. Considering the critino examples, [...], therefore this aspect is [...].
+Use new lines to separate your thoughts.
 """
 
 @traceable(run_type="chain", name="Evaluate Submission", output_type=Evaluation)

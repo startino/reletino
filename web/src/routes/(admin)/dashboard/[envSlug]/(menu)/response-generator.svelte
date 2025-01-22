@@ -120,7 +120,7 @@
 
 <div class="flex flex-row gap-4">
         <div class="flex flex-col gap-4 items-center">
-            <div class="flex flex-row gap-x-2">
+            <div class="flex flex-row gap-2">
                 <Button
             on:click={() => handleApprove()}
             disabled={feedbackLoading || (isDmSelected ? submission.approved_dm : submission.approved_comment)}
@@ -165,16 +165,13 @@
             Generate
         {/if}
         </Button>
-
-
-
         </div>
-        <div class="flex flex-col gap-4 items-center">
+        <div class="flex flex-col w-72 gap-4 items-center">
             <Textarea
                 id="response-feedback"
                 bind:value={feedback}
                 rows={3}
-                class="h-full"
+                class="w-full h-full"
             />
         </div>
 {#if isDmSelected}

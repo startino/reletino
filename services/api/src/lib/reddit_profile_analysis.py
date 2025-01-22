@@ -75,8 +75,8 @@ def generate_insights(state: State):
     llm = gpt_4o_mini()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
-        ("system", f"Profile Data:\n{format_profile_for_llm(state.profile)}"),
-        ("system", f"# Project\n Use the project's information to guide your analysis.\n{state.project}"),
+        ("system", f"# Profile Data\n{format_profile_for_llm(state.profile)}"),
+        ("system", f"# Project\n Use the project's information to guide your analysis and to highlight relevant aspects.\n{state.project}"),
         MessagesPlaceholder(variable_name="messages")
     ])
     
@@ -95,8 +95,8 @@ def reflect(state: State):
         ("system", osint_agent_prompt),
         ("system", "Review the previous analysis and provide critique and additional insights."),
         ("system", f"Last analysis: {state.messages[-1].content}"),
-        ("system", f"Profile Data: {format_profile_for_llm(state.profile)}"),
-        ("system", f"Project: {state.project}"),
+        ("system", f"# Profile Data\n{format_profile_for_llm(state.profile)}"),
+        ("system", f"# Project\n Use the project's information to guide your analysis and to highlight relevant aspects.\n{state.project}"),
         MessagesPlaceholder(variable_name="messages")
     ])
     
