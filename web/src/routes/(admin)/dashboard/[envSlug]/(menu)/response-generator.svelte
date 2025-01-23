@@ -118,69 +118,75 @@
     }
 </script>
 
-<div class="flex flex-row gap-4">
-        <div class="flex flex-col gap-4 items-center">
-            <div class="flex flex-row gap-2">
-                <Button
-            on:click={() => handleApprove()}
-            disabled={feedbackLoading || (isDmSelected ? submission.approved_dm : submission.approved_comment)}
-            size="icon"
-            variant="outline"
-            class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
-        >
-            {#if feedbackLoading}
-                <LoaderCircle class="w-5 h-5 animate-spin" />
-            {:else}
-                <ThumbsUp class="w-5 h-5" />
-            {/if}
-        </Button>
-            <Button 
-                            variant="outline"
-                            size="icon"
-                            class=""
-                            disabled={dmResponse === '' && commentResponse === ''}
-                            on:click={() => {
-                                navigator.clipboard.writeText(dmResponse);
-                                toast.success('Response copied to clipboard');
-                            }}
-                        >
-                            <Copy class="w-5 h-5" />
-                        </Button>
-            </div>
-            <div class="flex flex-col">
-                <Switch
-                bind:checked={isDmSelected}
-                />
-                <Typography variant="body-sm" class="text-center">{isDmSelected ? 'DM' : 'Comment'}</Typography>
-            </div>
+<div class="grid grid-cols-5 gap-4">
+<div class="grid grid-cols-3 gap-2 col-span-2">
+    <div class="flex flex-col gap-4 items-center">
+        <div class="flex flex-row gap-2">
             <Button
-                class="" 
-                disabled={generating}
-                on:click={() => generateResponse()} 
+        on:click={() => handleApprove()}
+        disabled={feedbackLoading || (isDmSelected ? submission.approved_dm : submission.approved_comment)}
+        size="icon"
+        variant="outline"
+        class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
     >
-        {#if generating}
-            <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-            Generating
+        {#if feedbackLoading}
+            <LoaderCircle class="w-5 h-5 animate-spin" />
         {:else}
-            Generate
+            <ThumbsUp class="w-5 h-5" />
         {/if}
-        </Button>
+    </Button>
+        <Button 
+                        variant="outline"
+                        size="icon"
+                        class=""
+                        disabled={dmResponse === '' && commentResponse === ''}
+                        on:click={() => {
+                            navigator.clipboard.writeText(dmResponse);
+                            toast.success('Response copied to clipboard');
+                        }}
+                    >
+                        <Copy class="w-5 h-5" />
+                    </Button>
         </div>
-        <div class="flex flex-col w-72 gap-4 items-center">
-            <Textarea
-                id="response-feedback"
-                bind:value={feedback}
-                rows={3}
-                class="w-full h-full"
+        <div class="flex flex-col col-span-2 w-full items-center">
+            <Switch
+            bind:checked={isDmSelected}
             />
+            <Typography variant="body-sm" class="text-center">{isDmSelected ? 'DM' : 'Comment'}</Typography>
         </div>
+        <Button
+            class=""
+            disabled={generating}
+            on:click={() => generateResponse()} 
+>
+    {#if generating}
+        <LoaderCircle class="mr-1 h-5 w-5 animate-spin" />
+        Generating
+    {:else}
+        {isDmSelected ? dmResponse ? 'Regenerate' : 'Generate' : commentResponse ? 'Regenerate' : 'Generate'}
+    {/if}
+    </Button>
+    </div>
+    <div class="flex flex-col w-full col-span-2 gap-1">
+        <Typography variant="title-sm" class="text-start pt-0 mt-0">Feedback</Typography>
+        <Textarea
+            id="response-feedback"
+            bind:value={feedback}
+            rows={3}
+            class="w-full h-full"
+        />
+    </div>
+</div>
+<div class="flex flex-col w-full col-span-3 gap-1">
+    <Typography variant="title-sm" class="text-start pt-0 mt-0">Response</Typography>
+
 {#if isDmSelected}
     <Textarea
         id="comment-response"
         bind:value={dmResponse}
         rows={6}
         disabled={submission.approved_dm}
-        class="w-full"
+        class="w-full col-span-3"
     />
 {:else}
     <Textarea
@@ -188,8 +194,8 @@
         bind:value={commentResponse}
         rows={6}
         disabled={submission.approved_comment}
-        class="w-full"
+        class="w-full col-span-3"
     />
 {/if}
-
+</div>
 </div>

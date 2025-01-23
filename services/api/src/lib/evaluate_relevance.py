@@ -25,7 +25,7 @@ Perform individual reasoning:
 1. Considering the submission, [...], therefore this aspect is [...].
 2. Considering the profile, [...], therefore this aspect is [...].
 (if any examples from Critino) 3. Considering the critino examples, [...], therefore this aspect is [...].
-Use new lines to separate your thoughts.
+Use new lines and numbers to separate your thoughts.
 """
 
 @traceable(run_type="chain", name="Evaluate Submission", output_type=Evaluation)

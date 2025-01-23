@@ -310,7 +310,7 @@
 			</div>
 			<Separator />
 
-			<div class="mt-2">
+			<div class="mt-1">
 				<ResponseGenerator
 					{supabase}
 					bind:submission 
