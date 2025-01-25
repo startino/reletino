@@ -11,8 +11,6 @@ from src.interfaces.llm import gpt_4o, gpt_4o_mini
 from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile
 from src.models.profile import RedditUserProfile
 
-
-
 class State(BaseModel):
     messages: Annotated[List[BaseMessage], add_messages] = []
     profile: RedditUserProfile
@@ -20,10 +18,6 @@ class State(BaseModel):
     project: str
 
 osint_agent_prompt = """
-Below is a revised version of your prompt that clarifies the task, emphasizes evidence-based analysis, and provides a clear, structured output format. Feel free to adapt it further to your specific needs.
-
----
-
 ## **OSINT Agent Prompt for Reddit User Profile Analysis**
 
 **Role & Objective**  

@@ -109,9 +109,9 @@ export const projectSchema = z.object({
 		.array(z.string())
 		.min(1, 'Must add at least one subreddit.')
 		.max(25, 'Max 25 subreddits'),
-	prompt: z.string().max(10000, 'Prompt too long'),
-	dm_style_prompt: z.string().max(10000, 'DM style prompt too long'),
-	comment_style_prompt: z.string().max(10000, 'Comment style prompt too long'),
+	prompt: z.string(),
+	dm_style_prompt: z.string(),
+	comment_style_prompt: z.string(),
 	running: z.boolean(),
 });
 
