@@ -67,7 +67,7 @@ def get_critiques(
             "environment_name": "reletino/" + team_name + "/" + project_name + "/" + agent_name,
             "query": query,
             "k": 3,
-            "similarity_key": "situation",
+            "similarity_key": "query",
         }
 
         logging.info(f"critino: {agent_name}: params: {params}")
