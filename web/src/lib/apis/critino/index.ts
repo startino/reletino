@@ -91,7 +91,7 @@ export const handleCommentOrDmCritique = async ({
                 team_name: 'startino',
                 environment_name: 'reletino/' + teamName + '/' + projectName + (isDm ? '/dm-generator' : '/comment-generator'),
                 populate_missing: true,
-                similarity_key: 'situation' as const,
+                similarity_key: 'query' as const,
             },
             header: {
                 'x-critino-key': PUBLIC_CRITINO_API_KEY,
