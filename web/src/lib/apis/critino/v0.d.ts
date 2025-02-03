@@ -165,8 +165,8 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** DeleteEnvironmentsKeyResponse */
-        DeleteEnvironmentsKeyResponse: {
+        /** DeleteEnvironmentKeyResponse */
+        DeleteEnvironmentKeyResponse: {
             /** Data */
             data: Record<string, never>;
             /** Key */
@@ -181,8 +181,22 @@ export interface components {
         };
         /** GetCritiquesResult */
         GetCritiquesResult: {
+            /** Situation */
+            situation?: string | null;
             /** Data */
             data: components["schemas"]["StrippedCritique"][];
+            /** Count */
+            count: number;
+        };
+        /** GetEnvironmentResponse */
+        GetEnvironmentResponse: {
+            /** Data */
+            data: Record<string, never>;
+        };
+        /** GetEnvironmentsResponse */
+        GetEnvironmentsResponse: {
+            /** Data */
+            data: unknown[];
             /** Count */
             count: number;
         };
@@ -191,28 +205,38 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
-        /** PatchEnvironmentsKeyResponse */
-        PatchEnvironmentsKeyResponse: {
+        /** PatchEnvironmentBody */
+        PatchEnvironmentBody: {
+            /**
+             * Data
+             * @default {}
+             */
+            data: Record<string, never>;
+        };
+        /** PatchEnvironmentKeyResponse */
+        PatchEnvironmentKeyResponse: {
             /** Data */
             data: Record<string, never>;
             /** Key */
             key: string | null;
         };
-        /** PatchEnvironmentsResponse */
-        PatchEnvironmentsResponse: {
+        /** PatchEnvironmentResponse */
+        PatchEnvironmentResponse: {
             /** Data */
             data: Record<string, never>;
         };
         /** PostCritiquesBody */
         PostCritiquesBody: {
-            /** Context */
-            context?: string | null;
             /** Query */
             query?: string | null;
-            /** Optimal */
-            optimal?: string | null;
             /** Response */
             response?: string | null;
+            /** Context */
+            context?: string | null;
+            /** Optimal */
+            optimal?: string | null;
+            /** Instructions */
+            instructions?: string | null;
         };
         /** PostCritiquesResponse */
         PostCritiquesResponse: {
@@ -221,8 +245,8 @@ export interface components {
             /** Data */
             data: Record<string, never>;
         };
-        /** PostEnvironmentsBody */
-        PostEnvironmentsBody: {
+        /** PostEnvironmentBody */
+        PostEnvironmentBody: {
             /**
              * Description
              * @default
@@ -234,8 +258,8 @@ export interface components {
              */
             gen_key: boolean;
         };
-        /** PostEnvironmentsResponse */
-        PostEnvironmentsResponse: {
+        /** PostEnvironmentResponse */
+        PostEnvironmentResponse: {
             /** Data */
             data: Record<string, never>;
             /** Key */
@@ -249,6 +273,10 @@ export interface components {
             query: string;
             /** Optimal */
             optimal: string;
+            /** Instructions */
+            instructions: string;
+            /** Situation */
+            situation: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -258,18 +286,6 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
-        };
-        /** GetEnvironmentsResponse */
-        src__routers__environments__GetEnvironmentsResponse__1: {
-            /** Data */
-            data: unknown[];
-            /** Count */
-            count: number;
-        };
-        /** GetEnvironmentsResponse */
-        src__routers__environments__GetEnvironmentsResponse__2: {
-            /** Data */
-            data: Record<string, never>;
         };
     };
     responses: never;
@@ -389,7 +405,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["src__routers__environments__GetEnvironmentsResponse__1"];
+                    "application/json": components["schemas"]["GetEnvironmentsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -425,7 +441,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["src__routers__environments__GetEnvironmentsResponse__2"];
+                    "application/json": components["schemas"]["GetEnvironmentResponse"];
                 };
             };
             /** @description Validation Error */
@@ -455,7 +471,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PostEnvironmentsBody"];
+                "application/json": components["schemas"]["PostEnvironmentBody"];
             };
         };
         responses: {
@@ -465,7 +481,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PostEnvironmentsResponse"];
+                    "application/json": components["schemas"]["PostEnvironmentResponse"];
                 };
             };
             /** @description Validation Error */
@@ -531,7 +547,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PostEnvironmentsBody"];
+                "application/json": components["schemas"]["PatchEnvironmentBody"];
             };
         };
         responses: {
@@ -541,7 +557,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PatchEnvironmentsResponse"];
+                    "application/json": components["schemas"]["PatchEnvironmentResponse"];
                 };
             };
             /** @description Validation Error */
@@ -577,7 +593,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DeleteEnvironmentsKeyResponse"];
+                    "application/json": components["schemas"]["DeleteEnvironmentKeyResponse"];
                 };
             };
             /** @description Validation Error */
@@ -613,7 +629,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PatchEnvironmentsKeyResponse"];
+                    "application/json": components["schemas"]["PatchEnvironmentKeyResponse"];
                 };
             };
             /** @description Validation Error */
@@ -652,13 +668,14 @@ export interface operations {
             query: {
                 team_name: string;
                 environment_name: string;
-                workflow_name?: string | null;
-                agent_name?: string | null;
+                context?: string | null;
                 query?: string | null;
                 k?: number | null;
+                similarity_key?: "query" | "situation" | "context";
             };
             header: {
                 "x-critino-key": string;
+                "x-openrouter-api-key": string | null;
             };
             path?: never;
             cookie?: never;
@@ -690,11 +707,11 @@ export interface operations {
             query: {
                 team_name: string;
                 environment_name: string;
-                workflow_name: string;
-                agent_name: string;
+                populate_missing?: boolean;
             };
             header: {
                 "x-critino-key": string;
+                "x-openrouter-api-key": string | null;
             };
             path: {
                 id: string;

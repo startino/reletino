@@ -11,18 +11,16 @@ import logging
 
 from pathlib import Path
 
+from src.interfaces import db
 from supabase import Client, create_client
 
 from src.models.project import Project
 from src.models import SavedSubmission
-from src.evaluate_relevance import evaluate_submission
+from src.lib.evaluate_relevance import evaluate_submission
 from src.models import Evaluation
-from src.reddit_utils import get_subreddits, get_reddit_instance
+from src.interfaces.reddit import get_subreddits
 
 load_dotenv()
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE = os.getenv("SUPABASE_SERVICE_ROLE")
 
 current_directory = Path(__file__).resolve().parent
 
@@ -36,13 +34,13 @@ cache = dc.Cache(cache_filepath)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class RedditStreamWorker:
-    def __init__(self, project: Project, environment_name: str):
+    def __init__(self, project: Project, team_name: str):
         self._running = False
         self.profile_id = project.profile_id
         self.project = project
         self.subreddits = get_subreddits(project.subreddits)
-        self.supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
-        self.environment_name = environment_name
+        self.supabase: Client = db.client()
+        self.team_name = team_name
         logging.info(f"Initialized RedditStreamWorker for project: {self.project.id}")
 
     def start(self):
@@ -64,11 +62,10 @@ class RedditStreamWorker:
                     logging.info(f"Skipping cached submission: {submission.id}")
                     continue
             
-                evaluation: Evaluation | None = evaluate_submission(
+                evaluation, profile_insights = evaluate_submission(
                     submission=submission,
                     project_prompt=self.project.prompt,
-                    workflow_name=self.project.title,
-                    environment_name=self.environment_name,
+                    team_name=self.team_name,
                     project_name=self.project.title,
                 )
 
@@ -85,7 +82,8 @@ class RedditStreamWorker:
                     selftext=submission.selftext,
                     url=submission.url,
                     is_relevant=evaluation.is_relevant,
-                    reasoning=evaluation.reasoning,
+                    reasoning=evaluation.chain_of_thought,
+                    profile_insights=profile_insights,
                 )
                 
                 # Check if submission already exists
@@ -100,7 +98,8 @@ class RedditStreamWorker:
                         "profile_id": self.profile_id,
                         "project_id": self.project.id,
                         **saved_submission.dict(),
-                        **evaluation.dict(),
+                        "is_relevant": evaluation.is_relevant,
+                        "profile_insights": profile_insights or "",
                     }
                 ).execute()
                 

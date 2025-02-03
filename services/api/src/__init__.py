@@ -8,23 +8,28 @@ from time import sleep
 from dotenv import load_dotenv
 from fastapi.concurrency import asynccontextmanager
 from pydantic import BaseModel
+from typing import Literal
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.models.simple_submission import SimpleSubmission
 from supabase import create_client
 
+from src.interfaces import db
 from src.models.project import Project
-from src.reddit_worker import RedditStreamWorker
+from src.lib.reddit_worker import RedditStreamWorker
+from src.lib.autofill_project import autofill_form, FormField
+from src.lib.generate_response import generate_response
+from praw.models import Submission
+
+from sse_starlette import EventSourceResponse
 
 load_dotenv()
 
 REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD")
 REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE = os.getenv("SUPABASE_SERVICE_ROLE")
 
 if REDDIT_PASSWORD is None:
     raise ValueError("REDDIT_PASSWORD is not set")
@@ -39,26 +44,26 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
+    supabase = db.client()
 
-    project_res = supabase.table("projects").select("*").eq("running", True).execute()
+    # project_res = supabase.table("projects").select("*").eq("running", True).execute()
         
-    for project_data in project_res.data:
+    # for project_data in project_res.data:
         
-        profile_res = supabase.table("profiles").select("*, environments (*)").eq("id", project_data["profile_id"]).execute()
-        logging.info(f"Profile: {profile_res.data}")
-        project = Project(**project_data)
-        worker, _ = workers.get(project.id, (None, None))
+    #     profile_res = supabase.table("profiles").select("*, environments (*)").eq("id", project_data["profile_id"]).execute()
+    #     logging.info(f"Profile: {profile_res.data}")
+    #     project = Project(**project_data)
+    #     worker, _ = workers.get(project.id, (None, None))
                 
-        # Project wasn't properly started
-        if project.running and worker is None:
-            logging.info(f"Starting project stream for project: {project.id}")
-            start_project_stream(StartStreamRequest(project=project, environment_name=profile_res.data[0]["environments"][0]["name"]))
+    #     # Project wasn't properly started
+    #     if project.running and worker is None:
+    #         logging.info(f"Starting project stream for project: {project.id}")
+    #         start_project_stream(StartStreamRequest(project=project, environment_name=profile_res.data[0]["environments"][0]["name"]))
         
-        # Project was stopped but the worker is still running
-        if not project.running and worker is not None:
-            logging.info(f"Stopping project stream for project: {project.id}")
-            stop_project_stream(StopStreamRequest(project_id=project.id))
+    #     # Project was stopped but the worker is still running
+    #     if not project.running and worker is not None:
+    #         logging.info(f"Stopping project stream for project: {project.id}")
+    #         stop_project_stream(StopStreamRequest(project_id=project.id))
             
     yield
     
@@ -94,7 +99,7 @@ def redirect_to_docs():
 
 class StartStreamRequest(BaseModel):
     project: Project
-    environment_name: str
+    team_name: str
 
 
 @app.post("/start")
@@ -103,7 +108,7 @@ def start_project_stream(q: StartStreamRequest):
         logging.info(f"Restarting project stream for project: {q.project.id}")
         stop_project_stream(StopStreamRequest(project_id=q.project.id))
 
-    worker = RedditStreamWorker(project=q.project, environment_name=q.environment_name)
+    worker = RedditStreamWorker(project=q.project, team_name=q.team_name)
     thread = threading.Thread(target=worker.start)
     workers[q.project.id] = (worker, thread)
     thread.start()
@@ -133,3 +138,58 @@ def stop_project_stream(q: StopStreamRequest):
     logging.info(f"Stopped project stream: {q.project_id}")
 
     return {"status": "success", "message": "Stream stopped"}
+
+
+class AutofillRequest(BaseModel):
+    url: str
+    use_case: Literal["leads", "competition_research", "other"]
+    form: dict
+
+@app.post("/autofill")
+async def autofill_project(q: AutofillRequest):
+    fields = [
+        FormField(label="business name", description="Company name"),
+        FormField(label="about", description="2-4 sentence description"),
+        FormField(label="subreddits", description="Relevant subreddits"),
+        FormField(label="ideal customer profile", description="Target audience"),
+        FormField(label="competitors", description="Main competitors"),
+        FormField(label="unique selling points", description="Differentiators"),
+    ]
+    
+    # Yields the fields one by one
+    autocompleted_field = autofill_form(q.use_case, q.url, fields)
+
+    return EventSourceResponse(autocompleted_field, media_type="text/event-stream")
+
+class GenerateResponseRequest(BaseModel):
+    author_name: str
+    project_id: str
+    submission_title: str
+    submission_selftext: str
+    team_name: str
+    is_dm: bool = False
+    feedback: str = ""
+
+@app.post("/generate-response")
+def generate_project_response(q: GenerateResponseRequest):
+    try:
+        logging.info(f"Generating response for project {q.project_id}, isDM: {q.is_dm}")
+        simple_submission = SimpleSubmission(
+            title=q.submission_title,
+            selftext=q.submission_selftext,
+            author_name=q.author_name
+        )
+        response = generate_response(
+            simple_submission, 
+            team_name=q.team_name, 
+            project_id=q.project_id, 
+            is_dm=q.is_dm,
+            feedback=q.feedback
+        )
+        logging.info("Response generated successfully")
+        return {"status": "success", "response": response}
+    except Exception as e:
+        logging.error(f"Error generating response: {e}", exc_info=True)  # Add full traceback
+        return {"status": "error", "message": str(e)}
+
+

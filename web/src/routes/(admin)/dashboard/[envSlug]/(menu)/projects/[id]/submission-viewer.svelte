@@ -8,17 +8,23 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 
-	import type { Tables } from '$lib/supabase';
+	import type { Tables, Json } from '$lib/supabase';
 
 	import { toast } from 'svelte-sonner';
 
 	import { enhance } from '$app/forms';
 	import { Typography } from '$lib/components/ui/typography';
 	import type { SupabaseClient } from '@supabase/supabase-js';
-	import { CheckCheck, ExternalLink, LoaderCircle, Undo } from 'lucide-svelte';
-	import { PUBLIC_CRITINO_API_KEY } from '$env/static/public';
+	import { CheckCheck, ExternalLink, LoaderCircle, Undo, ThumbsUp, ThumbsDown, Info, Copy } from 'lucide-svelte';
+	import { PUBLIC_CRITINO_API_KEY, PUBLIC_OPENROUTER_API_KEY } from '$env/static/public';
+	import ResponseGenerator from './response-generator.svelte';
+	import { handleSubmissionCritique } from '$lib/apis/critino';
+	import { TipTap } from '$lib/components/ui/tiptap';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import { Toggle } from '$lib/components/ui/toggle';
+	import { Switch } from '$lib/components/ui/switch';
 
-	interface Props {
+	type Props = {
 		supabase: SupabaseClient<any, 'public', any>;
 		submission: Tables<'submissions'>;
 		projectName: string;
@@ -30,15 +36,29 @@
 	let critinoLoading = $state(false);
 	let markingAsRead = $state(false);
 
+	let showUpdateDialog = $state(false);
+	let showAuthorDialog = $state(false);
+
+	// Critino variables
+	let updatedReasoning = $state('');
+	let updatedIsRelevant = $state(false);
+
 	// Function to copy to clipboard so I can easily copy this to my sales
 	// management Google Sheet :P
 	async function copyToClipboard(submission: Tables<'submissions'>) {
 		try {
 			const currentDate = new Date();
-			const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}`;
-			const cells = [submission.author, submission.url, '', formattedDate];
+			// Date has to be MM/DD/YYYY
+			const formattedDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}/${currentDate.getFullYear()}`;
+			const cells = [
+				submission.author, 
+				submission.url, 
+				(submission.approved_dm || '').replace(/\n/g, ' '), 
+				(submission.approved_comment || '').replace(/\n/g, ' '), 
+				formattedDate
+			];
 			// "	" is the special key that Google sheets uses to separate cells.
-			// Select the text to actually see the character s`in`ce my theme can't see
+			// Select the text to actually see the character since my theme can't see
 			// it by default lol
 			await navigator.clipboard.writeText(cells.join('	'));
 			toast.success('submission Copied', {
@@ -66,63 +86,73 @@
 		toast.success('Marked as read');
 	}
 
-	const handleCritique = async (submission: Tables<'submissions'>) => {
+	const handleApprove = async () => {
 		critinoLoading = true;
+		await handleSubmissionCritique({
+			submission,
+			projectName,
+			teamName: $page.data.environment.name,
+			response: submission.reasoning,
+			optimal: {reasoning: submission.reasoning, isRelevant: submission.is_relevant},
+		});
 
-		const context = '';
-		const query = `<title>${submission.title}</title><selftext>${submission.selftext}</selftext>`;
-		const response = `{"reasoning": "${submission.reasoning}", "is_relevant": "${submission.is_relevant}"}`;
-		const optimal = '';
+		const {data, error} = await supabase.from('submissions').update({
+			approved_evaluation: {reasoning: submission.reasoning, isRelevant: submission.is_relevant} satisfies Json,
+		}).eq('id', submission.id).select('*');
 
-		const postObject = {
-			params: {
-				path: { id: submission.id },
-				query: {
-					team_name: 'startino',
-					environment_name: 'reletino/' + $page.data.environment.name + '/' + projectName,
-					workflow_name: projectName,
-					agent_name: 'main',
-				},
-				header: {
-					'x-critino-key': PUBLIC_CRITINO_API_KEY,
-				},
-			},
-			body: {
-				context,
-				query,
-				optimal,
-				response,
-			},
-		};
-		console.log(`Creating Critique with object: ${JSON.stringify(postObject, null, 2)}...`);
-
-		const res = await critino.POST('/critiques/{id}', postObject);
-
-		console.log(`Creating Critique with response: ${JSON.stringify(res, null, 2)}`);
-
-		if (res.data) {
-			critinoLoading = false;
-			console.log('Opening Critino');
-			window.open(res.data.url + '?key=' + $page.data.environment.critino_key, '_blank');
-			return;
+		if (error || !data) {
+			toast.error('Failed to approve evaluation');
 		}
-		if (res.error) {
-			console.dir(res);
-			console.error(
-				`Error:\nMessage: ${res.error.detail?.message}\n${res.error.detail?.traceback}`
-			);
-			toast.error(`Error sending message: ${res.error.detail?.message}`);
-		}
+
 		critinoLoading = false;
+
+		toast.success('Evaluation Critiqued');
 	};
+
+	const handleFeedbackButtonClick = () => {
+		showUpdateDialog = true;
+		updatedReasoning = submission.reasoning;
+		updatedIsRelevant = submission.is_relevant;
+	}
+
+	const handleFeedback = async () => {
+		critinoLoading = true;
+		const res = await handleSubmissionCritique({
+			submission,
+			projectName,
+			teamName: $page.data.environment.name,
+			response: submission.reasoning,
+			optimal: {reasoning: updatedReasoning, isRelevant: updatedIsRelevant},
+		});
+
+		if (!res) return;
+
+		const {data, error} = await supabase.from('submissions').update({
+			approved_evaluation: {reasoning: updatedReasoning, isRelevant: updatedIsRelevant} satisfies Json,
+		}).eq('id', submission.id).select('*');
+
+		submission.approved_evaluation = {reasoning: updatedReasoning, isRelevant: updatedIsRelevant} satisfies Json;
+
+		if (error || !data) {
+			toast.error('Failed to update evaluation');
+		}
+
+		critinoLoading = false;
+		showUpdateDialog = false;
+
+		toast.success('Evaluation Critiqued');
+	}
 </script>
 
 <div class="flex h-full flex-col">
 	{#if submission}
-		<div class="flex h-full flex-col">
+		<div class="flex h-full flex-col gap-y-2">
 			<div class="flex flex-row place-items-center justify-between">
-				<Typography variant="headline-md" class="p-4 text-left">Post</Typography>
-				<Button
+				<Typography variant="headline-md" class="text-left {submission.is_relevant ? 'text-green-600' : 'text-red-600'}">
+					{submission.is_relevant ? "Relevant" : "Irrelevant"} Post
+				</Typography>
+				<div class="flex flex-row gap-4">
+					<Button
 					href={submission.url.includes('http')
 						? submission.url
 						: 'https://reddit.com/' + submission.url}
@@ -130,76 +160,167 @@
 					variant="default"
 					class=""
 				>
-					Visit Post <ExternalLink class="ml-2 w-5" />
-				</Button>
-			</div>
-
-			<div class="flex flex-row justify-between p-4 text-left">
-				<div>
-					<Typography variant="title-md" class="text-left">
-						Title: {submission.title}
-					</Typography>
-					<Typography variant="title-md" class="text-left">
-						Posted: {formatDistanceToNowStrict(submission.submission_created_utc, {
-							addSuffix: false,
-						})} ago, on {format(submission.submission_created_utc, 'dd/MM')}
-					</Typography>
-					<Typography variant="title-md" class="text-left">
-						Author: {submission.author}
-					</Typography>
-					<Typography variant="title-md" class="text-left">
-						Subredit: {submission.subreddit}
-					</Typography>
-				</div>
-			</div>
-
-			<Separator />
-			<div class="flex-1 overflow-y-auto whitespace-pre-wrap p-4 text-left text-sm">
-				<Typography variant="body-md" class="text-left">{submission.selftext}</Typography>
-			</div>
-
-			<Separator />
-			<!-- <div class="flex flex-col p-4 self-end">
-        <Typography variant="title-lg" class="text-left">
-          {submission.is_relevant ? "Relevant" : "Irrelevant"}
-        </Typography>
-        <Typography variant="title-md" class="text-left">Reasoning</Typography>
-        <Typography variant="body-md" class="text-left">
-          {submission.reasoning}
-        </Typography>
-      </div> -->
-
-			<Separator />
-			<div class="grid w-full grid-cols-2 gap-6 p-4">
-				<Button
-					onclick={async () => await handleCritique(submission)}
-					variant="secondary"
-					target="_blank"
-					disabled={critinoLoading}
-				>
-					Create Critino Review
-					{#if critinoLoading}
-						<LoaderCircle class="ml-2 w-5 animate-spin" />
-					{:else}
-						<ExternalLink class="ml-2 w-5" />
-					{/if}
+					Visit <ExternalLink class="ml-2 w-5" />
 				</Button>
 				<Button onclick={() => markAsRead()} disabled={markingAsRead}>
 					{#if !submission.done}
-						Mark as Read
+						Read it
 					{:else}
-						Mark as Unread
+						Unread it
 					{/if}
 					{#if markingAsRead}
-						<LoaderCircle class="ml-2 w-5 animate-spin" />
+						<LoaderCircle class="animate-spin ml-2 w-5" />
 					{:else if !submission.done}
 						<CheckCheck class="ml-2 w-5" />
 					{:else}
 						<Undo class="ml-2 w-5" />
 					{/if}
 				</Button>
+				<Button onclick={() => copyToClipboard(submission)}>
+					Copy Lead <Copy class="ml-2 w-5" />
+				</Button>
+				</div>
 			</div>
+
+			<div class="flex flex-row justify-between text-left">
+				<div>
+					<Typography variant="title-sm" class="text-left">
+						<strong>Title:</strong> {submission.title}
+					</Typography>
+					<Typography variant="title-sm" class="text-left">
+						<strong>Posted:</strong>
+						{formatDistanceToNowStrict(submission.submission_created_utc, {
+							addSuffix: false,
+						})} ago, on {format(submission.submission_created_utc, 'dd/MM')}
+					</Typography>
+					<Typography variant="title-sm" class="text-left flex flex-row gap-x-2">
+						<strong>Author:</strong> {submission.author}
+						<Dialog.Root bind:open={showAuthorDialog}>
+								<Button onclick={() => showAuthorDialog = true} variant="ghost" class="w-6 h-6" size="icon">
+									<Info class="w-5" />
+								</Button>
+							<Dialog.Content class="max-w-3xl w-full">
+								<Dialog.Title>Author: {submission.author}</Dialog.Title>
+								<Dialog.Description class="max-w-3xl w-full">
+									<ScrollArea class="max-w-3xl w-full h-[600px]">
+										<TipTap
+											editable={false}
+											class="text-white"
+											content={submission.profile_insights}
+										/>
+									</ScrollArea>
+								</Dialog.Description>
+							</Dialog.Content>
+						</Dialog.Root>
+					</Typography>
+					<Typography variant="title-sm" class="text-left">
+						<strong>Subreddit:</strong> {submission.subreddit}
+					</Typography>
+				</div>
+			</div>
+
+			
+			<Separator />
+
+				<ScrollArea class=" w-full min-h-44 h-[700px]">
+					<Typography variant="body-md" class="w-full pr-4 text-left">
+						{submission.selftext}
+					</Typography>
+				</ScrollArea>
+			
+			<Separator />
+
+			<div class="flex flex-row gap-x-2">
+				<div class="flex flex-col gap-y-2 pt-2 justify-start">
+					<Button
+						onclick={() => handleApprove()}
+						disabled={critinoLoading || submission.approved_evaluation}
+						size="icon"
+						variant="outline"
+						class="flex items-center gap-2 text-green-600 border-green-600 hover:bg-green-600/40 hover:text-white"
+					>
+						{#if critinoLoading}
+							<LoaderCircle class="w-5 animate-spin" />
+						{:else}
+							<ThumbsUp class="w-5" />
+						{/if}
+					</Button>
+
+		
+					<Button
+						size="icon"
+						variant="outline"
+						class="flex items-center text-red-600 border-red-600 hover:bg-red-600/40 hover:text-white"
+						onclick={() => handleFeedbackButtonClick()}
+						disabled={critinoLoading || submission.approved_evaluation}
+					>
+						<ThumbsDown class="w-5" />
+					</Button>
+				</div>
+				<Dialog.Root bind:open={showUpdateDialog}>
+					<Dialog.Trigger />
+					<Dialog.Content class="sm:max-w-3xl">
+						<Dialog.Header>
+							<Dialog.Title>Update the Evaluation</Dialog.Title>
+							<Dialog.Description>
+								What's the final verdict and reasoning?
+							</Dialog.Description>
+						</Dialog.Header>
+						<div class="flex flex-col gap-y-2">
+							<div class="flex items-center flex-row gap-4">
+								<Typography variant="title-md" class="text-left">Final Verdict:</Typography>
+								<Switch
+									bind:checked={updatedIsRelevant}
+									aria-label="Toggle relevance"
+								>
+									<span class="sr-only">Toggle relevance</span>
+								</Switch>
+								<Typography variant="body-lg" class="text-sm">{updatedIsRelevant ? "Relevant" : "Irrelevant"}</Typography>
+							</div>
+							<Textarea
+								bind:value={updatedReasoning}
+								placeholder="Enter the updated reasoning..."
+								class="min-h-[300px]"
+							/>
+						</div>
+					<Dialog.Footer>
+						<Button variant="outline" onclick={() => showUpdateDialog = false}>
+							Cancel
+						</Button>
+						<Button onclick={handleFeedback} disabled={critinoLoading}>
+							{#if critinoLoading}
+								<LoaderCircle class="w-5 animate-spin" />
+							{:else}
+								Update & Submit
+							{/if}
+						</Button>
+					</Dialog.Footer>
+				</Dialog.Content>
+				</Dialog.Root>
+
+
+				<div class="flex flex-col w-full">
+					<Typography variant="title-sm" class="text-left ">Reasoning</Typography>
+					<ScrollArea class="min-h-24 w-full max-h-[100px]">
+						<Typography variant="body-md" class="text-left">
+							{submission.reasoning}
+						</Typography>
+					</ScrollArea>
+				</div>
+			</div>
+			<Separator />
+
+			<div class="mt-1">
+				<ResponseGenerator
+					{supabase}
+					bind:submission 
+					projectId={submission.project_id}
+					{projectName}
+				/>
+			</div>
+
 		</div>
+		
 	{:else}
 		<div class="p-8 text-center text-muted-foreground">No submission selected</div>
 	{/if}

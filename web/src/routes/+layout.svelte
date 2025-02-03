@@ -60,7 +60,7 @@
 	></div>
 {/if}
 
-<Toaster position="top-right" richColors />
+<Toaster position="bottom-left" richColors />
 
 <div class="bg-background text-foreground">
 	{@render children()}

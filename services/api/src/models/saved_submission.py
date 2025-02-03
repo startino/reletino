@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import uuid4, UUID
 
+from src.models.profile import RedditUserProfile
 
 class SavedSubmission(BaseModel):
     author: str
@@ -14,3 +15,4 @@ class SavedSubmission(BaseModel):
     url: str
     is_relevant: bool
     reasoning: str
+    profile_insights: str | None

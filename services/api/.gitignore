@@ -1,6 +1,8 @@
 # Custom
 OAI_CONFIG_LIST
 tasks
+.profiles/
+tmp/
 
 # For caches
 cache.db

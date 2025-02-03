@@ -123,8 +123,10 @@ export const projectSchema = z.object({
 	subreddits: z
 		.array(z.string())
 		.min(1, 'Must add at least one subreddit.')
-		.max(10, 'Max 10 subreddits'),
-	prompt: z.string().max(3000, 'Prompt too long'),
+		.max(25, 'Max 25 subreddits'),
+	prompt: z.string(),
+	dm_style_prompt: z.string(),
+	comment_style_prompt: z.string(),
 	running: z.boolean(),
 	category: z.enum(['find-leads', 'find-competition']),
 	context: z.discriminatedUnion('category', [findLeadsDataSchema, findCompetitionDataSchema]),

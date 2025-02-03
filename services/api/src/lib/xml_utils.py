@@ -1,6 +1,15 @@
 import re
 import xml.dom.minidom
 
+from praw.models import Submission
+from src.models.saved_submission import SavedSubmission
+
+def submission_to_xml(submission: Submission | SavedSubmission):
+    if isinstance(submission, Submission):
+        return f"<title>{submission.title}</title><selftext>{submission.selftext}</selftext>"
+    else:
+        return f"<title>{submission.title}</title><selftext>{submission.selftext}</selftext>"
+
 
 def trim_xml(xml_string):
     return re.sub(r">\s+<", "><", xml_string.strip())

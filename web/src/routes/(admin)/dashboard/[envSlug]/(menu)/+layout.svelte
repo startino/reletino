@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import { Menu } from 'lucide-svelte';
+	import { Menu, ChevronLeft, ChevronRight } from 'lucide-svelte';
 
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -17,6 +17,7 @@
 	let { session, supabase, usage } = data;
 
 	let open = $state(false);
+	let isCollapsed = $state(false);
 
 	const basePath = '/dashboard/';
 
@@ -74,7 +75,9 @@
 	class="grid grid-rows-[auto_1fr] lg:grid-rows-1 lg:grid-cols-[auto_1fr] overflow-hidden top-0 bottom-0 right-0 left-0 absolute bg-background"
 >
 	<nav
-		class="w-full h-20 flex items-center justify-between lg:block lg:w-44 lg:h-dvh p-4 bg-card text-card-foreground"
+		class="w-full h-20 flex items-center justify-between lg:block lg:h-dvh p-4 bg-card text-card-foreground transition-all duration-300"
+		class:lg:w-44={!isCollapsed}
+		class:lg:w-20={isCollapsed}
 	>
 		<a href="/" class="text-xl font-bold inline lg:hidden">
 			reletino <span class="text-sm">beta</span>
@@ -116,58 +119,92 @@
 		</Dialog.Root>
 		<ul class="hidden flex-col h-full lg:flex items-center">
 			<li class="mb-6 flex">
-				<a href="/" class="text-xl font-bold">reletino</a>
-				<span class="ml-1 text-xs">beta</span>
+				<a href="/" class="text-xl font-bold" class:hidden={isCollapsed}>reletino</a>
+				<span class="ml-1 text-xs" class:hidden={isCollapsed}>beta</span>
 			</li>
 
 			{#each navItems as item}
 				<li class="my-1 w-full">
-					<a
-						href={item.href}
-						class="{buttonVariants({
-							variant: item.active ? 'secondary' : 'ghost',
-						})} w-full"
-					>
-						{item.label}
-					</a>
+					{#if isCollapsed}
+						<Tooltip.Root>
+							<Tooltip.Trigger class="w-full">
+								<a
+									href={item.href}
+									class="{buttonVariants({
+										variant: item.active ? 'secondary' : 'ghost',
+									})} w-full"
+								>
+									<span class="truncate w-8">{item.label[0]}</span>
+								</a>
+							</Tooltip.Trigger>
+							<Tooltip.Content side="right">
+								<p>{item.label}</p>
+							</Tooltip.Content>
+						</Tooltip.Root>
+					{:else}
+						<a
+							href={item.href}
+							class="{buttonVariants({
+								variant: item.active ? 'secondary' : 'ghost',
+							})} w-full"
+						>
+							{item.label}
+						</a>
+					{/if}
 				</li>
 			{/each}
 			<span class="flex-grow"></span>
 			<li class="my-7 w-full">
-				<Tooltip.Root>
-					<Tooltip.Trigger class="w-full">
-						<div class="flex flex-col border rounded-md p-2 w-full relative">
-							<Info class="right-2 w-5 absolute" />
-							<Typography variant="body-sm" class="font-light pt-2">
-								{credits}
-							</Typography>
-							<Typography variant="body-sm" class="font-light">
-								Credits remaining
-							</Typography>
-						</div>
-					</Tooltip.Trigger>
-					<Tooltip.Content>
+				<div class="flex flex-col border rounded-md p-2 w-full relative">
+					{#if !isCollapsed}
+						<Info class="right-2 w-5 absolute" />
+					{/if}
+					<Typography variant="body-sm" class="font-light pt-2">
+						{credits}
+					</Typography>
+					{#if !isCollapsed}
 						<Typography variant="body-sm" class="font-light">
-							1 submission = 1 credit. <br />
-							1 credit ≈ $0.00324
-							<br />
-							If you run out of credits: jorge.lewis@starti.no
+							Credits remaining
 						</Typography>
-					</Tooltip.Content>
-				</Tooltip.Root>
+					{/if}
+				</div>
 			</li>
 			<li>
-				<a
-					href="/sign_out"
-					class="{buttonVariants({
-						variant: 'ghost',
-					})} w-full flex flex-col place-items-center"
+				{#if isCollapsed}
+					<a
+						href="/sign_out"
+						class="{buttonVariants({
+							variant: 'ghost',
+						})} w-full flex flex-col place-items-center"
+					>
+						<span class="truncate w-8">Out</span>
+					</a>
+				{:else}
+					<a
+						href="/sign_out"
+						class="{buttonVariants({
+							variant: 'ghost',
+						})} w-full flex flex-col place-items-center"
+					>
+						Sign Out
+						<Typography variant="body-sm" class="font-light">
+							({session?.user.user_metadata.full_name})
+						</Typography>
+					</a>
+				{/if}
+			</li>
+			<li class="mt-4 w-full">
+				<button
+					onclick={() => (isCollapsed = !isCollapsed)}
+					class={buttonVariants({ variant: 'ghost' })}
+					aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
 				>
-					Sign Out
-					<Typography variant="body-sm" class="font-light">
-						({session?.user.user_metadata.full_name})
-					</Typography>
-				</a>
+					{#if isCollapsed}
+						<ChevronRight />
+					{:else}
+						<ChevronLeft />
+					{/if}
+				</button>
 			</li>
 		</ul>
 	</nav>
