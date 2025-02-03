@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Select from '$lib/components/ui/select';
-	import SubmissionViewer from './submission-viewer.svelte';
+	import { SubmissionViewer } from '$lib/components/ui/submission-viewer';
 	import type { Database, Tables } from '$lib/supabase';
 	import type { SupabaseClient } from '@supabase/supabase-js';
 	import { Toggle } from '$lib/components/ui/toggle';
@@ -32,11 +32,11 @@
 		if (!browser || data.projects.length === 0) return;
 
 		const storedId = localStorage.getItem(STORAGE_KEY);
-		const project = data.projects.find(p => p.id === storedId);
+		const project = data.projects.find((p) => p.id === storedId);
 
 		if (!project || !data.projects[0]) return;
 
-		selectedProject = project 
+		selectedProject = project
 			? { label: project.title, value: project.id }
 			: { label: data.projects[0].title, value: data.projects[0].id };
 	};
@@ -130,9 +130,9 @@
 		</Button>
 	</div>
 {:else}
-	<div class="grid grid-cols-7 grid-rows-5 gap-6 h-full">
-		<div class="flex flex-col p-2 col-span-2 row-span-5">
-			<div class="flex flex-col place-items-start w-full justify-between mb-4">
+	<div class="grid h-full grid-cols-7 grid-rows-5 gap-6">
+		<div class="col-span-2 row-span-5 flex flex-col p-2">
+			<div class="mb-4 flex w-full flex-col place-items-start justify-between">
 				<Select.Root
 					portal={null}
 					bind:selected={selectedProject}
@@ -141,13 +141,13 @@
 						project && getSubmissionsFromDB(project.value);
 					}}
 				>
-					<div class="flex flex-row mb-4 gap-y-0.5 place-items-center gap-x-4 w-full">
-						<Select.Label class="text-left pl-0">
+					<div class="mb-4 flex w-full flex-row place-items-center gap-x-4 gap-y-0.5">
+						<Select.Label class="pl-0 text-left">
 							<Typography variant="headline-md" class="text-left">
 								Project:
 							</Typography>
 						</Select.Label>
-						<Select.Trigger class="border border-foreground text-primary w-[250px]">
+						<Select.Trigger class="w-[250px] border border-foreground text-primary">
 							<Select.Value placeholder="Select a project" class="text-foreground" />
 						</Select.Trigger>
 						<Select.Content>
@@ -157,7 +157,9 @@
 										value={project.id}
 										label={project.title}
 										class="text-primary"
-										on:click={() => browser && localStorage.setItem(STORAGE_KEY, project.id)}
+										on:click={() =>
+											browser &&
+											localStorage.setItem(STORAGE_KEY, project.id)}
 									>
 										{project.title}
 									</Select.Item>
@@ -176,33 +178,33 @@
 				</div>
 			</div>
 
-			<ScrollArea class="h-fit mt-2 px-4">
+			<ScrollArea class="mt-2 h-fit px-4">
 				<div class="flex flex-col gap-y-2">
-				<Typography variant="headline-md" class="text-left">
-					Submissions {!projectLoading ? '(' + displaySubmissions.length + ')' : ''}
-					{#if projectLoading}
-						<LoaderCircle class="animate-spin text-primary h-24 w-24" />
-					{/if}
-				</Typography>
+					<Typography variant="headline-md" class="text-left">
+						Submissions {!projectLoading ? '(' + displaySubmissions.length + ')' : ''}
+						{#if projectLoading}
+							<LoaderCircle class="h-24 w-24 animate-spin text-primary" />
+						{/if}
+					</Typography>
 
-				{#each displaySubmissions as submission}
-					<Button
-						class="text-wrap text-left h-fit w-full grid grid-cols-7 {selectedSubmission ==
-						submission
-							? 'bg-accent'
-							: ''}"
-						variant="outline"
-						on:click={() => (selectedSubmission = submission)}
-					>
-						<div class="col-span-6 truncate">
-							{submission.title}
-						</div>
-						<div class="ml-auto col-span-1">
-							{#if submission.done}
-								<CheckCheck class="w-5" />
-							{/if}
-							{#if !submission.is_relevant}
-								<LocateOff class="w-5 " />
+					{#each displaySubmissions as submission}
+						<Button
+							class="grid h-fit w-full grid-cols-7 text-wrap text-left {selectedSubmission ==
+							submission
+								? 'bg-accent'
+								: ''}"
+							variant="outline"
+							on:click={() => (selectedSubmission = submission)}
+						>
+							<div class="col-span-6 truncate">
+								{submission.title}
+							</div>
+							<div class="col-span-1 ml-auto">
+								{#if submission.done}
+									<CheckCheck class="w-5" />
+								{/if}
+								{#if !submission.is_relevant}
+									<LocateOff class="w-5 " />
 								{/if}
 							</div>
 						</Button>
