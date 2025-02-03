@@ -31,9 +31,10 @@ export const actions = {
 			},
 		});
 
-		if (userError) {
+		if (userError?.code === 'email_exists') {
+			return setError(form, 'User already exists', { status: 401 });
+		} else if (userError) {
 			console.error({ userError });
-
 			return setError(form, 'Something went wrong...', { status: 500 });
 		}
 
