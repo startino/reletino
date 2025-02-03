@@ -1,92 +1,46 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Dialog from '$lib/components/ui/dialog';
 	import Typography from '$lib/components/ui/typography/typography.svelte';
 
 	import type { Tables } from '$lib/supabase';
-	import type { SuperValidated, Infer } from 'sveltekit-superforms';
-	import type { ProjectSchema } from '$lib/schemas';
-	import ProjectForm from './project-form.svelte';
-	import type { Session, SupabaseClient } from '@supabase/supabase-js';
+	import { EntityControlGrid } from '$lib/components/ui/entity-control-grid';
+	import { Pen, X } from 'lucide-svelte';
+	import { getEnvironmentState } from '$lib/states';
+	import { deleteProject } from '$lib/supabase/projects';
+	import { goto } from '$app/navigation';
 
-	type Props = {
-		data: {
-			supabase: SupabaseClient<any, 'public', any>;
-			environment: Tables<'environments'>;
-			session: Session;
-			projects: Tables<'projects'>[];
-			projectForm: SuperValidated<Infer<ProjectSchema>>;
-		};
-	}
+	let { data } = $props();
 
-	let { data }: Props = $props();
+	let { session, projects: dataProjects, supabase } = data;
 
-	let { supabase, session, environment, projects: dataProjects } = data;
+	const env = getEnvironmentState();
 
 	let projects: Tables<'projects'>[] = $state(dataProjects || []);
-	let selectedProjectId: string = $state('');
+	let entities = $derived(projects.map((p) => ({ ...p, name: p.title, description: p.title })));
 
-	let newProject: Tables<'projects'> | null = $state(null);
+	let baseURL = `/dashboard/${env.value?.name}/projects`;
 </script>
 
 <div class="flex flex-col gap-8">
 	<Typography variant="display-lg">Projects</Typography>
-	<Dialog.Root
-		open={selectedProjectId != ''}
-		onOpenChange={(open) => {
-			if (!open) {
-				selectedProjectId = '';
-			}
+
+	<EntityControlGrid
+		{entities}
+		name="Project"
+		oncreate={() => {
+			goto(`${baseURL}/create`);
+		}}
+		ondelete={(idx) => {
+			const [project] = projects.splice(idx, 1);
+			deleteProject(project!.id, { supabase });
 		}}
 	>
-		<Dialog.Content class="w-full max-w-5xl">
-			<Dialog.Header>
-				<Dialog.Title>Project</Dialog.Title>
-			</Dialog.Header>
-			{#if selectedProjectId != ''}
-				<ProjectForm
-					{session}
-					{supabase}
-					{environment}
-					projectForm={data.projectForm}
-					bind:projects
-					bind:selectedProjectId
-					bind:newProject
-				/>
-			{/if}
-		</Dialog.Content>
-	</Dialog.Root>
-	<ul class="grid grid-cols-3 gap-4">
-		<li class="col-span-3 mx-auto">
-			<Button
-				class=""
-				onclick={() => {
-					newProject = {
-						id: crypto.randomUUID(),
-						profile_id: session.user.id,
-						created_at: new Date().toISOString(),
-						title: 'Untitled Project',
-						prompt: '',
-						running: false,
-						subreddits: [],
-						comment_style_prompt: '',
-						dm_style_prompt: '',
-						use_case: null,
-					};
-					selectedProjectId = newProject.id;
-				}}
-			>
-				Create New Project
-			</Button>
-		</li>
-		{#each projects as project}
-			<li class="rounded-md bg-card">
+		{#snippet itemCell(project, { deleteEntity })}
+			<div class="relative grid gap-4 bg-card">
 				<Button
-					class="flex h-full w-full flex-col p-8 py-12 pt-3"
+					class=" flex h-full w-full flex-col p-8 py-12 pb-10 pt-3"
+					href="{baseURL}/{project.id}"
 					variant="ghost"
-					onclick={() => {
-						selectedProjectId = project.id;
-					}}
 				>
 					<div class="mb-4 ml-auto flex flex-row place-items-center gap-x-2">
 						<div
@@ -102,7 +56,25 @@
 					</div>
 					<Typography variant="title-lg">{project.title}</Typography>
 				</Button>
-			</li>
-		{/each}
-	</ul>
+
+				<div class="absolute bottom-3 left-4 flex gap-4">
+					<a
+						class="z-20 rounded-full"
+						href="{baseURL}/{project.id}/edit"
+						aria-label="Edit project"
+					>
+						<Pen size="20" class="transition-all hover:scale-125" />
+					</a>
+
+					<button
+						onclick={() => {
+							deleteEntity();
+						}}
+					>
+						<X size="20" class="transition-all hover:scale-125" />
+					</button>
+				</div>
+			</div>
+		{/snippet}
+	</EntityControlGrid>
 </div>
