@@ -2,7 +2,7 @@ import textwrap
 from dotenv import load_dotenv
 from src.lib.critino import critino_prompt, get_critiques
 from src.interfaces.db import client
-from src.interfaces.llm import gpt_4o
+from src.interfaces.llm import gpt_o1, gpt_4o
 from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.lib.xml_utils import submission_to_xml
 from src.models.simple_submission import SimpleSubmission

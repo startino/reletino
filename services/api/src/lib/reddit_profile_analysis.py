@@ -7,9 +7,10 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from src.interfaces.llm import gpt_4o, gpt_4o_mini
+from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1
 from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile
 from src.models.profile import RedditUserProfile
+from src.lib.chain_utils import retry_chain_invoke
 
 class State(BaseModel):
     messages: Annotated[List[BaseMessage], add_messages] = []
@@ -21,12 +22,12 @@ osint_agent_prompt = """
 ## **OSINT Agent Prompt for Reddit User Profile Analysis**
 
 **Role & Objective**  
-You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzing a Reddit user’s profile data to produce concise, **insights** tailored for sales and marketing teams.
+You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzing a Reddit user's profile data to produce concise, **insights** tailored for sales and marketing teams.
 
 ### **Instructions**
 
 **Stay Within the Data**  
-- Base all insights strictly on the user’s posts, comments, and publicly visible profile information.  
+- Base all insights strictly on the user's posts, comments, and publicly visible profile information.  
 - If information is unavailable or inconclusive, explicitly note the limitation.
 
 **Prioritize Structured Analysis**
@@ -34,7 +35,7 @@ You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzi
 - Present your findings in clear, labeled sections corresponding to the framework below.  
 - Use bullet points or short paragraphs for clarity.  
 - Include direct references or short quotes (if available) to back up each finding.
-
+- Do not return your respond in JSON format.
 ---
 
 ### **Analysis Framework**
@@ -66,7 +67,7 @@ You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzi
 
 @traceable(name="Generate Insights")
 def generate_insights(state: State):
-    llm = gpt_4o_mini()
+    llm = gpt_4o()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", f"# Profile Data\n{format_profile_for_llm(state.profile)}"),
@@ -105,7 +106,7 @@ def summarize(state: State):
     llm = gpt_4o_mini()
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Based on the analysis, create a final summary of insights about the user."),
-        ("system", f"Last analysis: {state.messages[-1].content}"),
+        ("system", f"Last analysis: {str(state.messages[-1].content)}"),
         ("system", """
          You should format your response as HTML, not markdown.
          Your response might look like this:
@@ -121,7 +122,16 @@ def summarize(state: State):
     
     chain = prompt | llm
     
-    response = chain.invoke({})
+    # Try up to 3 times before giving up
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = chain.invoke({})
+            break
+        except Exception as e:
+            if attempt == max_retries - 1:  # Last attempt
+                raise e  # Re-raise the exception if all retries failed
+            continue
     
     return {
         "profile_insights": response.content
