@@ -13,7 +13,11 @@
 	import { Switch } from '$lib/components/ui/switch';
 	import { PUBLIC_CRITINO_URL } from '$env/static/public';
 	import { goto } from '$app/navigation';
+	import { TipTap } from '$lib/components/ui/tiptap';
 	import { deleteProject as deleteProjectById } from '$lib/supabase/projects';
+	import { generateHTML } from '@tiptap/core';
+	import StarterKit from '@tiptap/starter-kit';
+	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
 
 	let { data } = $props();
 
@@ -54,6 +58,340 @@
 			toast.success('Project successfully deleted.');
 			goto(`/dashboard/${environment!.slug}/projects`);
 		}
+	};
+
+	const fillPromptWithTemplate = () => {
+		const defaultPrompt = generateHTML(
+			{
+				type: 'doc',
+				content: [
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Objective' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'The end-goal is to use the relevant posts to acquire new users for Reletino.',
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'General Guidance' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'The author must own/run an existing SaaS product or is planning on building one.',
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Relevant Post Examples' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'A post of someone asking for marketing tools they can use to help sell their software product.',
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'A post from someone that is running a SaaS business and needs to market it.',
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Irrelevant Post Examples' }],
+					},
+					{
+						type: 'bulletList',
+						content: [
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: "A really technical post about a person's software.",
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Someone with an idea that is too vague or still in the concept phase, with the author not already committing to building the product.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'A post related to e-commerce or physical products.',
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'About Reletino' }],
+					},
+					{
+						type: 'paragraph',
+						content: [{ type: 'text', text: 'Reletino is a Reddit automation tool.' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Its primary goal is to help users find relevant posts.',
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: "It uses AI to filter a live stream of Reddit posts based on a prompt; you simply tell it what is relevant to you in plain English and it'll give you relevant posts as they get published.",
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Reletino is great at connecting someone with a product/service to someone that needs it.',
+							},
+						],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: "Reletino is like RedditFlow and GummySearch, but instead of using keywords which don't capture nuance, Reletino does.",
+							},
+						],
+					},
+				],
+			},
+			[StarterKit]
+		);
+		$formData.prompt = defaultPrompt;
+	};
+
+	const fillCommentStyleWithTemplate = () => {
+		const defaultCommentStyle = generateHTML(
+			{
+				type: 'doc',
+				content: [
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'Comment Style Guide' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Be friendly and professional when commenting on posts.',
+							},
+						],
+					},
+					{
+						type: 'bulletList',
+						content: [
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Always start with a greeting.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Acknowledge their specific situation or problem.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Explain how our product can help them.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'End with a clear call to action.',
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			[StarterKit]
+		);
+		$formData.comment_style_prompt = defaultCommentStyle;
+	};
+
+	const fillDMStyleWithTemplate = () => {
+		const defaultDMStyle = generateHTML(
+			{
+				type: 'doc',
+				content: [
+					{
+						type: 'heading',
+						attrs: { level: 1 },
+						content: [{ type: 'text', text: 'DM Style Guide' }],
+					},
+					{
+						type: 'paragraph',
+						content: [
+							{
+								type: 'text',
+								text: 'Be concise and professional when sending direct messages.',
+							},
+						],
+					},
+					{
+						type: 'bulletList',
+						content: [
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Introduce yourself and your role.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Reference their specific post or comment.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Explain why you think our product would be valuable to them.',
+											},
+										],
+									},
+								],
+							},
+							{
+								type: 'listItem',
+								content: [
+									{
+										type: 'paragraph',
+										content: [
+											{
+												type: 'text',
+												text: 'Provide a clear next step or call to action.',
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+			[StarterKit]
+		);
+		$formData.dm_style_prompt = defaultDMStyle;
 	};
 </script>
 
@@ -101,7 +439,7 @@
 
 		<div>
 			{#if $formData.context.category == 'find-leads'}
-				<Typography as="h2" variant="body-md" class="font-bold">
+				<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
 					Lead Finding Configuration
 				</Typography>
 				<Form.Field {form} name="context.product_name">
@@ -159,7 +497,112 @@
 				</Form.Field>
 			{/if}
 		</div>
+		<Form.Field {form} name="prompt">
+			<Form.Control let:attrs>
+				<Form.Label>Prompt</Form.Label>
+				<Form.Description>
+					Accurate results are achieved by providing a great prompt. <br />
+					Tell the AI exactly what to look for.
+				</Form.Description>
+				<input type="hidden" name="prompt" bind:value={$formData.prompt} />
+				<Dialog.Root>
+					<Dialog.Trigger>
+						<Button variant="secondary" class="">Open Prompt</Button>
+					</Dialog.Trigger>
+					<Dialog.Content
+						class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
+					>
+						<Button
+							onclick={fillPromptWithTemplate}
+							variant="outline"
+							class="right-2 top-2"
+						>
+							Insert Example Prompt (Reletino's)
+						</Button>
 
+						<ScrollArea class="h-full w-full p-3">
+							<TipTap
+								class="h-full border border-input p-3 outline-input"
+								bind:content={$formData.prompt}
+							/>
+						</ScrollArea>
+					</Dialog.Content>
+				</Dialog.Root>
+				<Form.FieldErrors />
+			</Form.Control>
+		</Form.Field>
+		<Form.Field {form} name="comment_style_prompt">
+			<Form.Control let:attrs>
+				<Form.Label>Comment Style</Form.Label>
+				<Form.Description>
+					Define how the AI should style its comments when responding to relevant posts.
+				</Form.Description>
+				<input
+					type="hidden"
+					name="comment_style_prompt"
+					bind:value={$formData.comment_style_prompt}
+				/>
+				<Dialog.Root>
+					<Dialog.Trigger>
+						<Button variant="secondary" class="">Open Comment Style</Button>
+					</Dialog.Trigger>
+					<Dialog.Content
+						class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
+					>
+						<Button
+							onclick={fillCommentStyleWithTemplate}
+							variant="outline"
+							class="right-2 top-2"
+						>
+							Insert Example Comment Style
+						</Button>
+						<ScrollArea class="h-full w-full p-3">
+							<TipTap
+								class="h-full border border-input p-3 outline-input"
+								bind:content={$formData.comment_style_prompt}
+							/>
+						</ScrollArea>
+					</Dialog.Content>
+				</Dialog.Root>
+				<Form.FieldErrors />
+			</Form.Control>
+		</Form.Field>
+		<Form.Field {form} name="dm_style_prompt">
+			<Form.Control let:attrs>
+				<Form.Label>DM Style</Form.Label>
+				<Form.Description>
+					Define how the AI should style its direct messages when reaching out to users.
+				</Form.Description>
+				<input
+					type="hidden"
+					name="dm_style_prompt"
+					bind:value={$formData.dm_style_prompt}
+				/>
+				<Dialog.Root>
+					<Dialog.Trigger>
+						<Button variant="secondary" class="">Open DM Style</Button>
+					</Dialog.Trigger>
+					<Dialog.Content
+						class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
+					>
+						<Button
+							onclick={fillDMStyleWithTemplate}
+							variant="outline"
+							class="right-2 top-2"
+						>
+							Insert Example DM Style
+						</Button>
+						<ScrollArea class="h-full w-full p-3">
+							<TipTap
+								class="h-full border border-input p-3 outline-input"
+								bind:content={$formData.dm_style_prompt}
+							/>
+						</ScrollArea>
+					</Dialog.Content>
+				</Dialog.Root>
+				<Form.FieldErrors />
+			</Form.Control>
+		</Form.Field>
 		<Form.Field
 			{form}
 			name="running"

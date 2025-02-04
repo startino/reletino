@@ -12,7 +12,7 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 		redirect(303, '/login');
 	}
 
-	console.log("PUBLIC_CRITINO_API_KEY", PUBLIC_CRITINO_API_KEY);
+	console.log('PUBLIC_CRITINO_API_KEY', PUBLIC_CRITINO_API_KEY);
 
 	const { data, error: err } = await supabase
 		.from('environments')
@@ -49,68 +49,70 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 
 	const getOrCreateTeamEnv = async () => {
 		if (environment.critino_key) {
-		  console.log('environment key already exists');
-		  return;
+			console.log('environment key already exists');
+			return;
 		}
 		console.log('environment', environment);
 
 		// Reletino hiearchy:
 		// environment (team) -> environment_profile (relationship) -> profile (user) -> project
-		// but environment 1:1 with profile 
-	  
+		// but environment 1:1 with profile
+
 		const critinoTeamEnv = await critino.GET('/environments/{name}', {
-		  params: {
-			query: {
-			  team_name: 'startino',
-			  parent_name: 'reletino'
+			params: {
+				query: {
+					team_name: 'startino',
+					parent_name: 'reletino',
+				},
+				path: {
+					name: environment.name,
+				},
+				header: {
+					'x-critino-key': PUBLIC_CRITINO_API_KEY,
+				},
 			},
-			path: {
-			  name: environment.name
-			},
-			header: {
-			  'x-critino-key': PUBLIC_CRITINO_API_KEY,
-			},
-		  },
 		});
 
 		console.log('reletinoEnvironment', environment);
-	  
+
 		if (!critinoTeamEnv.error) {
-		  const updateKeyResponse = await critino.PATCH('/environments/{name}/key', {
-			params: {
-			  query: {
-				team_name: 'startino',
-				parent_name: 'reletino'
-			  },
-			  path: {
-				name: environment.name
-			  },
-			  header: {
-				'x-critino-key': PUBLIC_CRITINO_API_KEY,
-			  },
-			},
-		  });
+			const updateKeyResponse = await critino.PATCH('/environments/{name}/key', {
+				params: {
+					query: {
+						team_name: 'startino',
+						parent_name: 'reletino',
+					},
+					path: {
+						name: environment.name,
+					},
+					header: {
+						'x-critino-key': PUBLIC_CRITINO_API_KEY,
+					},
+				},
+			});
 
-		  console.log('updateKeyResponse', updateKeyResponse);
-	  
-		  if (!updateKeyResponse.data || updateKeyResponse.error) {
-			console.error(`Error updating environment key: ${JSON.stringify(updateKeyResponse.error, null, 2)}`);
-			throw error(500, 'Failed to update environment key');
-		  }
-	  
-		  const { error: eEnvironment } = await supabase
-			.from('environments')
-			.update({ critino_key: updateKeyResponse.data.key })
-			.eq('name', environment.name);
-	  
-		  console.log('error env', environment.name, eEnvironment);
-		  environment.critino_key = updateKeyResponse.data.key;
+			console.log('updateKeyResponse', updateKeyResponse);
 
-		  return;
+			if (!updateKeyResponse.data || updateKeyResponse.error) {
+				console.error(
+					`Error updating environment key: ${JSON.stringify(updateKeyResponse.error, null, 2)}`
+				);
+				throw error(500, 'Failed to update environment key');
+			}
+
+			const { error: eEnvironment } = await supabase
+				.from('environments')
+				.update({ critino_key: updateKeyResponse.data.key })
+				.eq('name', environment.name);
+
+			console.log('error env', environment.name, eEnvironment);
+			environment.critino_key = updateKeyResponse.data.key;
+
+			return;
 		}
 
 		console.log('create new critino team env');
-	  
+
 		const newCritinoTeamEnv = await critino.POST('/environments/{name}', {
 			params: {
 				query: {
@@ -126,7 +128,7 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 			},
 			body: {
 				description: `env name: ${environment.name}\nemail: ${auth.user?.email}\nuser id: ${auth.user?.id}`,
-				gen_key: false
+				gen_key: false,
 			},
 		});
 
@@ -192,6 +194,8 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 			});
 
 			if (!createCritinoProjectEnv.data?.key || createCritinoProjectEnv.error) {
+				console.log(createCritinoProjectEnv);
+
 				console.error('Error creating project:', createCritinoProjectEnv.error);
 				throw error(500, 'Failed to create project');
 			}
@@ -200,7 +204,6 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 			console.log('createCritinoProjectEnv', createCritinoProjectEnv);
 		}
 	};
-
 
 	console.log('environment', environment);
 	await getOrCreateTeamEnv();
@@ -222,6 +225,6 @@ export const load = async ({ locals: { safeGetSession, supabase, environment, au
 
 	return {
 		projects,
-		usage,	
+		usage,
 	};
 };

@@ -125,9 +125,9 @@ const colors = {
 	// shadcn aliases
 	foreground: withOpacity('--color-background-on'),
 	accent: withOpacity('--color-tertiary-on'),
-	border: withOpacity('--color-surface-variant'),
-	input: withOpacity('--color-surface-variant'),
-	ring: withOpacity('--color-surface-variant'),
+	border: withOpacity('--color-surface-variant-on'),
+	input: withOpacity('--color-surface-variant-on'),
+	ring: withOpacity('--color-surface-variant-on'),
 
 	destructive: {
 		DEFAULT: withOpacity('--color-error'),
