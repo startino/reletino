@@ -106,7 +106,7 @@ def summarize(state: State):
     llm = gpt_4o_mini()
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Based on the analysis, create a final summary of insights about the user."),
-        ("system", f"Last analysis: {str(state.messages[-1].content)}"),
+        ("system", f"Last analysis: {str(state.messages[-1].content).replace('{', '{{').replace('}', '}}')}"),
         ("system", """
          You should format your response as HTML, not markdown.
          Your response might look like this:
