@@ -471,7 +471,7 @@
 					</Form.Control>
 				</Form.Field>
 			{:else if $formData.context.category == 'find-competition'}
-				<Typography as="h2" variant="body-md" class="font-bold">
+				<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
 					Competition Finding Configuration
 				</Typography>
 
