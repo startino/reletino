@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Plus, X } from 'lucide-svelte';
 
 	type Props = {
@@ -11,6 +9,7 @@
 	};
 
 	let value = $state('');
+	let focus = $state(false);
 
 	let { items = $bindable(), placeholder, onNewItem }: Props = $props();
 
@@ -25,8 +24,15 @@
 </script>
 
 <div class="grid gap-3">
-	<div class="flex gap-2">
-		<Input
+	<div
+		class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 {focus
+			? 'ring-2 ring-ring ring-offset-2 ring-offset-background'
+			: ''}"
+	>
+		<input
+			class="flex-1 border-none bg-transparent p-0 placeholder:text-muted-foreground focus:border-transparent focus:ring-0"
+			onfocus={() => (focus = true)}
+			onblur={() => (focus = false)}
 			bind:value
 			{placeholder}
 			onkeydown={(e) => {
@@ -36,9 +42,9 @@
 				}
 			}}
 		/>
-		<Button type="button" variant="outline" onclick={addItem}>
-			<Plus />
-		</Button>
+		<button type="button" onclick={addItem}>
+			<Plus class={value ? '' : 'text-muted-foreground'} />
+		</button>
 	</div>
 	{#if items.length > 0}
 		<ul class="flex flex-wrap gap-2">
