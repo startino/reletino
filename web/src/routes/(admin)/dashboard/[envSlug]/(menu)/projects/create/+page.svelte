@@ -22,11 +22,30 @@
 	];
 
 	const stepToTitle = {
-		1: 'Choose a category',
-		2: 'Give your project a name',
-		3: 'Enter your website URL',
-		4: 'Provide additional data',
-		5: 'Preview and confirm',
+		1: {
+			title: 'Choose a category',
+			description:
+				"Select a category that aligns with your project goal, whether it's discovering new opportunities or analyzing market trends.",
+		},
+		2: {
+			title: 'Enter your project name',
+			description:
+				'Give your project a unique and memorable name to set the stage for success.',
+		},
+		3: {
+			title: 'Enter your website URL',
+			description:
+				'Link your project to a website so we can gather relevant insights and data.',
+		},
+		4: {
+			title: 'Provide additional data',
+			description:
+				'Enhance your project with extra details to refine and personalize your results.',
+		},
+		5: {
+			title: 'Preview and confirm',
+			description: 'Take a final look at your project setup before moving forward.',
+		},
 	};
 
 	const next = async () => {
@@ -83,7 +102,10 @@
 	<Card.Root class="border-none">
 		<Card.Header>
 			<Card.Description>{currentStep} / 5</Card.Description>
-			<Card.Title class="text-3xl">{stepToTitle[currentStep]}</Card.Title>
+			<Card.Title class="text-3xl">{stepToTitle[currentStep].title}</Card.Title>
+			<Card.Description>
+				{stepToTitle[currentStep].description}
+			</Card.Description>
 		</Card.Header>
 
 		<Card.Content>
