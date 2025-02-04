@@ -56,9 +56,6 @@
 		validators: zod(projectCreationSchema),
 	});
 
-	let irrelevantPostExample = $state('');
-	let coreFeature = $state('');
-
 	$effect(() => {
 		$form.category = selectedCategory as 'find-leads' | 'find-competition';
 		$form.projectName = projectName;
@@ -83,10 +80,10 @@
 
 <div class="mx-auto max-w-2xl">
 	<Typography as="h1" variant="headline-sm" class="mb-6">Create a project</Typography>
-	<Card.Root>
+	<Card.Root class="border-none">
 		<Card.Header>
-			<Card.Title>{stepToTitle[currentStep]}</Card.Title>
-			<Card.Description>Step {currentStep} of 5</Card.Description>
+			<Card.Description>{currentStep} / 5</Card.Description>
+			<Card.Title class="text-3xl">{stepToTitle[currentStep]}</Card.Title>
 		</Card.Header>
 
 		<Card.Content>
@@ -176,7 +173,7 @@
 			{:else}
 				<div class="space-y-6">
 					<div class="space-y-2">
-						<Typography as="h2" variant="body-md" class="font-bold">
+						<Typography as="h2" variant="body-md" class="text-left font-bold">
 							Project Details
 						</Typography>
 						<div class="grid grid-cols-[auto_1fr] gap-2 text-sm">
@@ -195,7 +192,7 @@
 
 					{#if $form.context.category === 'find-leads'}
 						<div class="space-y-2">
-							<Typography as="h2" variant="body-md" class="font-bold">
+							<Typography as="h2" variant="body-md" class="text-left font-bold">
 								Lead Finding Configuration
 							</Typography>
 							<div class="grid grid-cols-[auto_1fr] gap-2 text-sm">
@@ -219,7 +216,7 @@
 						</div>
 					{:else if $form.category === 'find-competition'}
 						<div class="space-y-2">
-							<Typography as="h2" variant="body-md" class="font-bold">
+							<Typography as="h2" variant="body-md" class="text-left font-bold">
 								Competition Finding Configuration
 							</Typography>
 							<div class="grid grid-cols-[auto_1fr] gap-2 text-sm">
@@ -281,12 +278,19 @@
 		</Card.Content>
 
 		<Card.Footer class="">
-			<Button onclick={prev} size="sm" disabled={currentStep === 1} variant="ghost">
-				<ChevronLeft /> Previous
+			<Button
+				onclick={prev}
+				aria-label="previous step"
+				size="sm"
+				disabled={currentStep === 1}
+				variant="ghost"
+			>
+				<ChevronLeft />
 			</Button>
 			<Button
 				onclick={next}
 				size="sm"
+				aria-label="next step"
 				disabled={currentStep === 5 ||
 					(currentStep === 1 && !selectedCategory) ||
 					(currentStep === 2 && !projectName) ||
@@ -298,7 +302,7 @@
 								!$form.context.name)))}
 				variant="ghost"
 			>
-				Next <ChevronRight />
+				<ChevronRight />
 			</Button>
 		</Card.Footer>
 	</Card.Root>
