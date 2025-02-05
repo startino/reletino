@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
-	import { ChevronRight, Plus, X, Pen } from 'lucide-svelte';
+	import { ChevronRight, Plus, X, Pen, Trash } from 'lucide-svelte';
 	import { TipTap } from '$lib/components/ui/tiptap';
 	import * as Dialog from '../dialog';
 	import { Button } from '../button';
@@ -125,7 +125,7 @@
 										}
 									}}
 								>
-									<X
+									<Trash
 										class="scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100"
 									/>
 								</div>
