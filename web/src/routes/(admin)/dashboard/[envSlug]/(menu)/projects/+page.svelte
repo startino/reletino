@@ -18,7 +18,7 @@
 	let projects: Tables<'projects'>[] = $state(dataProjects || []);
 	let entities = $derived(projects.map((p) => ({ ...p, name: p.title, description: p.title })));
 
-	let baseURL = `/dashboard/${env.value?.name}/projects`;
+	let baseURL = `/dashboard/${env.value?.slug}/projects`;
 </script>
 
 <div class="flex flex-col gap-8">
