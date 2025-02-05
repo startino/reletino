@@ -395,270 +395,278 @@
 	};
 </script>
 
-<div class="mx-auto max-w-3xl">
-	<Typography as="h1" variant="headline-md" class="mb-4 text-center">Edit Project</Typography>
-
-	<form method="POST" action="?/updateProject" class="flex flex-col gap-y-2" use:enhance>
-		<input type="hidden" name="id" bind:value={$formData.id} />
-		<input type="hidden" name="profile_id" bind:value={$formData.profile_id} />
-		<!-- this button has to be here for disabling submit on enter when focusing on input fields-->
-		<!-- https://github.com/sveltejs/kit/discussions/8657 -->
-		<button type="submit" disabled style="display: none"></button>
-
-		<Form.Field {form} name="title">
-			<Form.Control let:attrs>
-				<Form.Label>Title</Form.Label>
-				<Form.Description>This is the project's title.</Form.Description>
-				<Input {...attrs} class="max-w-sm" bind:value={$formData.title} />
-			</Form.Control>
-
-			<Form.FieldErrors />
-		</Form.Field>
-
-		<Form.Field {form} name="subreddits" class="flex flex-col pb-0">
-			<Form.Control let:attrs>
-				<div class="space-y-0.5">
-					<Form.Label>Subreddits</Form.Label>
-					<Form.Description>
-						Manually add your subreddits, For example: "saas", "startups".
-						<br />
-						The cost of the project is proportional to the size and number of the subreddits
-						you add.
-					</Form.Description>
-				</div>
-				<TagInput
-					bind:items={$formData.subreddits}
-					placeholder="Type a subreddit here..."
-					onNewItem={(newSubreddit) =>
-						newSubreddit.toLowerCase().trim().replace('r/', '')}
-				/>
-			</Form.Control>
-
-			<Form.FieldErrors />
-		</Form.Field>
-
-		<div>
-			{#if $formData.context.category == 'find-leads'}
-				<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
-					Lead Finding Configuration
-				</Typography>
-				<Form.Field {form} name="context.product_name">
-					<Form.Control let:attrs>
-						<Form.Label>Project Name</Form.Label>
-						<Input {...attrs} bind:value={$formData.context.product_name} />
-						<Form.FieldErrors />
-					</Form.Control>
-				</Form.Field>
-
-				<Form.Field {form} name="context.icp">
-					<Form.Control let:attrs>
-						<Form.Label>ICP</Form.Label>
-						<Input {...attrs} bind:value={$formData.context.icp} />
-						<Form.FieldErrors />
-					</Form.Control>
-				</Form.Field>
-
-				<Form.Field {form} name="context.irrelevant_post_examples">
-					<Form.Control>
-						<Form.Label>Irrelevant Post Examples</Form.Label>
-
-						<TagInput
-							bind:items={$formData.context.irrelevant_post_examples}
-							placeholder="Add example"
-						/>
-
-						<Form.FieldErrors />
-					</Form.Control>
-				</Form.Field>
-			{:else if $formData.context.category == 'find-competition'}
-				<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
-					Competition Finding Configuration
-				</Typography>
-
-				<Form.Field {form} name="context.product_name">
-					<Form.Control let:attrs>
-						<Form.Label>Name</Form.Label>
-						<Input {...attrs} bind:value={$formData.context.name} />
-						<Form.FieldErrors />
-					</Form.Control>
-				</Form.Field>
-
-				<Form.Field {form} name="context.core_features">
-					<Form.Control>
-						<Form.Label>Core Features</Form.Label>
-
-						<TagInput
-							bind:items={$formData.context.core_features}
-							placeholder="Add feature"
-						/>
-
-						<Form.FieldErrors />
-					</Form.Control>
-				</Form.Field>
-			{/if}
-		</div>
-		<Form.Field {form} name="prompt">
-			<Form.Control let:attrs>
-				<Form.Label>Prompt</Form.Label>
-				<Form.Description>
-					Accurate results are achieved by providing a great prompt. <br />
-					Tell the AI exactly what to look for.
-				</Form.Description>
-				<input type="hidden" name="prompt" bind:value={$formData.prompt} />
-				<Dialog.Root>
-					<Dialog.Trigger>
-						<Button variant="secondary" class="">Open Prompt</Button>
-					</Dialog.Trigger>
-					<Dialog.Content
-						class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
-					>
-						<Button
-							onclick={fillPromptWithTemplate}
-							variant="outline"
-							class="right-2 top-2"
-						>
-							Insert Example Prompt (Reletino's)
-						</Button>
-
-						<ScrollArea class="h-full w-full p-3">
-							<TipTap
-								class="h-full border border-input p-3 outline-input"
-								bind:content={$formData.prompt}
-							/>
-						</ScrollArea>
-					</Dialog.Content>
-				</Dialog.Root>
-				<Form.FieldErrors />
-			</Form.Control>
-		</Form.Field>
-		<Form.Field {form} name="comment_style_prompt">
-			<Form.Control let:attrs>
-				<Form.Label>Comment Style</Form.Label>
-				<Form.Description>
-					Define how the AI should style its comments when responding to relevant posts.
-				</Form.Description>
-				<input
-					type="hidden"
-					name="comment_style_prompt"
-					bind:value={$formData.comment_style_prompt}
-				/>
-				<Dialog.Root>
-					<Dialog.Trigger>
-						<Button variant="secondary" class="">Open Comment Style</Button>
-					</Dialog.Trigger>
-					<Dialog.Content
-						class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
-					>
-						<Button
-							onclick={fillCommentStyleWithTemplate}
-							variant="outline"
-							class="right-2 top-2"
-						>
-							Insert Example Comment Style
-						</Button>
-						<ScrollArea class="h-full w-full p-3">
-							<TipTap
-								class="h-full border border-input p-3 outline-input"
-								bind:content={$formData.comment_style_prompt}
-							/>
-						</ScrollArea>
-					</Dialog.Content>
-				</Dialog.Root>
-				<Form.FieldErrors />
-			</Form.Control>
-		</Form.Field>
-		<Form.Field {form} name="dm_style_prompt">
-			<Form.Control let:attrs>
-				<Form.Label>DM Style</Form.Label>
-				<Form.Description>
-					Define how the AI should style its direct messages when reaching out to users.
-				</Form.Description>
-				<input
-					type="hidden"
-					name="dm_style_prompt"
-					bind:value={$formData.dm_style_prompt}
-				/>
-				<Dialog.Root>
-					<Dialog.Trigger>
-						<Button variant="secondary" class="">Open DM Style</Button>
-					</Dialog.Trigger>
-					<Dialog.Content
-						class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
-					>
-						<Button
-							onclick={fillDMStyleWithTemplate}
-							variant="outline"
-							class="right-2 top-2"
-						>
-							Insert Example DM Style
-						</Button>
-						<ScrollArea class="h-full w-full p-3">
-							<TipTap
-								class="h-full border border-input p-3 outline-input"
-								bind:content={$formData.dm_style_prompt}
-							/>
-						</ScrollArea>
-					</Dialog.Content>
-				</Dialog.Root>
-				<Form.FieldErrors />
-			</Form.Control>
-		</Form.Field>
-		<Form.Field
-			{form}
-			name="running"
-			class="flex flex-row items-center justify-between rounded-lg border p-4"
-		>
-			<Form.Control let:attrs>
-				<div class="space-y-0.5">
-					<Form.Label>Running</Form.Label>
-					<Form.Description>
-						Turn on to start listening for Reddit posts.
-					</Form.Description>
-				</div>
-				<Switch includeInput {...attrs} bind:checked={$formData.running} />
-			</Form.Control>
-		</Form.Field>
-		<Form.Button class="mt-2 " disabled={$timeout || $delayed}>
-			{#if $timeout}
-				<LoaderCircle class="animate-spin" />
-			{:else if $delayed}
-				<Loader class="animate-spin" />
-			{:else}
-				Save
-			{/if}
-		</Form.Button>
-		<Button
-			variant="secondary"
-			href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment!.name}/${project.title}/workflows?key=${environment!.critino_key}`}
-			target="_blank"
-			class="w-full"
-		>
-			Manage Critiques
-			<ExternalLink class="ml-2 w-5" />
+<div class="flex gap-8">
+	<div class="fixed">
+		<Button variant="outline" href="/dashboard/{environment!.slug}/projects" class="gap-2">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+			Back
 		</Button>
-		<Dialog.Root>
-			<Dialog.Trigger>
-				<Button variant="destructive" class="w-full" disabled={$timeout || $delayed}>
-					Delete
-				</Button>
-			</Dialog.Trigger>
-			<Dialog.Content class="place-items-center">
-				<Dialog.Header>
-					<Dialog.Title class="text-center">
-						YOU ARE ABOUT TO DELETE THIS PROJECT.
-					</Dialog.Title>
-				</Dialog.Header>
+	</div>
+	<div class="flex-1 max-w-3xl mx-auto">
+		<Typography as="h1" variant="headline-md" class="mb-4 text-center">Edit Project</Typography>
 
-				<Typography variant="body-md">
-					Are you sure you want to delete this project?
-				</Typography>
+		<form method="POST" action="?/updateProject" class="flex flex-col gap-y-2" use:enhance>
+			<input type="hidden" name="id" bind:value={$formData.id} />
+			<input type="hidden" name="profile_id" bind:value={$formData.profile_id} />
+			<!-- this button has to be here for disabling submit on enter when focusing on input fields-->
+			<!-- https://github.com/sveltejs/kit/discussions/8657 -->
+			<button type="submit" disabled style="display: none"></button>
 
-				<Dialog.Footer>
-					<Button class="w-full" variant="destructive" on:click={() => deleteProject()}>
-						If I click this, I am sure.
+			<Form.Field {form} name="title">
+				<Form.Control let:attrs>
+					<Form.Label>Title</Form.Label>
+					<Form.Description>This is the project's title.</Form.Description>
+					<Input {...attrs} class="max-w-sm" bind:value={$formData.title} />
+				</Form.Control>
+
+				<Form.FieldErrors />
+			</Form.Field>
+
+			<Form.Field {form} name="subreddits" class="flex flex-col pb-0">
+				<Form.Control let:attrs>
+					<div class="space-y-0.5">
+						<Form.Label>Subreddits</Form.Label>
+						<Form.Description>
+							Manually add your subreddits, For example: "saas", "startups".
+							<br />
+							The cost of the project is proportional to the size and number of the subreddits
+							you add.
+						</Form.Description>
+					</div>
+					<TagInput
+						bind:items={$formData.subreddits}
+						placeholder="Type a subreddit here..."
+						onNewItem={(newSubreddit) =>
+							newSubreddit.toLowerCase().trim().replace('r/', '')}
+					/>
+				</Form.Control>
+
+				<Form.FieldErrors />
+			</Form.Field>
+
+			<div>
+				{#if $formData.context.category == 'find-leads'}
+					<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
+						Lead Finding Configuration
+					</Typography>
+					<Form.Field {form} name="context.product_name">
+						<Form.Control let:attrs>
+							<Form.Label>Project Name</Form.Label>
+							<Input {...attrs} bind:value={$formData.context.product_name} />
+							<Form.FieldErrors />
+						</Form.Control>
+					</Form.Field>
+
+					<Form.Field {form} name="context.icp">
+						<Form.Control let:attrs>
+							<Form.Label>ICP</Form.Label>
+							<Input {...attrs} bind:value={$formData.context.icp} />
+							<Form.FieldErrors />
+						</Form.Control>
+					</Form.Field>
+
+					<Form.Field {form} name="context.irrelevant_post_examples">
+						<Form.Control>
+							<Form.Label>Irrelevant Post Examples</Form.Label>
+
+							<TagInput
+								bind:items={$formData.context.irrelevant_post_examples}
+								placeholder="Add example"
+							/>
+
+							<Form.FieldErrors />
+						</Form.Control>
+					</Form.Field>
+				{:else if $formData.context.category == 'find-competition'}
+					<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
+						Competition Finding Configuration
+					</Typography>
+
+					<Form.Field {form} name="context.product_name">
+						<Form.Control let:attrs>
+							<Form.Label>Name</Form.Label>
+							<Input {...attrs} bind:value={$formData.context.name} />
+							<Form.FieldErrors />
+						</Form.Control>
+					</Form.Field>
+
+					<Form.Field {form} name="context.core_features">
+						<Form.Control>
+							<Form.Label>Core Features</Form.Label>
+
+							<TagInput
+								bind:items={$formData.context.core_features}
+								placeholder="Add feature"
+							/>
+
+							<Form.FieldErrors />
+						</Form.Control>
+					</Form.Field>
+				{/if}
+			</div>
+			<Form.Field {form} name="prompt">
+				<Form.Control let:attrs>
+					<Form.Label>Prompt</Form.Label>
+					<Form.Description>
+						Accurate results are achieved by providing a great prompt. <br />
+						Tell the AI exactly what to look for.
+					</Form.Description>
+					<input type="hidden" name="prompt" bind:value={$formData.prompt} />
+					<Dialog.Root>
+						<Dialog.Trigger>
+							<Button variant="secondary" class="">Open Prompt</Button>
+						</Dialog.Trigger>
+						<Dialog.Content
+							class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
+						>
+							<Button
+								onclick={fillPromptWithTemplate}
+								variant="outline"
+								class="right-2 top-2"
+							>
+								Insert Example Prompt (Reletino's)
+							</Button>
+
+							<ScrollArea class="h-full w-full p-3">
+								<TipTap
+									class="h-full border border-input p-3 outline-input"
+									bind:content={$formData.prompt}
+								/>
+							</ScrollArea>
+						</Dialog.Content>
+					</Dialog.Root>
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+			<Form.Field {form} name="comment_style_prompt">
+				<Form.Control let:attrs>
+					<Form.Label>Comment Style</Form.Label>
+					<Form.Description>
+						Define how the AI should style its comments when responding to relevant posts.
+					</Form.Description>
+					<input
+						type="hidden"
+						name="comment_style_prompt"
+						bind:value={$formData.comment_style_prompt}
+					/>
+					<Dialog.Root>
+						<Dialog.Trigger>
+							<Button variant="secondary" class="">Open Comment Style</Button>
+						</Dialog.Trigger>
+						<Dialog.Content
+							class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
+						>
+							<Button
+								onclick={fillCommentStyleWithTemplate}
+								variant="outline"
+								class="right-2 top-2"
+							>
+								Insert Example Comment Style
+							</Button>
+							<ScrollArea class="h-full w-full p-3">
+								<TipTap
+									class="h-full border border-input p-3 outline-input"
+									bind:content={$formData.comment_style_prompt}
+								/>
+							</ScrollArea>
+						</Dialog.Content>
+					</Dialog.Root>
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+			<Form.Field {form} name="dm_style_prompt">
+				<Form.Control let:attrs>
+					<Form.Label>DM Style</Form.Label>
+					<Form.Description>
+						Define how the AI should style its direct messages when reaching out to users.
+					</Form.Description>
+					<input
+						type="hidden"
+						name="dm_style_prompt"
+						bind:value={$formData.dm_style_prompt}
+					/>
+					<Dialog.Root>
+						<Dialog.Trigger>
+							<Button variant="secondary" class="">Open DM Style</Button>
+						</Dialog.Trigger>
+						<Dialog.Content
+							class="h-full min-h-96 w-full max-w-5xl grid-rows-[auto_1fr] place-items-center px-7"
+						>
+							<Button
+								onclick={fillDMStyleWithTemplate}
+								variant="outline"
+								class="right-2 top-2"
+							>
+								Insert Example DM Style
+							</Button>
+							<ScrollArea class="h-full w-full p-3">
+								<TipTap
+									class="h-full border border-input p-3 outline-input"
+									bind:content={$formData.dm_style_prompt}
+								/>
+							</ScrollArea>
+						</Dialog.Content>
+					</Dialog.Root>
+					<Form.FieldErrors />
+				</Form.Control>
+			</Form.Field>
+			<Form.Field
+				{form}
+				name="running"
+				class="flex flex-row items-center justify-between rounded-lg border p-4"
+			>
+				<Form.Control let:attrs>
+					<div class="space-y-0.5">
+						<Form.Label>Running</Form.Label>
+						<Form.Description>
+							Turn on to start listening for Reddit posts.
+						</Form.Description>
+					</div>
+					<Switch includeInput {...attrs} bind:checked={$formData.running} />
+				</Form.Control>
+			</Form.Field>
+			<Form.Button class="mt-2 " disabled={$timeout || $delayed}>
+				{#if $timeout}
+					<LoaderCircle class="animate-spin" />
+				{:else if $delayed}
+					<Loader class="animate-spin" />
+				{:else}
+					Save
+				{/if}
+			</Form.Button>
+			<Button
+				variant="secondary"
+				href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment!.name}/${project.title}/workflows?key=${environment!.critino_key}`}
+				target="_blank"
+				class="w-full"
+			>
+				Manage Critiques
+				<ExternalLink class="ml-2 w-5" />
+			</Button>
+			<Dialog.Root>
+				<Dialog.Trigger>
+					<Button variant="destructive" class="w-full" disabled={$timeout || $delayed}>
+						Delete
 					</Button>
-				</Dialog.Footer>
-			</Dialog.Content>
-		</Dialog.Root>
-	</form>
+				</Dialog.Trigger>
+				<Dialog.Content class="place-items-center">
+					<Dialog.Header>
+						<Dialog.Title class="text-center">
+							YOU ARE ABOUT TO DELETE THIS PROJECT.
+						</Dialog.Title>
+					</Dialog.Header>
+
+					<Typography variant="body-md">
+						Are you sure you want to delete this project?
+					</Typography>
+
+					<Dialog.Footer>
+						<Button class="w-full" variant="destructive" on:click={() => deleteProject()}>
+							If I click this, I am sure.
+						</Button>
+					</Dialog.Footer>
+				</Dialog.Content>
+			</Dialog.Root>
+		</form>
+	</div>
 </div>
