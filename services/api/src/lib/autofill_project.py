@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import aiohttp
 from pydantic import BaseModel, Field
 import asyncio
-from src.interfaces.llm import gpt_4o_mini
+from src.interfaces.llm import gpt_4o_mini, gpt_o1
 import logging
 from langchain.tools import Tool
 from langchain.tools.tavily_search.tool import TavilySearchResults
@@ -73,7 +73,7 @@ async def autofill_form(use_case: Literal["leads", "competition_research", "othe
                     
                     # Use GPT-4o Mini to extract relevant content
                     logger.debug("Initializing GPT-4o Mini")
-                    llm = gpt_4o_mini().with_structured_output(ProcessedWebsite)
+                    llm = gpt_o1().with_structured_output(ProcessedWebsite)
                     
                     prompt = ChatPromptTemplate.from_messages([
                         ("system", f"""
@@ -93,17 +93,27 @@ async def autofill_form(use_case: Literal["leads", "competition_research", "othe
                     processed_website = await chain.ainvoke({})
                     logger.debug(f"Got LLM response: {processed_website}")
                     
-                    return processed_website
+                    return processed_website # type: ignore
                     
             except Exception as e:
                 logger.error(f"Error processing website: {e}", exc_info=True)
                 raise
     
     async def field_autocompleter(state: State):
+
+        if not state.processed_website:
+            logger.debug("No processed website, skipping field autocompleter")
+            return
+        
+        if not state.current_action:
+            logger.debug("No current action, skipping field autocompleter")
+            return
+
         logger.debug(f"Processing field: {state.current_action.field_label}")
         
         # Create prompt with required variables
-        prompt = f"""You are an AI assistant that fills form fields based on website content for the use case of: {state.use_case}.
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", f"""You are an AI assistant that fills form fields based on website content for the use case of: {state.use_case}.
             
             ### WEBSITE CONTENT ###
             Business Name: {state.processed_website.business_name}
@@ -114,6 +124,8 @@ async def autofill_form(use_case: Literal["leads", "competition_research", "othe
             Label: {state.current_action.field_label}
             Description: {next((field.description for field in state.form if field.label == state.current_action.field_label), "No description found")}
             """
+        ),
+        ])
         
         # Create structured agent with tools
         llm = gpt_4o_mini()

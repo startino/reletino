@@ -5,6 +5,7 @@
 	import { LocateOff, CheckCheck, LoaderCircle } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Typography } from '$lib/components/ui/typography';
+	import { getEnvironmentState } from '$lib/states';
 	import { onMount } from 'svelte';
 
 	let { data } = $props();
@@ -12,6 +13,9 @@
 	const { supabase, project } = data;
 
 	let submissions: Tables<'submissions'>[] = $state([]);
+
+	const env = getEnvironmentState();
+
 
 	supabase
 		.channel('submissions')
@@ -87,10 +91,17 @@
 	});
 </script>
 
-<div class="grid h-full grid-cols-5 grid-rows-5 gap-6">
-	<div class="col-span-2 row-span-5 flex flex-col p-2">
+<div class="grid h-full grid-cols-5 grid-rows-12 gap-6">
+	<div class="col-span-5 row-span-1 flex flex-row place-items-center gap-4">
+		<Button variant="outline" href="/dashboard/{env.value?.slug}/projects" class="gap-2">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+			Back
+		</Button>
+		<Typography as="h1" variant="title-md" class="text-left"><b>Project:</b> {project.title}</Typography>
+
+	</div>
+	<div class="col-span-2 row-span-11 flex flex-col p-2">
 		<div class="mb-4 flex w-full flex-col place-items-start justify-between gap-4">
-			<Typography as="h1" variant="headline-lg">{project.title}</Typography>
 			<div class="flex flex-row gap-2">
 				<Toggle variant="outline" bind:pressed={includeRead} class="gap-2">
 					<CheckCheck /> Include Read
@@ -134,7 +145,7 @@
 		</div>
 	</div>
 
-	<div class="col-span-3 row-span-5">
+	<div class="col-span-3 row-span-11">
 		{#if selectedSubmission}
 			<SubmissionViewer
 				{supabase}
