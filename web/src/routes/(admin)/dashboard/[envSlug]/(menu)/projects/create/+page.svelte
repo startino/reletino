@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-svelte';
 	import { Typography } from '$lib/components/ui/typography';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -10,6 +10,7 @@
 	import { TagInput } from '$lib/components/ui/tag-input';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { projectCreationSchema } from '$lib/schemas';
+	import * as Select from '$lib/components/ui/select';
 
 	let currentStep: 1 | 2 | 3 | 4 | 5 = $state(1);
 	let selectedCategory = $state('');
@@ -112,16 +113,20 @@
 			{#if currentStep === 1}
 				<div class="space-y-2">
 					<Label for="category">Category</Label>
-					<select
-						id="category"
-						class="w-full rounded-md border border-input bg-background px-3 py-2"
-						bind:value={selectedCategory}
+					<Select.Root
+						onSelectedChange={(v) => {
+							v && (selectedCategory = v.value as 'find-leads' | 'find-competition');
+						}}
 					>
-						<option value="">Select a category</option>
-						{#each categories as category}
-							<option value={category.value}>{category.label}</option>
-						{/each}
-					</select>
+						<Select.Trigger class="w-full">
+							<Select.Value placeholder="Select a category" />
+						</Select.Trigger>
+						<Select.Content>
+							{#each categories as category}
+								<Select.Item value={category.value}>{category.label}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 			{:else if currentStep === 2}
 				<div class="space-y-2">
@@ -299,19 +304,18 @@
 			{/if}
 		</Card.Content>
 
-		<Card.Footer class="">
+		<Card.Footer class="flex flex-row justify-between mt-6">
 			<Button
 				onclick={prev}
 				aria-label="previous step"
-				size="sm"
 				disabled={currentStep === 1}
-				variant="ghost"
+				variant="outline"
+				class=""
 			>
-				<ChevronLeft />
+				<ArrowLeft class="mr-2 w-4 h-4" /> Go Back
 			</Button>
 			<Button
 				onclick={next}
-				size="sm"
 				aria-label="next step"
 				disabled={currentStep === 5 ||
 					(currentStep === 1 && !selectedCategory) ||
@@ -322,9 +326,9 @@
 							(!$form.context.product_name || !$form.context.icp)) ||
 							($form.context.category === 'find-competition' &&
 								!$form.context.name)))}
-				variant="ghost"
+				class=""
 			>
-				<ChevronRight />
+				Next step
 			</Button>
 		</Card.Footer>
 	</Card.Root>
