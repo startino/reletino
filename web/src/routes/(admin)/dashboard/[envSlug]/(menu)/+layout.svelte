@@ -185,7 +185,9 @@
 					>
 						Sign Out
 						<Typography variant="body-sm" class="font-light">
-							({session?.user.user_metadata.full_name})
+							{session?.user.user_metadata.full_name
+								? `(${session?.user.user_metadata.full_name})`
+								: ''}
 						</Typography>
 					</a>
 				{/if}
