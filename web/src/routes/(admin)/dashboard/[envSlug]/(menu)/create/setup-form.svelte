@@ -232,7 +232,7 @@
 
     </Card>
     <div class="mt-4 mx-auto w-fit">
-        <a href="/projects" class="text-sm underline hover:text-primary">
+        <a href="/dashboard/{env.value?.slug}" class="text-sm underline hover:text-primary">
             Back to Projects
         </a>
     </div>

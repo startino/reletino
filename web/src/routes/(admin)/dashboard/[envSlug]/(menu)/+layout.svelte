@@ -41,8 +41,10 @@
 
 	$effect(() => {
 		navItems = [
-			new NavItem(`${basePath}${environment.value?.slug}/projects`, 'Projects', (href) =>
-				$page.url.pathname.startsWith(href)
+			new NavItem(
+				`${basePath}${environment.value?.slug}`,
+				'Home',
+				(href) => $page.url.pathname === href
 			),
 			new NavItem(`${basePath}${environment.value?.slug}/settings`, 'Setting', (href) =>
 				$page.url.pathname.startsWith(href)

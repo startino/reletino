@@ -397,9 +397,9 @@
 
 <div class="flex gap-8">
 	<div class="fixed">
-		<Button variant="outline" href="/dashboard/{environment!.slug}/projects" class="gap-2">
+		<Button variant="outline" href={`/dashboard/${environment!.slug}`} class="gap-2">
 			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-			Back
+			Back to Projects
 		</Button>
 	</div>
 	<div class="flex-1 max-w-3xl mx-auto">
