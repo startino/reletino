@@ -17,11 +17,14 @@
     import { TipTap } from '$lib/components/ui/tiptap';
 	import { PUBLIC_API_URL } from '$env/static/public';
 	import { Typography } from '$lib/components/ui/typography';
+	import { getEnvironmentState } from '$lib/states';
 
     let currentStep = 0;
     let isLoading = false;
     let newSubreddit = '';
     let saasInputType: 'url' | 'text' = 'url';
+
+    const env = getEnvironmentState();
 
     let projectForm: ProjectSetup = {
         objective: '',
@@ -232,7 +235,7 @@
 
     </Card>
     <div class="mt-4 mx-auto w-fit">
-        <a href="/dashboard/{env.value?.slug}" class="text-sm underline hover:text-primary">
+        <a href={`/dashboard/${env.value?.slug}`} class="text-sm underline hover:text-primary">
             Back to Projects
         </a>
     </div>
