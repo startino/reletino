@@ -7,6 +7,7 @@
 	import { Typography } from '$lib/components/ui/typography';
 	import { getEnvironmentState } from '$lib/states';
 	import { onMount } from 'svelte';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 
 	let { data } = $props();
 
@@ -91,17 +92,17 @@
 	});
 </script>
 
-<div class="grid h-full grid-cols-5 grid-rows-12 gap-6">
-	<div class="col-span-5 row-span-1 flex flex-row place-items-center gap-4">
-		<Button variant="outline" href="/dashboard/{env.value?.slug}" class="gap-2">
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-			Back to Projects
-		</Button>
-		<Typography as="h1" variant="title-md" class="text-left"><b>Project:</b> {project.title}</Typography>
-
-	</div>
+<div class="grid h-full grid-cols-5 grid-rows-11 gap-6">
 	<div class="col-span-2 row-span-11 flex flex-col p-2">
 		<div class="mb-4 flex w-full flex-col place-items-start justify-between gap-4">
+			<div class="flex flex-row place-items-center gap-4 mb-2">
+				<Button variant="outline" href="/dashboard/{env.value?.slug}" class="gap-2">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+					Back to Projects
+				</Button>
+				<Typography as="h1" variant="title-md" class="text-left"><b>Project:</b> {project.title}</Typography>
+		
+			</div>
 			<div class="flex flex-row gap-2">
 				<Toggle variant="outline" bind:pressed={includeRead} class="gap-2">
 					<CheckCheck /> Include Read
@@ -112,17 +113,16 @@
 			</div>
 		</div>
 
-		<div class="mt-4 flex h-fit flex-col gap-y-4 overflow-y-scroll">
+		<ScrollArea class="mt-4 h-full pr-2">
 			<Typography variant="headline-md" class="text-left">
 				Submissions {!projectLoading ? '(' + displaySubmissions.length + ')' : ''}
 				{#if projectLoading}
 					<LoaderCircle class="h-24 w-24 animate-spin text-primary" />
 				{/if}
 			</Typography>
-
 			{#each displaySubmissions as submission}
 				<Button
-					class="mx-2 grid h-fit grid-cols-7 text-wrap text-left {selectedSubmission ==
+					class=" grid h-fit w-full grid-cols-7 my-2 text-wrap text-left {selectedSubmission ==
 					submission
 						? 'bg-accent'
 						: ''}"
@@ -142,7 +142,7 @@
 					</div>
 				</Button>
 			{/each}
-		</div>
+		</ScrollArea>
 	</div>
 
 	<div class="col-span-3 row-span-11">
