@@ -276,7 +276,7 @@
 			},
 			[StarterKit]
 		);
-		$formData.prompt = defaultPrompt;
+		$formData.filter_prompt = defaultPrompt;
 	};
 
 	const fillCommentStyleWithTemplate = () => {
@@ -535,7 +535,7 @@
 				Accurate results are achieved by providing a great prompt. <br />
 				 Tell the AI exactly what to look for.
 			</Form.Description>
-			<input type="hidden" name="prompt" bind:value={$formData.prompt} />
+			<input type="hidden" name="prompt" bind:value={$formData.filter_prompt} />
 			<Dialog.Root>
 				<Dialog.Trigger>
 					<Button variant="secondary" class="">Open Prompt</Button>
@@ -547,7 +547,7 @@
 					<div class="h-full min-h-96 w-full p-3">
 						<TipTap
 							class="h-full max-h-[700px] min-h-[500px] w-full overflow-y-scroll p-3"
-							bind:content={$formData.prompt}
+							bind:content={$formData.filter_prompt}
 						/>
 					</div>
 				</Dialog.Content>

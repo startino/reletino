@@ -44,7 +44,7 @@
 	const { form: formData, enhance, delayed, timeout } = form;
 
 	$effect(() => {
-		$formData = { ...project, context: project.context as any };
+		$formData = { ...project };
 	});
 
 	const deleteProject = async () => {
@@ -443,67 +443,6 @@
 
 				<Form.FieldErrors />
 			</Form.Field>
-
-			<div>
-				{#if $formData.context.category == 'find-leads'}
-					<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
-						Lead Finding Configuration
-					</Typography>
-					<Form.Field {form} name="context.product_name">
-						<Form.Control let:attrs>
-							<Form.Label>Project Name</Form.Label>
-							<Input {...attrs} bind:value={$formData.context.product_name} />
-							<Form.FieldErrors />
-						</Form.Control>
-					</Form.Field>
-
-					<Form.Field {form} name="context.icp">
-						<Form.Control let:attrs>
-							<Form.Label>ICP</Form.Label>
-							<Input {...attrs} bind:value={$formData.context.icp} />
-							<Form.FieldErrors />
-						</Form.Control>
-					</Form.Field>
-
-					<Form.Field {form} name="context.irrelevant_post_examples">
-						<Form.Control>
-							<Form.Label>Irrelevant Post Examples</Form.Label>
-
-							<TagInput
-								bind:items={$formData.context.irrelevant_post_examples}
-								placeholder="Add example"
-							/>
-
-							<Form.FieldErrors />
-						</Form.Control>
-					</Form.Field>
-				{:else if $formData.context.category == 'find-competition'}
-					<Typography as="h2" variant="body-md" class="mb-2 text-left font-bold">
-						Competition Finding Configuration
-					</Typography>
-
-					<Form.Field {form} name="context.product_name">
-						<Form.Control let:attrs>
-							<Form.Label>Name</Form.Label>
-							<Input {...attrs} bind:value={$formData.context.name} />
-							<Form.FieldErrors />
-						</Form.Control>
-					</Form.Field>
-
-					<Form.Field {form} name="context.core_features">
-						<Form.Control>
-							<Form.Label>Core Features</Form.Label>
-
-							<TagInput
-								bind:items={$formData.context.core_features}
-								placeholder="Add feature"
-							/>
-
-							<Form.FieldErrors />
-						</Form.Control>
-					</Form.Field>
-				{/if}
-			</div>
 			<Form.Field {form} name="prompt">
 				<Form.Control let:attrs>
 					<Form.Label>Prompt</Form.Label>

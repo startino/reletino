@@ -51,8 +51,15 @@ export const actions = {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					project: { ...form.data },
-					environment_name: env.name,
+					project: {
+						id: form.data.id,
+						title: form.data.title,
+						profile_id: form.data.profile_id,
+						prompt: form.data.prompt,
+						subreddits: form.data.subreddits,
+						running: form.data.running,
+					},
+					team_name: env.name,
 				}),
 			})
 				.then((res) => res.json())
