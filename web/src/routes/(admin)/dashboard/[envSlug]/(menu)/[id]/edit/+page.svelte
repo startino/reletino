@@ -444,7 +444,7 @@
 	<div class="flex-1 max-w-3xl mx-auto">
 		<Typography as="h1" variant="headline-md" class="mb-4 text-center">Edit Project</Typography>
 
-		<form method="POST" action="?/updateProject" class="flex flex-col gap-y-2" use:enhance>
+		<form method="POST" action="?/updateProject" class="flex flex-col gap-y-6" use:enhance>
 			<input type="hidden" name="id" bind:value={$formData.id} />
 			<input type="hidden" name="profile_id" bind:value={$formData.profile_id} />
 			<!-- this button has to be here for disabling submit on enter when focusing on input fields-->
@@ -457,22 +457,21 @@
 				class="flex flex-row items-center justify-between rounded-lg border p-4 transition-opacity duration-200 {isToggling ? 'opacity-50' : ''}"
 			>
 				<Form.Control let:attrs>
-					<div class="space-y-0.5">
-						<Form.Label>Running</Form.Label>
-						<Form.Description>
-							Turn on to start listening for Reddit posts.
-						</Form.Description>
+					<div class="flex flex-col gap-y-0.5">
 						<div class="flex items-center gap-2 mt-1">
 							<div
-								class="h-2.5 w-2.5 rounded-full transition-colors
+								class="h-3 w-3 rounded-full transition-colors
 								{isToggling ? 'animate-pulse bg-gray-500' : $formData.running ? 'animate-pulse bg-emerald-500' : 'bg-orange-500'}"
 							></div>
 							{#if isToggling}
 								<Typography variant="body-sm">Updating...</Typography>
 							{:else}
-								<Typography variant="body-sm">{$formData.running ? 'Running' : 'Paused'}</Typography>
+								<Typography variant="body-sm">{$formData.running ? 'Project is running' : 'Project is paused'}</Typography>
 							{/if}
-						</div>
+						</div>						<Form.Description>
+							Turn {!$formData.running ? 'on' : 'off'} to {!$formData.running ? 'start' : 'stop'} listening for Reddit posts.
+						</Form.Description>
+						
 					</div>
 					<div class="relative">
 						<Switch 
@@ -500,8 +499,10 @@
 
 			<Form.Field {form} name="title">
 				<Form.Control let:attrs>
-					<Form.Label>Title</Form.Label>
-					<Form.Description>This is the project's title.</Form.Description>
+					<div class="flex flex-col gap-y-1.5 items-start">
+						<Form.Label>Title</Form.Label>
+						<Form.Description>This is the project's title.</Form.Description>
+					</div>
 					<Input {...attrs} class="max-w-sm" bind:value={$formData.title} />
 				</Form.Control>
 
@@ -510,7 +511,7 @@
 
 			<Form.Field {form} name="subreddits" class="flex flex-col pb-0">
 				<Form.Control let:attrs>
-					<div class="space-y-0.5">
+					<div class="flex flex-col gap-y-1.5 items-start">
 						<Form.Label>Subreddits</Form.Label>
 						<Form.Description>
 							Manually add your subreddits, For example: "saas", "startups".
@@ -531,12 +532,14 @@
 			</Form.Field>
 			<Form.Field {form} name="prompt">
 				<Form.Control let:attrs>
+					<div class="flex flex-col gap-y-1.5 items-start">
 					<Form.Label>Prompt</Form.Label>
 					<Form.Description>
 						Accurate results are achieved by providing a great prompt. <br />
 						Tell the AI exactly what to look for.
 					</Form.Description>
 					<input type="hidden" name="prompt" bind:value={$formData.prompt} />
+					</div>
 					<Dialog.Root>
 						<Dialog.Trigger>
 							<Button variant="secondary" class="">Open Prompt</Button>
@@ -565,6 +568,7 @@
 			</Form.Field>
 			<Form.Field {form} name="comment_style_prompt">
 				<Form.Control let:attrs>
+					<div class="flex flex-col gap-y-1.5 items-start">
 					<Form.Label>Comment Style</Form.Label>
 					<Form.Description>
 						Define how the AI should style its comments when responding to relevant posts.
@@ -574,6 +578,7 @@
 						name="comment_style_prompt"
 						bind:value={$formData.comment_style_prompt}
 					/>
+					</div>
 					<Dialog.Root>
 						<Dialog.Trigger>
 							<Button variant="secondary" class="">Open Comment Style</Button>
@@ -601,9 +606,10 @@
 			</Form.Field>
 			<Form.Field {form} name="dm_style_prompt">
 				<Form.Control let:attrs>
-					<Form.Label>DM Style</Form.Label>
-					<Form.Description>
-						Define how the AI should style its direct messages when reaching out to users.
+					<div class="flex flex-col gap-y-1.5 items-start">
+						<Form.Label>DM Style</Form.Label>
+						<Form.Description>
+							Define how the AI should style its direct messages when reaching out to users.
 					</Form.Description>
 					<input
 						type="hidden"
@@ -635,48 +641,50 @@
 					<Form.FieldErrors />
 				</Form.Control>
 			</Form.Field>
-			<Form.Button class="mt-2 " disabled={$timeout || $delayed}>
-				{#if $timeout}
-					<LoaderCircle class="animate-spin" />
-				{:else if $delayed}
-					<Loader class="animate-spin" />
-				{:else}
-					Save
-				{/if}
-			</Form.Button>
-			<!-- <Button
-				variant="secondary"
-				href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment!.name}/${project.title}/workflows?key=${environment!.critino_key}`}
-				target="_blank"
-				class="w-full"
-			>
-				Manage Critiques
-				<ExternalLink class="ml-2 w-5" />
-			</Button> -->
-			<Dialog.Root>
-				<Dialog.Trigger>
-					<Button variant="destructive" class="w-full" disabled={$timeout || $delayed}>
-						Delete
-					</Button>
-				</Dialog.Trigger>
-				<Dialog.Content class="place-items-center">
-					<Dialog.Header>
-						<Dialog.Title class="text-center">
-							YOU ARE ABOUT TO DELETE THIS PROJECT.
-						</Dialog.Title>
-					</Dialog.Header>
-
-					<Typography variant="body-md">
-						Are you sure you want to delete this project?
-					</Typography>
-
-					<Dialog.Footer>
-						<Button class="w-full" variant="destructive" on:click={() => deleteProject()}>
-							If I click this, I am sure.
+			<div class="flex flex-col gap-y-2">
+				<Form.Button class="mt-2" disabled={$timeout || $delayed}>
+					{#if $timeout}
+						<LoaderCircle class="animate-spin" />
+					{:else if $delayed}
+						<Loader class="animate-spin" />
+					{:else}
+						Save
+					{/if}
+				</Form.Button>
+				<!-- <Button
+					variant="secondary"
+					href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment!.name}/${project.title}/workflows?key=${environment!.critino_key}`}
+					target="_blank"
+					class="w-full"
+				>
+					Manage Critiques
+					<ExternalLink class="ml-2 w-5" />
+				</Button> -->
+				<Dialog.Root>
+					<Dialog.Trigger>
+						<Button variant="destructive" class="w-full" disabled={$timeout || $delayed}>
+							Delete
 						</Button>
-					</Dialog.Footer>
-				</Dialog.Content>
-			</Dialog.Root>
+					</Dialog.Trigger>
+					<Dialog.Content class="place-items-center">
+						<Dialog.Header>
+							<Dialog.Title class="text-center">
+								YOU ARE ABOUT TO DELETE THIS PROJECT.
+							</Dialog.Title>
+						</Dialog.Header>
+	
+						<Typography variant="body-md">
+							Are you sure you want to delete this project?
+						</Typography>
+	
+						<Dialog.Footer>
+							<Button class="w-full" variant="destructive" on:click={() => deleteProject()}>
+								If I click this, I am sure.
+							</Button>
+						</Dialog.Footer>
+					</Dialog.Content>
+				</Dialog.Root>
+			</div>
 		</form>
 	</div>
 </div>
