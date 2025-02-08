@@ -5,7 +5,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { TagInput } from '$lib/components/ui/tag-input';
 	import { projectSchema } from '$lib/schemas';
-	import { LoaderCircle, Loader, ExternalLink } from 'lucide-svelte';
+	import { LoaderCircle, Loader, ExternalLink, Loader2 } from 'lucide-svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { Typography } from '$lib/components/ui/typography';
@@ -18,10 +18,12 @@
 	import { generateHTML } from '@tiptap/core';
 	import StarterKit from '@tiptap/starter-kit';
 	import ScrollArea from '$lib/components/ui/scroll-area/scroll-area.svelte';
+	import { fade, scale } from 'svelte/transition';
 
 	let { data } = $props();
 
 	let { supabase, environment, project } = data;
+	let isToggling = $state(false);
 
 	const form = superForm(data.projectForm, {
 		dataType: 'json',
@@ -46,6 +48,43 @@
 	$effect(() => {
 		$formData = { ...project };
 	});
+
+	const toggleProject = async (newState: boolean) => {
+		if (isToggling) return;
+		
+		isToggling = true;
+		// Create a copy of the project with the new state
+		const updatedProject = { ...project, running: newState };
+
+		try {
+			const response = await fetch(`/api/projects/${project.id}/toggle`, {
+				method: 'POST',
+				body: JSON.stringify({
+					...updatedProject,
+					environment_slug: environment!.slug
+				}),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			const result = await response.json();
+
+			if (result.type === 'success') {
+				// Update both the form data and the project reference
+				$formData.running = newState;
+				project.running = newState;
+				toast.success(result.text);
+			} else {
+				toast.error(result.text || 'Failed to update project state');
+			}
+		} catch (error) {
+			console.error('Error toggling project:', error);
+			toast.error('Failed to update project state');
+		} finally {
+			isToggling = false;
+		}
+	};
 
 	const deleteProject = async () => {
 		const { error } = await deleteProjectById(project.id, { supabase });
@@ -412,6 +451,53 @@
 			<!-- https://github.com/sveltejs/kit/discussions/8657 -->
 			<button type="submit" disabled style="display: none"></button>
 
+			<Form.Field
+				{form}
+				name="running"
+				class="flex flex-row items-center justify-between rounded-lg border p-4 transition-opacity duration-200 {isToggling ? 'opacity-50' : ''}"
+			>
+				<Form.Control let:attrs>
+					<div class="space-y-0.5">
+						<Form.Label>Running</Form.Label>
+						<Form.Description>
+							Turn on to start listening for Reddit posts.
+						</Form.Description>
+						<div class="flex items-center gap-2 mt-1">
+							<div
+								class="h-2.5 w-2.5 rounded-full transition-colors
+								{isToggling ? 'animate-pulse bg-gray-500' : $formData.running ? 'animate-pulse bg-emerald-500' : 'bg-orange-500'}"
+							></div>
+							{#if isToggling}
+								<Typography variant="body-sm">Updating...</Typography>
+							{:else}
+								<Typography variant="body-sm">{$formData.running ? 'Running' : 'Paused'}</Typography>
+							{/if}
+						</div>
+					</div>
+					<div class="relative">
+						<Switch 
+							includeInput 
+							{...attrs} 
+							checked={$formData.running}
+							onCheckedChange={(checked) => toggleProject(checked)}
+							disabled={isToggling}
+							class="data-[state=checked]:bg-emerald-500 transition-opacity duration-200 {isToggling ? 'opacity-50' : ''}"
+						/>
+						{#if isToggling}
+							<div 
+								class="absolute inset-0 flex items-center justify-center"
+								in:fade={{ duration: 200 }}
+								out:fade={{ duration: 150 }}
+							>
+								<div in:scale={{ duration: 200 }}>
+									<Loader2 class="w-4 h-4 animate-spin text-foreground" />
+								</div>
+							</div>
+						{/if}
+					</div>
+				</Form.Control>
+			</Form.Field>
+
 			<Form.Field {form} name="title">
 				<Form.Control let:attrs>
 					<Form.Label>Title</Form.Label>
@@ -549,21 +635,6 @@
 					<Form.FieldErrors />
 				</Form.Control>
 			</Form.Field>
-			<Form.Field
-				{form}
-				name="running"
-				class="flex flex-row items-center justify-between rounded-lg border p-4"
-			>
-				<Form.Control let:attrs>
-					<div class="space-y-0.5">
-						<Form.Label>Running</Form.Label>
-						<Form.Description>
-							Turn on to start listening for Reddit posts.
-						</Form.Description>
-					</div>
-					<Switch includeInput {...attrs} bind:checked={$formData.running} />
-				</Form.Control>
-			</Form.Field>
 			<Form.Button class="mt-2 " disabled={$timeout || $delayed}>
 				{#if $timeout}
 					<LoaderCircle class="animate-spin" />
@@ -573,7 +644,7 @@
 					Save
 				{/if}
 			</Form.Button>
-			<Button
+			<!-- <Button
 				variant="secondary"
 				href={`${PUBLIC_CRITINO_URL}/startino/reletino/${environment!.name}/${project.title}/workflows?key=${environment!.critino_key}`}
 				target="_blank"
@@ -581,7 +652,7 @@
 			>
 				Manage Critiques
 				<ExternalLink class="ml-2 w-5" />
-			</Button>
+			</Button> -->
 			<Dialog.Root>
 				<Dialog.Trigger>
 					<Button variant="destructive" class="w-full" disabled={$timeout || $delayed}>
