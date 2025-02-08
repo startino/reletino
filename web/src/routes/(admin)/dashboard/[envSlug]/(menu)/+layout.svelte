@@ -46,8 +46,15 @@
 				'Home',
 				(href) => $page.url.pathname === href
 			),
-			new NavItem(`${basePath}${environment.value?.slug}/settings`, 'Setting', (href) =>
-				$page.url.pathname.startsWith(href)
+			new NavItem(
+				`${basePath}${environment.value?.slug}/profile-research`,
+				'Profile Research',
+				(href) => $page.url.pathname.startsWith(href)
+			),
+			new NavItem(
+				`${basePath}${environment.value?.slug}/settings`,
+				'Setting',
+				(href) => $page.url.pathname.startsWith(href)
 			),
 		];
 	});

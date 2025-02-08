@@ -10,10 +10,11 @@ from fastapi.concurrency import asynccontextmanager
 from pydantic import BaseModel
 from typing import Literal
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models.simple_submission import SimpleSubmission
 from supabase import create_client
 
@@ -192,4 +193,28 @@ def generate_project_response(q: GenerateResponseRequest):
         logging.error(f"Error generating response: {e}", exc_info=True)  # Add full traceback
         return {"status": "error", "message": str(e)}
 
+class ProfileAnalysisRequest(BaseModel):
+    username: str
 
+@app.post("/analyze-profile")
+async def analyze_profile(request: ProfileAnalysisRequest):
+    """
+    Analyze a Reddit user's profile and return insights
+    """
+    try:
+        if not request.username:
+            raise HTTPException(status_code=400, detail="Username is required")
+            
+        analysis = analyze_reddit_user(request.username, "")  # Empty project prompt since we're just analyzing the profile
+        
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Profile not found or has been deleted")
+            
+        return {
+            "status": "success",
+            "analysis": analysis
+        }
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error analyzing profile for {request.username}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to analyze profile: {str(e)}") 
