@@ -25,6 +25,13 @@ export const primaryRoutes: Route[] = [
 		icon: Icons.PanelsTopLeft,
 		variant: 'ghost',
 	},
+	{
+		title: 'Profile Research',
+		label: null,
+		href: 'profile-research',
+		icon: Icons.Search,
+		variant: 'ghost',
+	},
 ];
 
 export const teamRoutes: Route[] = [
