@@ -21,7 +21,9 @@ class Drafter:
         self.llm = gpt_4o_mini()
         self.context = context
         self.objective = objective
+        
     async def __call__(self, state: ProfileState):
+        
         """Main function to analyze product and get recommendations"""
         
         prompt = ChatPromptTemplate.from_messages([
@@ -37,6 +39,7 @@ class Drafter:
         ])
         
         chain = prompt | self.llm.bind_tools([RecommendationOutput], tool_choice="any") | JsonOutputToolsParser(return_id=True)
+        
         recommendation = (await chain.ainvoke({}))[0]
         
         recommendation["name"] = recommendation["type"]
