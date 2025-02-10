@@ -24,16 +24,17 @@ async def run():
     final_state = await graph.ainvoke(initial_state)
     
     parsed_results = RecommendationOutput(**final_state["messages"][-1].tool_calls[0]["args"])
-    print(parsed_results)
-    print("Results: \n\n")
-    print("Product Name:", parsed_results.product_name)
-    print("Product Description:", parsed_results.product_description)
-    print("\nRecommended Subreddits:")
-    for subreddit in parsed_results.subreddits:
-        print(f"Name: {subreddit.name}")
-        print(f"Description: {subreddit.description}")
-    print("\nFiltering Prompt: ", parsed_results.filtering_prompt)
+    return parsed_results
+    
 
 if __name__ == "__main__":
     import asyncio
-    asyncio.run(run())
+    results = asyncio.run(run())
+    print("Results: \n\n")
+    print("Product Name:", results.product_name)
+    print("Product Description:", results.product_description)
+    print("\nRecommended Subreddits:")
+    for subreddit in results.subreddits:
+        print(f"Name: {subreddit.name}")
+        print(f"Description: {subreddit.description}")
+    print("\nFiltering Prompt: ", results.filtering_prompt)
