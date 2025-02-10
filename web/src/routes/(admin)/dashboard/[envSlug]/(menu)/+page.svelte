@@ -73,7 +73,7 @@
 </svelte:head>
 
 <div class="flex flex-col gap-8">
-	<Typography variant="display-sm" class="">Projects</Typography>
+	<Typography variant="display-sm" class="text-left ml-10">Projects</Typography>
 
 	<EntityControlGrid
 		{entities}

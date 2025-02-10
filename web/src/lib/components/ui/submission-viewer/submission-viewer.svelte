@@ -333,8 +333,8 @@
 				</Dialog.Root>
 
 				<div class="flex w-full flex-col">
-					<Typography variant="title-sm" class="text-left ">Reasoning</Typography>
-					<ScrollArea class="max-h-[100px] min-h-24 w-full">
+					<Typography variant="title-sm" class="text-left ">Agent's Reasoning</Typography>
+					<ScrollArea class="max-h-[140px] min-h-24 w-full">
 						<Typography variant="body-md" class="text-left">
 							{submission.reasoning}
 						</Typography>

@@ -95,31 +95,46 @@
 <div class="grid h-full grid-cols-5 grid-rows-11 gap-6">
 	<div class="col-span-2 row-span-11 flex flex-col p-2">
 		<div class="mb-4 flex w-full flex-col place-items-start justify-between gap-4">
-			<div class="flex flex-row place-items-center gap-4 mb-2">
+			<div class="flex flex-row place-items-center gap-4 mb-2 w-full">
 				<Button variant="outline" href="/dashboard/{env.value?.slug}" class="gap-2">
 					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
 					Back to Projects
 				</Button>
 				<Typography as="h1" variant="title-md" class="text-left"><b>Project:</b> {project.title}</Typography>
+				<div class="flex flex-row items-center gap-x-2 ml-auto justify-self-end">
+					<div
+						class="h-3 w-3 rounded-full transition-colors
+						{project.running ? 'animate-pulse bg-emerald-500' : 'bg-orange-500'}"
+						
+					>
+					</div>
+					<Typography variant="body-sm">
+						{project.running ? 'Running' : 'Paused'}
+					</Typography>
+				</div>
 		
 			</div>
-			<div class="flex flex-row gap-2">
-				<Toggle variant="outline" bind:pressed={includeRead} class="gap-2">
-					<CheckCheck /> Include Read
-				</Toggle>
-				<Toggle variant="outline" bind:pressed={includeIrrelevant} class="gap-2">
-					<LocateOff /> Include Irrelevant
-				</Toggle>
-			</div>
+			
 		</div>
-
-		<ScrollArea class="mt-4 h-full pr-2">
-			<Typography variant="headline-md" class="text-left">
+		<div class="flex flex-row gap-4">
+			<Typography variant="headline-md" class="text-left mb-2">
 				Submissions {!projectLoading ? '(' + displaySubmissions.length + ')' : ''}
 				{#if projectLoading}
 					<LoaderCircle class="h-24 w-24 animate-spin text-primary" />
 				{/if}
 			</Typography>
+			<div class="flex flex-row ml-auto gap-2">
+				<Toggle variant="outline" bind:pressed={includeRead} class="gap-2">
+					<CheckCheck /> Show Read
+				</Toggle>
+				<Toggle variant="outline" bind:pressed={includeIrrelevant} class="gap-2">
+					<LocateOff /> Show Irrelevant
+				</Toggle>
+			</div>
+	
+		</div>
+		<ScrollArea class=" h-full pr-2">
+			
 			{#each displaySubmissions as submission}
 				<Button
 					class=" grid h-fit w-full grid-cols-7 my-2 text-wrap text-left {selectedSubmission ==
