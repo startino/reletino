@@ -37,7 +37,7 @@ def gpt_4o_mini(temperature: float = 0.5) -> AzureChatOpenAI:
         api_key=SecretStr(AZURE_OPENAI_API_KEY),
         azure_endpoint=AZURE_OPENAI_API_ENDPOINT,
         model="gpt-4o-mini",
-        api_version="2024-02-01",
+        api_version="2024-06-01",
         max_retries=20,
     )
 
