@@ -4,7 +4,7 @@ from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 
 class Context(BaseModel):
-    type: Literal["url", "text"] = Field(description="The type of the context")
+    type: Literal["link", "description"] = Field(description="The type of the context")
     value: str = Field(description="The value of the context")
 
 class ProfileState(BaseModel):
