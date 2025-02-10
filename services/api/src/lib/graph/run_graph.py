@@ -19,7 +19,7 @@ async def run():
         messages=[],  
     )
     
-    graph = ProfileGraph().graph(initial_state)
+    graph = ProfileGraph(initial_state).graph()
   
     final_state = await graph.ainvoke(initial_state)
     
