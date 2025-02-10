@@ -4,32 +4,14 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
 from praw import Reddit
-# from src.interfaces.llm import gpt_4o_mini
-# from src.interfaces import reddit
+from src.interfaces.llm import gpt_4o_mini
+from src.interfaces import reddit
 import praw
 import os
 from dotenv import load_dotenv
 from praw.models import Subreddit, Submission
 
 from langchain.tools import tool
-
-load_dotenv()
-
-REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
-REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
-REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD")
-REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
-
-
-def get_reddit_instance():
-    return Reddit(
-        client_id=REDDIT_CLIENT_ID,
-        client_secret=REDDIT_CLIENT_SECRET,
-        password=REDDIT_PASSWORD,
-        user_agent="reletino bot by u/antopia_hk",
-        username=REDDIT_USERNAME,
-    )
-
 
 class Subreddit(BaseModel):
     name: str = Field(description="Name of the subreddit without the 'r/' prefix")
@@ -38,7 +20,7 @@ class Subreddit(BaseModel):
 @tool
 def search_relevant_subreddits(queries: list[str]) -> list[Subreddit]:
     """Get relevant subreddits for a product/service"""
-    reddit = get_reddit_instance()
+    reddit = reddit.get_reddit_instance()
     
     subredditss = []
     

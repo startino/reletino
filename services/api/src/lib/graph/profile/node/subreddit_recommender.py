@@ -5,15 +5,15 @@ from src.interfaces.reddit import get_reddit_instance
 from src.lib.graph.profile.tools.subreddit import Subreddit
 from src.lib.graph.profile.tools.web_scraper import web_scraper
 from src.lib.graph.profile.tools.subreddit import search_relevant_subreddits
-from src.lib.graph.profile.state import Context
-from langchain_core.output_parsers import JSONOutputToolsParser
+from src.lib.graph.profile.state import ProfileState, Context
+from langchain_core.output_parsers import JsonOutputToolsParser
 from langchain_core.messages import AIMessage
 import json, uuid
 import logging
 
 class SubredditRecommendationOutput(BaseModel):
-    reasoning: str
-    subreddits: list[Subreddit]
+    reasoning: str = Field(description="The reasoning behind the subreddit recommendation")
+    subreddits: list[Subreddit] = Field(description="The subreddits that are recommended")
 
 def parse_response(response: dict[str, str], name: str) -> list[AIMessage]:
     """
@@ -38,21 +38,40 @@ class SubredditRecommender:
         self.llm = gpt_4o_mini()
         self.context = context
         self.objective = objective
-        if context.type == "url":
-            self.context.value = web_scraper(context.value)
 
-    async def __call__(self) -> SubredditRecommendationOutput:
+    async def __call__(self, state: ProfileState):
         """Main function to analyze product and get recommendations"""
         
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "Recommend subreddits based on the product information"),
+            ("system", """You are a specialized subreddit recommendation expert. Your task is to recommend highly relevant subreddits based on the provided product/service information.
+
+                    Guidelines for recommendations:
+                    1. Recommend 5-7 subreddits that are likely to be active and have a substantial user base
+                    2. Focus on both direct industry/niche subreddits and adjacent communities where potential users might be
+                    3. Consider the following factors:
+                    - Product/service type and industry
+                    - Target audience demographics
+                    - User pain points and needs
+                    - Related technologies or solutions
+                    - Professional/business context if B2B
+                    - Consumer interests if B2C
+
+                    For each subreddit, provide:
+                    - Subreddit name (without r/ prefix)
+                    - A brief explanation of why it's relevant
+
+                    Avoid:
+                    - Extremely broad subreddits (e.g., r/all, r/popular)
+                    - Inactive or very small communities
+                    - Off-topic or loosely related subreddits
+                    - NSFW or controversial subreddits"""),
             ("user", self.context.value)
         ])
         
-        chain = prompt | self.llm.bind_tools([search_relevant_subreddits, SubredditRecommendationOutput], tool_choice="any") | JSONOutputToolsParser(return_id=True)
+        chain = prompt | self.llm.bind_tools([search_relevant_subreddits, SubredditRecommendationOutput], tool_choice="any") | JsonOutputToolsParser(return_id=True)
         recommendation = await chain.ainvoke({})
         
-        result = parse_response(response=recommendation[0], name=self.name)            
+        result = parse_response(response=recommendation[0], name="subreddit_recommender")            
 
         return {
             "messages": result

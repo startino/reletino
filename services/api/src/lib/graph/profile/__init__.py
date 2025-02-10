@@ -6,15 +6,14 @@ from langgraph.prebuilt import ToolNode
 from src.lib.graph.profile.tools.subreddit import search_relevant_subreddits
 
 class ProfileGraph:
-    def __init__(self, objective: str):
-        self.objective = objective
-        self.context = Context
+    def __init__(self):
+        pass
         
     def graph(self, state: ProfileState):
         workflow = StateGraph(ProfileState)
         
-        drafter = Drafter(context=state.context, objective=self.objective)
-        subreddit_recommender = SubredditRecommender(context=state.context, objective=self.objective)
+        drafter = Drafter(context=state.context, objective=state.objective)
+        subreddit_recommender = SubredditRecommender(context=state.context, objective=state.objective)
         
         workflow.add_node(
             "subreddit_recommender",

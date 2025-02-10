@@ -4,10 +4,10 @@ from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 
 class Context(BaseModel):
-    type: Literal["url", "text"]
-    value: str
+    type: Literal["url", "text"] = Field(description="The type of the context")
+    value: str = Field(description="The value of the context")
 
 class ProfileState(BaseModel):
     context: Context
-    objective: str
+    objective: str = Field(description="The objective of the profile")
     messages: Annotated[list[BaseMessage], add_messages] = []
