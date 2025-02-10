@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import { Menu, ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import { Menu, ChevronLeft, ChevronRight, Component, Home, Icon, UserSearch, Settings } from 'lucide-svelte';
 
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
@@ -11,6 +11,8 @@
 	import { Info } from 'lucide-svelte';
 	import { sub } from 'date-fns';
 	import { getEnvironmentState } from '$lib/states/environment.svelte';
+	import type { ComponentType } from 'svelte';
+	import type { Icon as IconType } from 'lucide-svelte';
 
 	let { data, children } = $props();
 
@@ -25,37 +27,29 @@
 
 	let credits = $state(usage ? usage.credits : 69);
 
-	class NavItem {
+	type NavItem = {
 		href: string;
 		label: string;
 		active: boolean;
-
-		constructor(href: string, label: string, isActive: (href: string) => boolean) {
-			this.href = href;
-			this.label = label;
-			this.active = isActive(this.href);
-		}
-	}
+		icon: typeof IconType;
+	};
 
 	let navItems = $state<NavItem[]>([]);
 
 	$effect(() => {
 		navItems = [
-			new NavItem(
-				`${basePath}${environment.value?.slug}`,
-				'Home',
-				(href) => $page.url.pathname === href
-			),
-			new NavItem(
-				`${basePath}${environment.value?.slug}/profile-research`,
-				'Profile Research',
-				(href) => $page.url.pathname.startsWith(href)
-			),
-			new NavItem(
-				`${basePath}${environment.value?.slug}/settings`,
-				'Setting',
-				(href) => $page.url.pathname.startsWith(href)
-			),
+			{
+				href: `${basePath}${environment.value?.slug}`,
+				label: 'Projects',
+				active: $page.url.pathname === `${basePath}${environment.value?.slug}`,
+				icon: Home
+			},
+			{
+				href: `${basePath}${environment.value?.slug}/profile-research`,
+				label: 'Redditor Analysis',
+				active: $page.url.pathname.startsWith(`${basePath}${environment.value?.slug}/profile-research`),
+				icon: UserSearch
+			},
 		];
 	});
 
@@ -76,15 +70,15 @@
 </svelte:head>
 
 <div
-	class="grid grid-rows-[auto_1fr] lg:grid-rows-1 lg:grid-cols-[auto_1fr] overflow-hidden top-0 bottom-0 right-0 left-0 absolute bg-background"
+	class="grid grid-rows-[auto_1fr] lg:grid-rows-1 lg:grid-cols-[auto_2fr] overflow-hidden top-0 bottom-0 right-0 left-0 absolute bg-background"
 >
 	<nav
-		class="w-full h-20 flex items-center justify-between lg:block lg:h-dvh p-4 bg-card text-card-foreground transition-all duration-300"
-		class:lg:w-44={!isCollapsed}
+		class="w-full ml-4 my-6 rounded-lg flex flex-col items-center p-4 bg-card text-card-foreground transition-all duration-300"
+		class:lg:w-54={!isCollapsed}
 		class:lg:w-20={isCollapsed}
 	>
 		<a href="/" class="text-xl font-bold inline lg:hidden">
-			reletino <span class="text-sm">beta</span>
+			<img src="/favicon.png" class="w-10 h-10" alt="reletino logo" />
 		</a>
 		<Dialog.Root bind:open>
 			<Dialog.Trigger class="lg:hidden">
@@ -121,14 +115,18 @@
 				</ul>
 			</Dialog.Content>
 		</Dialog.Root>
-		<ul class="hidden flex-col h-full lg:flex items-center">
-			<li class="mb-6 flex">
-				<a href="/" class="text-xl font-bold" class:hidden={isCollapsed}>reletino</a>
-				<span class="ml-1 text-xs" class:hidden={isCollapsed}>beta</span>
+		<ul class="hidden flex-col h-full lg:flex">
+			<li class="mb-6 flex flex-col">
+				<a href="/" class="text-xl font-bold flex flex-row place-items-center gap-2" class:hidden={isCollapsed}>
+					<img src="/reletino_logo.png" class="w-10 h-10" alt="reletino logo" />
+					Reletino
+				</a>
+
 			</li>
 
 			{#each navItems as item}
-				<li class="my-1 w-full">
+			{@const Icon = item.icon}
+				<li class="my-2 w-full">
 					{#if isCollapsed}
 						<Tooltip.Root>
 							<Tooltip.Trigger class="w-full">
@@ -148,11 +146,10 @@
 					{:else}
 						<a
 							href={item.href}
-							class="{buttonVariants({
-								variant: item.active ? 'secondary' : 'ghost',
-							})} w-full"
+							class="w-full text-left flex flex-row place-items-center hover:bg-accent p-2 rounded-md"
 						>
-							{item.label}
+							<Icon class="w-4 h-4 mr-2" />
+						{item.label}
 						</a>
 					{/if}
 				</li>
@@ -198,19 +195,6 @@
 						</Typography>
 					</a>
 				{/if}
-			</li>
-			<li class="mt-4 w-full">
-				<button
-					onclick={() => (isCollapsed = !isCollapsed)}
-					class={buttonVariants({ variant: 'ghost' })}
-					aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-				>
-					{#if isCollapsed}
-						<ChevronRight />
-					{:else}
-						<ChevronLeft />
-					{/if}
-				</button>
 			</li>
 		</ul>
 	</nav>
