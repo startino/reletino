@@ -9,6 +9,7 @@
     import { Textarea } from '$lib/components/ui/textarea';
     import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '$lib/components/ui/select';
     import { RadioGroup, RadioGroupItem } from '$lib/components/ui/radio-group';
+    import { TagInput } from '$lib/components/ui/tag-input';
     import ProgressBar from './progress-bar.svelte';
     import SetupProgress from './setup-progress.svelte';
     import { generateSubredditsAndPrompt } from './mock-ai-agent';
@@ -225,25 +226,13 @@
         }
     };
 
-    const addSubreddit = async () => {
-        if (newSubreddit) {
-            const cleanSubreddit = newSubreddit.toLowerCase().trim().replace('r/', '');
-            if (cleanSubreddit) {
-                if (projectForm.selectedSubreddits.some(sr => sr.toLowerCase() === cleanSubreddit)) {
-                    toast.error(`Subreddit r/${cleanSubreddit} is already added`);
-                    return;
-                }
-                if (await validateSubreddit(cleanSubreddit)) {
-                    projectForm.selectedSubreddits = [...projectForm.selectedSubreddits, cleanSubreddit];
-                    newSubreddit = '';
-                }
-            }
+    const handleNewSubreddit = async (subreddit: string) => {
+        const cleanSubreddit = subreddit.toLowerCase().trim().replace('r/', '');
+        if (cleanSubreddit && await validateSubreddit(cleanSubreddit)) {
+            return cleanSubreddit;
         }
-    }
-
-    const removeSubreddit = (subreddit: string) => {
-        projectForm.selectedSubreddits = projectForm.selectedSubreddits.filter(s => s !== subreddit);
-    }
+        return null;
+    };
 </script>
 
 <div class="container max-w-3xl py-10">
@@ -321,39 +310,12 @@
                         <Label>Subreddits</Label>
                         <p class="text-sm text-muted-foreground mb-2">Edit generated subreddits or add new ones</p>
                         <div class="space-y-3">
-                            <div class="flex gap-2">
-                                <Input
-                                    placeholder="Add a subreddit..."
-                                    bind:value={newSubreddit}
-                                    disabled={isValidatingSubreddit}
-                                    onkeydown={(e) => {
-                                        if (e.key === 'Enter' && newSubreddit) {
-                                            e.preventDefault();
-                                            addSubreddit();
-                                        }
-                                    }}
-                                />
-                                <Button variant="secondary" onclick={addSubreddit} disabled={isValidatingSubreddit}>
-                                    {#if isValidatingSubreddit}
-                                        <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-                                    {:else}
-                                        <Plus class="mr-2" />
-                                    {/if}
-                                    Add
-                                </Button>
-                            </div>
-                            <div class="flex flex-wrap gap-2">
-                                {#each projectForm.selectedSubreddits as subreddit}
-                                    <Badge
-                                        variant="outline"
-                                        class="cursor-pointer hover:bg-destructive/90 hover:text-destructive-foreground"
-                                        onclick={() => removeSubreddit(subreddit)}
-                                    >
-                                        r/{subreddit}
-                                        <X class="ml-1 h-3 w-3" />
-                                    </Badge>
-                                {/each}
-                            </div>
+                            <TagInput
+                                bind:items={projectForm.selectedSubreddits}
+                                placeholder="Add a subreddit..."
+                                disabled={isValidatingSubreddit}
+                                onNewItem={handleNewSubreddit}
+                            />
                         </div>
                     </div>
                     <div>
@@ -364,7 +326,7 @@
                         <div class="rounded-lg border">
                             <TipTap
                                 bind:content={projectForm.filteringPrompt}
-                                class="min-h-[300px] p-4"
+                                class="min-h-[300px] p-4 bg-background-variant"
                             />
                         </div>
                         <div class="mt-2 text-xs text-muted-foreground">Supports Markdown formatting</div>
