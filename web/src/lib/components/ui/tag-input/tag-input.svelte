@@ -1,24 +1,46 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Plus, X } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
 
 	type Props = {
 		items: string[];
 		placeholder?: string;
-		onNewItem?: (item: string) => string;
+		onNewItem?: (item: string) => string | null | Promise<string | null>;
+		disabled?: boolean;
 	};
 
 	let value = $state('');
 	let focus = $state(false);
 
-	let { items = $bindable(), placeholder, onNewItem }: Props = $props();
+	let { items = $bindable(), placeholder, onNewItem, disabled = false }: Props = $props();
 
 	$inspect(items);
-	const addItem = () => {
+	const addItem = async () => {
 		if (value) {
-			onNewItem && (value = onNewItem(value));
-			items = [...items, value];
-			value = '';
+			if (onNewItem) {
+				const newValue = await onNewItem(value);
+				if (newValue !== null) {
+					if (items.some(item => item.toLowerCase() === newValue.toLowerCase())) {
+						toast.error('This item is already added');
+						return;
+					}
+					items = [...items, newValue];
+					value = '';
+				}
+			} else {
+				const cleanValue = value.trim();
+				if (cleanValue) {
+					if (items.some(item => item.toLowerCase() === cleanValue.toLowerCase())) {
+						toast.error('This item is already added');
+						return;
+					}
+					items = [...items, cleanValue];
+					value = '';
+				} else {
+					toast.error('Please enter a valid value');
+				}
+			}
 		}
 	};
 </script>

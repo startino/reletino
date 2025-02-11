@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
-from src.interfaces.llm import gpt_4o_mini
+from src.interfaces.llm import gpt_4o_mini, gpt_o1
 from src.interfaces.reddit import get_reddit_instance
 from src.lib.graph.profile.tools.subreddit import Subreddit
 from src.lib.graph.profile.tools.web_scraper import web_scraper
@@ -12,13 +12,12 @@ import json
 
 class RecommendationOutput(BaseModel):
     project_name: str = Field(description="The name of the product")
-    product_description: str = Field(description="The description of the product")
     subreddits: list[Subreddit] = Field(description="The subreddits that are recommended")
     filtering_prompt: str = Field(description="The filtering prompt for the subreddits")
     
 class Drafter:
     def __init__(self, context: Context, objective: str):
-        self.llm = gpt_4o_mini()
+        self.llm = gpt_o1()
         self.context = context
         self.objective = objective
         
@@ -27,13 +26,82 @@ class Drafter:
         """Main function to analyze product and get recommendations"""
         
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are an expert in product drafting. You are given a product and you need to draft a product description and subreddits that are relevant to the product.
+            ("system", """
+#### **Objective**
+Your role is to **automatically configure a project** in Reletino based on the user’s SaaS/business context. This includes:
+1. Identifying relevant **subreddits** where potential leads are likely to post.
+2. **Drafting a tailored prompt** for the Filter Agent to evaluate posts based on the user’s ideal customer profile.
+3. **Ensuring high-quality filtering** by aligning with the user’s business objectives and preferences.
+
+---
+
+---
+
+### **Guidelines for Subreddit Selection**
+- Look for **communities where the target audience is actively seeking solutions.**  
+- Avoid subreddits where posts are dominated by **competitors or non-actionable discussions.**  
+- Consider past performance (if available) and suggest only the **most effective** subreddits.
+
+---
+
+### **Example Input & Output**
+
+#### **Input:**  
+SaaS Name: Hyros
+Context: Hyros is an AI-powered ad attribution and optimization platform that helps businesses track and improve their digital advertising performance. Key features include:
+- Print tracking technology that captures up to 250% more conversions than standard ad platforms
+- AI-powered optimization that improves ad targeting and increases conversions by ~12.5% on average
+- Advanced attribution tracking across multiple traffic sources
+- Detailed analytics for tracking sales, calls, leads and customer lifetime value
+- Forecasting capabilities to predict long-term revenue and ROI
+- Integration with major ad platforms like Facebook and Google Ads
+- Used by major brands like Tony Robbins, ClickFunnels, and Grant Cardone
+- Focused on high-spending advertisers who need maximum accuracy in tracking
+
+#### **Output:**  
+**Recommended Subreddits:**  
+- r/marketing
+- r/EntrepreneurRideAlong
+- r/SaaS
+- r/AdOps
+- r/Entrepreneur
+- r/DigitalMarketing
+- r/ppc
              
-             Guidelines for drafting:
-             1. The product name should justify the context provided by the user
-             2. The product description should be 1-2 sentences
-             3. The subreddits should be 5-7 subreddits that are relevant to the product
-             4. The subreddits should be relevant to the product and the context
+**Filter Agent Prompt:**  
+```
+<h2>Objective:</h2>
+<p>Find potential clients and leads for Hyros.</p>
+
+<h2>Ideal Customer Profile:</h2>
+<ul>
+    <li>High-spending advertisers who need maximum accuracy in tracking.</li>
+</ul>
+
+<h2>Relevant Posts:</h2>
+<ul>
+    <li>✅ Posts discussing paid advertising and tracking.</li>
+    <li>✅ Posts discussing ad attribution and optimization.</li>
+    <li>✅ Posts discussing analytics and reporting.</li>
+</ul>
+
+<h2>Irrelevant Posts:</h2>
+<ul>
+    <li>❌ Posts discussing organic marketing.</li>
+    <li>❌ Posts discussing non-advertising related content.</li>
+</ul>
+
+<h2>About Hyros</h2>
+<p>Hyros is an AI-powered ad attribution and optimization platform that helps businesses track and improve their digital advertising performance. Key features include:</p>
+<ul>
+    <li>Print tracking technology that captures up to 250% more conversions than standard ad platforms</li>
+    <li>AI-powered optimization that improves ad targeting and increases conversions by ~12.5% on average</li>
+    <li>Advanced attribution tracking across multiple traffic sources</li>
+    <li>Detailed analytics for tracking sales, calls, leads and customer lifetime value</li>
+    <li>Forecasting capabilities to predict long-term revenue and ROI</li>
+    <li>Integration with major ad platforms like Facebook and Google Ads</li>
+</ul>
+```
             """),
             ("user", self.context.value)
         ])

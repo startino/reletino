@@ -20,6 +20,7 @@
 	import { getEnvironmentState } from '$lib/states';
     import { Target, Users, Lightbulb, Search, DollarSign, Handshake, Globe, FileText } from 'lucide-svelte';
     import type { SupabaseClient, Session } from '@supabase/supabase-js';
+    import { toast } from 'svelte-sonner';
 
     type Props = {
 		supabase: SupabaseClient<any, 'public', any>;
@@ -30,6 +31,7 @@
 
     let currentStep = $state(0);
     let isLoading = $state(false);
+    let isValidatingSubreddit = $state(false);
     let newSubreddit = $state('');
     let saasInputType = $state<'url' | 'text'>('url');
 
@@ -97,6 +99,17 @@
         saasUrl: '',
         saasDescription: '',
     });
+
+    const processUrl = (url: string) => {
+        if (!url) return '';
+        // Remove any whitespace
+        url = url.trim();
+        // Add https:// if no protocol is specified
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        return url;
+    };
 
     const steps = $derived([
         {
@@ -191,10 +204,40 @@
         goto(`/dashboard/${env.value?.slug}/${data.id}/edit`);
     }
 
-    const addSubreddit = () => {
+    const validateSubreddit = async (subreddit: string): Promise<boolean> => {
+        isValidatingSubreddit = true;
+        try {
+            const response = await fetch(`https://www.reddit.com/r/${subreddit}/about.json`);
+            const data = await response.json();
+            
+            if (response.ok && !data.error) {
+                return true;
+            } else {
+                toast.error(`Subreddit r/${subreddit} does not exist`);
+                return false;
+            }
+        } catch (error) {
+            console.error('Error validating subreddit:', error);
+            toast.error('Failed to validate subreddit');
+            return false;
+        } finally {
+            isValidatingSubreddit = false;
+        }
+    };
+
+    const addSubreddit = async () => {
         if (newSubreddit) {
-            projectForm.selectedSubreddits = [...projectForm.selectedSubreddits, newSubreddit];
-            newSubreddit = '';
+            const cleanSubreddit = newSubreddit.toLowerCase().trim().replace('r/', '');
+            if (cleanSubreddit) {
+                if (projectForm.selectedSubreddits.some(sr => sr.toLowerCase() === cleanSubreddit)) {
+                    toast.error(`Subreddit r/${cleanSubreddit} is already added`);
+                    return;
+                }
+                if (await validateSubreddit(cleanSubreddit)) {
+                    projectForm.selectedSubreddits = [...projectForm.selectedSubreddits, cleanSubreddit];
+                    newSubreddit = '';
+                }
+            }
         }
     }
 
@@ -256,8 +299,11 @@
                             <Input
                                 id="saasUrl"
                                 bind:value={projectForm.saasUrl}
-                                placeholder="https://your-saas.com"
-                                type="url"
+                                placeholder="your-saas.com"
+                                type="text"
+                                on:blur={(e) => {
+                                    projectForm.saasUrl = processUrl(e.currentTarget.value);
+                                }}
                             />
                         {:else}
                             <Textarea
@@ -279,14 +325,21 @@
                                 <Input
                                     placeholder="Add a subreddit..."
                                     bind:value={newSubreddit}
+                                    disabled={isValidatingSubreddit}
                                     onkeydown={(e) => {
                                         if (e.key === 'Enter' && newSubreddit) {
+                                            e.preventDefault();
                                             addSubreddit();
                                         }
                                     }}
                                 />
-                                <Button variant="secondary" onclick={addSubreddit}>
-                                    <Plus class="mr-2" /> Add
+                                <Button variant="secondary" onclick={addSubreddit} disabled={isValidatingSubreddit}>
+                                    {#if isValidatingSubreddit}
+                                        <Loader2 class="mr-2 h-4 w-4 animate-spin" />
+                                    {:else}
+                                        <Plus class="mr-2" />
+                                    {/if}
+                                    Add
                                 </Button>
                             </div>
                             <div class="flex flex-wrap gap-2">
@@ -321,15 +374,7 @@
                 <div class="space-y-6">
                     <div class="rounded-lg p-4">
                         <h3 class="font-medium">Setup Complete! 🎉</h3>
-                        <Typography variant="body-md" class="mb-4">
-                            Here are the details of your project:
-                        </Typography>
-                        <div class="space-y-2">
-                            <Typography variant="body-md">Project Name: {projectForm.projectName}</Typography>
-                            <Typography variant="body-md">Subreddits: {projectForm.selectedSubreddits.join(', ')}</Typography>
-                            <Typography variant="body-md">Filtering Prompt: {projectForm.filteringPrompt}</Typography>
-                        </div>
-                        <p class="mt-2 text-sm text-muted-foreground">
+                        <p class="mt-2 text-sm">
                             Your project has been created. You can now configure additional settings:
                         </p>
                         <ul class="mt-4 space-y-2 text-sm">
@@ -349,16 +394,22 @@
                         handleComplete();
                     }}>Go to Project</Button>
                 {:else}
-                    <Button onclick={handleNext} disabled={currentStep >= steps.length || !steps[currentStep]?.isComplete || isLoading}>
+                    <div class="flex flex-col gap-2">
+                        <Button onclick={handleNext} disabled={currentStep >= steps.length || !steps[currentStep]?.isComplete || isLoading}>
+                            {#if isLoading}
+                                <Loader2 class="mr-2 h-4 w-4 animate-spin" />
+                                Generating...
+                            {:else}
+                                Next Step
+                            {/if}
+                        </Button>
                         {#if isLoading}
-                            <Loader2 class="mr-2 h-4 w-4 animate-spin" />
-                            Generating...
-                        {:else}
-                            Next Step
+                            <Typography variant="body-sm" class="text-left">This may take up to a minute</Typography>
                         {/if}
-                    </Button>
+                    </div>
                 {/if}
             </div>
+
            
         </div>
 
