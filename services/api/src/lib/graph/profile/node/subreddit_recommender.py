@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
-from src.interfaces.llm import gpt_4o_mini
+from src.interfaces.llm import gpt_o1, gpt_4o
 from src.interfaces.reddit import get_reddit_instance
 from src.lib.graph.profile.tools.subreddit import Subreddit
 from src.lib.graph.profile.tools.web_scraper import web_scraper
@@ -35,7 +35,7 @@ def parse_response(response: dict[str, str], name: str) -> list[AIMessage]:
 
 class SubredditRecommender:
     def __init__(self, context: Context, objective: str):
-        self.llm = gpt_4o_mini()
+        self.llm = gpt_4o()
         self.context = context
         self.objective = objective
 

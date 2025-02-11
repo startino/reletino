@@ -24,6 +24,28 @@
 
 	let { supabase, environment, project } = data;
 	let isToggling = $state(false);
+	let isValidatingSubreddit = $state(false);
+
+	const validateSubreddit = async (subreddit: string): Promise<boolean> => {
+		isValidatingSubreddit = true;
+		try {
+			const response = await fetch(`https://www.reddit.com/r/${subreddit}/about.json`);
+			const data = await response.json();
+			
+			if (response.ok && !data.error) {
+				return true;
+			} else {
+				toast.error(`Subreddit r/${subreddit} does not exist`);
+				return false;
+			}
+		} catch (error) {
+			console.error('Error validating subreddit:', error);
+			toast.error('Failed to validate subreddit');
+			return false;
+		} finally {
+			isValidatingSubreddit = false;
+		}
+	};
 
 	const form = superForm(data.projectForm, {
 		dataType: 'json',
@@ -523,8 +545,14 @@
 					<TagInput
 						bind:items={$formData.subreddits}
 						placeholder="Type a subreddit here..."
-						onNewItem={(newSubreddit) =>
-							newSubreddit.toLowerCase().trim().replace('r/', '')}
+						onNewItem={async (newSubreddit) => {
+							const cleanSubreddit = newSubreddit.toLowerCase().trim().replace('r/', '');
+							if (await validateSubreddit(cleanSubreddit)) {
+								return cleanSubreddit;
+							}
+							return null;
+						}}
+						disabled={isValidatingSubreddit}
 					/>
 				</Form.Control>
 
