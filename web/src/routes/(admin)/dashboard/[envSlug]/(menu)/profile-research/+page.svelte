@@ -7,7 +7,7 @@
     import { PUBLIC_API_URL } from '$env/static/public';
     import { onMount } from 'svelte';
 
-    interface HistoryEntry {
+    type HistoryEntry = {
         username: string;
         analysis: string;
         timestamp: number;
@@ -27,7 +27,7 @@
         }
     });
 
-    function addToHistory(username: string, analysis: string) {
+    const addToHistory = (username: string, analysis: string) => {
         const newEntry: HistoryEntry = {
             username,
             analysis,
@@ -38,12 +38,12 @@
         localStorage.setItem('profile-analysis-history', JSON.stringify(history));
     }
 
-    function removeFromHistory(index: number) {
+    const removeFromHistory = (index: number) => {
         history = history.filter((_, i) => i !== index);
         localStorage.setItem('profile-analysis-history', JSON.stringify(history));
     }
 
-    function loadFromHistory(entry: HistoryEntry) {
+    const loadFromHistory = (entry: HistoryEntry) => {
         username = entry.username;
         analysis = entry.analysis;
     }
@@ -85,7 +85,7 @@
         }
     }
 
-    function formatDate(timestamp: number): string {
+    const formatDate = (timestamp: number): string => {
         return new Date(timestamp).toLocaleString();
     }
 </script>

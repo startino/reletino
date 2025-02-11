@@ -14,6 +14,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.lib.graph.profile import ProfileGraph
+from src.lib.graph.profile.node.drafter import RecommendationOutput
+from src.lib.graph.profile.state import Context, ProfileState
+from src.lib.graph.profile.tools.web_scraper import web_scraper
 from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models.simple_submission import SimpleSubmission
 from supabase import create_client
@@ -141,26 +145,46 @@ def stop_project_stream(q: StopStreamRequest):
     return {"status": "success", "message": "Stream stopped"}
 
 
-class AutofillRequest(BaseModel):
-    url: str
-    use_case: Literal["leads", "competition_research", "other"]
-    form: dict
+class SetupProjectRequest(BaseModel):
+    url: str | None = None
+    description: str | None = None
+    objective: Literal["find_leads", "find_competitors", "find_ideas", "find_influencers", "find_investors", "find_partners"]
 
-@app.post("/autofill")
-async def autofill_project(q: AutofillRequest):
-    fields = [
-        FormField(label="business name", description="Company name"),
-        FormField(label="about", description="2-4 sentence description"),
-        FormField(label="subreddits", description="Relevant subreddits"),
-        FormField(label="ideal customer profile", description="Target audience"),
-        FormField(label="competitors", description="Main competitors"),
-        FormField(label="unique selling points", description="Differentiators"),
-    ]
+
+@app.post("/setup-project")
+async def setup_project(q: SetupProjectRequest):
+    if q.url is not None:
+        link_or_profile = "link"
+    elif q.description is not None:
+        link_or_profile = "description"
+    else:
+        raise HTTPException(status_code=400, detail="Either url or description must be provided")
+
+    context = Context(
+        type=link_or_profile,
+        value=str(q.url if link_or_profile == "link" else q.description)
+    )
+
+    if context.type == "link":
+        context.value = f"# URL: \n{context.value}" + f"## URL DATA: \n{web_scraper(context.value)}"
     
-    # Yields the fields one by one
-    autocompleted_field = autofill_form(q.use_case, q.url, fields)
+    initial_state = ProfileState(
+        context=context,
+        objective=q.objective,
+        messages=[],
+    )
+    
+    graph = ProfileGraph(initial_state).graph()
+  
+    final_state = await graph.ainvoke(initial_state)
+    
+    parsed_results = RecommendationOutput(**final_state["messages"][-1].tool_calls[0]["args"])
 
-    return EventSourceResponse(autocompleted_field, media_type="text/event-stream")
+    return {
+        "project_name": parsed_results.project_name,
+        "subreddits": [subreddit.name for subreddit in parsed_results.subreddits],
+        "filtering_prompt": parsed_results.filtering_prompt,
+    }
 
 class GenerateResponseRequest(BaseModel):
     author_name: str

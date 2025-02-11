@@ -108,7 +108,7 @@
 							{/if}
 						{/if}
 					</div>
-					<Typography variant="title-lg">{project.title}</Typography>
+					<Typography variant="title-md" class="text-wrap flex whitespace-wrap">{project.title}</Typography>
 				</Button>
 
 				<div class="absolute bottom-3 left-4 flex items-center gap-2">

@@ -6,11 +6,11 @@ import json
 
 async def run():
     context = Context(
-        type="url",
+        type="link",
         value="https://starti.no/"
     )
 
-    if context.type == "url":
+    if context.type == "link":
         context.value = f"# URL: \n{context.value}" + f"## URL DATA: \n{web_scraper(context.value)}"
     
     initial_state = ProfileState(
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     import asyncio
     results = asyncio.run(run())
     print("Results: \n\n")
-    print("Product Name:", results.product_name)
+    print("Product Name:", results.project_name)
     print("Product Description:", results.product_description)
     print("\nRecommended Subreddits:")
     for subreddit in results.subreddits:

@@ -11,7 +11,7 @@ from langchain_core.messages import AIMessage
 import json
 
 class RecommendationOutput(BaseModel):
-    product_name: str = Field(description="The name of the product")
+    project_name: str = Field(description="The name of the product")
     product_description: str = Field(description="The description of the product")
     subreddits: list[Subreddit] = Field(description="The subreddits that are recommended")
     filtering_prompt: str = Field(description="The filtering prompt for the subreddits")
