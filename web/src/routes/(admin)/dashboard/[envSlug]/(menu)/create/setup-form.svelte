@@ -19,11 +19,19 @@
 	import { Typography } from '$lib/components/ui/typography';
 	import { getEnvironmentState } from '$lib/states';
     import { Target, Users, Lightbulb, Search, DollarSign, Handshake, Globe, FileText } from 'lucide-svelte';
+    import type { SupabaseClient, Session } from '@supabase/supabase-js';
 
-    let currentStep = 0;
-    let isLoading = false;
-    let newSubreddit = '';
-    let saasInputType: 'url' | 'text' = 'url';
+    type Props = {
+		supabase: SupabaseClient<any, 'public', any>;
+        session: Session;
+    }
+
+    let { supabase, session }: Props = $props();
+
+    let currentStep = $state(0);
+    let isLoading = $state(false);
+    let newSubreddit = $state('');
+    let saasInputType = $state<'url' | 'text'>('url');
 
     const env = getEnvironmentState();
 
@@ -81,15 +89,16 @@
         }
     ];
 
-    let projectForm: ProjectSetup = {
+    let projectForm = $state<ProjectSetup>({
         objective: '',
         selectedSubreddits: [],
         filteringPrompt: '',
+        projectName: '',
         saasUrl: '',
         saasDescription: '',
-    };
+    });
 
-    $: steps = [
+    const steps = $derived([
         {
             title: 'Choose Objective',
             description: 'Select your goal',
@@ -110,60 +119,93 @@
             description: 'Finish setup',
             isComplete: true,
         },
-    ] satisfies SetupStep[];
+    ] satisfies SetupStep[]);
 
-    async function handleNext() {
-        if (currentStep === 0) {
+    const handleNext = async () => {
+        if (currentStep === 1) {
             isLoading = true;
             try {
                 // Request AI Agent to generate subreddits and filtering prompt
                 const data = await fetch(`${PUBLIC_API_URL}/setup-project`, {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
                         objective: projectForm.objective,
                         ...(saasInputType === 'url' 
-                            ? { saasUrl: projectForm.saasUrl }
-                            : { saasDescription: projectForm.saasDescription }),
+                            ? { url: projectForm.saasUrl }
+                            : { description: projectForm.saasDescription }),
                     }),
                 }).then(res => res.json());
 
                 projectForm.selectedSubreddits = data.subreddits;
-                projectForm.filteringPrompt = data.filteringPrompt;
+                projectForm.filteringPrompt = data.filtering_prompt;
+                projectForm.projectName = data.project_name;
+                
                 currentStep++;
             } finally {
                 isLoading = false;
             }
+            return;
         }
-        if (currentStep < steps.length - 1) {
+        
+        // Only proceed to review step if we're on AI Generation step (step 2) and there are subreddits and a filtering prompt
+        if (currentStep === 2 && projectForm.selectedSubreddits.length > 0 && projectForm.filteringPrompt) {
+            currentStep++;
+            return;
+        }
+        
+        // For other steps, just increment if not at the end
+        if (currentStep < steps.length - 1 && currentStep !== 1 && currentStep !== 2) {
             currentStep++;
         }
     }
 
-    function handleBack() {
+    const handleBack = () => {
         if (currentStep > 0) {
             currentStep--;
         }
     }
 
-    function handleComplete() {
-        goto(`/projects/new-project/edit`);
+    const handleComplete = async () => {
+        console.log('handleComplete');
+        isLoading = true;
+		const { data, error } = await supabase
+			.from('projects')
+			.insert({
+				profile_id: session.user!.id,
+				title: projectForm.projectName,
+				context: projectForm.filteringPrompt,
+				website_url: projectForm.saasUrl,
+				running: true,
+                subreddits: projectForm.selectedSubreddits,
+                prompt: projectForm.filteringPrompt,
+			})
+			.select()
+			.single();
+
+		if (error) {
+			console.error(error);
+		}
+        goto(`/dashboard/${env.value?.slug}/${data.id}/edit`);
     }
 
-    function addSubreddit() {
+    const addSubreddit = () => {
         if (newSubreddit) {
             projectForm.selectedSubreddits = [...projectForm.selectedSubreddits, newSubreddit];
             newSubreddit = '';
         }
     }
 
-    function removeSubreddit(subreddit: string) {
+    const removeSubreddit = (subreddit: string) => {
         projectForm.selectedSubreddits = projectForm.selectedSubreddits.filter(s => s !== subreddit);
     }
 </script>
 
 <div class="container max-w-3xl py-10">
     <Card class="p-6">
-        <ProgressBar {steps} {currentStep} />
+        <ProgressBar steps={steps} currentStep={currentStep} />
         <div class="mt-8 space-y-6">
             {#if currentStep === 0}
                 <div class="space-y-8">
@@ -176,7 +218,7 @@
                                 <button
                                     class="flex flex-col gap-2 p-6 rounded-lg border-2 transition-all hover:border-primary text-left
                                         {projectForm.objective === objective.value ? 'border-primary bg-primary/5' : 'border-border'}"
-                                    on:click={() => projectForm.objective = objective.value}
+                                    onclick={() => projectForm.objective = objective.value}
                                 >
                                     <div class="flex items-center gap-3">
                                         <svelte:component this={objective.icon} class="w-5 h-5" />
@@ -199,7 +241,7 @@
                                 <button
                                     class="flex flex-col gap-2 p-6 rounded-lg border-2 transition-all hover:border-primary text-left
                                         {saasInputType === method.value ? 'border-primary bg-primary/5' : 'border-border'}"
-                                    on:click={() => saasInputType = method.value}
+                                    onclick={() => saasInputType = method.value}
                                 >
                                     <div class="flex items-center gap-3">
                                         <svelte:component this={method.icon} class="w-5 h-5" />
@@ -237,7 +279,7 @@
                                 <Input
                                     placeholder="Add a subreddit..."
                                     bind:value={newSubreddit}
-                                    on:keydown={(e) => {
+                                    onkeydown={(e) => {
                                         if (e.key === 'Enter' && newSubreddit) {
                                             addSubreddit();
                                         }
@@ -279,6 +321,14 @@
                 <div class="space-y-6">
                     <div class="rounded-lg p-4">
                         <h3 class="font-medium">Setup Complete! 🎉</h3>
+                        <Typography variant="body-md" class="mb-4">
+                            Here are the details of your project:
+                        </Typography>
+                        <div class="space-y-2">
+                            <Typography variant="body-md">Project Name: {projectForm.projectName}</Typography>
+                            <Typography variant="body-md">Subreddits: {projectForm.selectedSubreddits.join(', ')}</Typography>
+                            <Typography variant="body-md">Filtering Prompt: {projectForm.filteringPrompt}</Typography>
+                        </div>
                         <p class="mt-2 text-sm text-muted-foreground">
                             Your project has been created. You can now configure additional settings:
                         </p>
@@ -295,7 +345,9 @@
                     Back
                 </Button>
                 {#if currentStep === steps.length - 1}
-                    <Button onclick={handleComplete}>Go to Project</Button>
+                    <Button onclick={() => {
+                        handleComplete();
+                    }}>Go to Project</Button>
                 {:else}
                     <Button onclick={handleNext} disabled={currentStep >= steps.length || !steps[currentStep]?.isComplete || isLoading}>
                         {#if isLoading}

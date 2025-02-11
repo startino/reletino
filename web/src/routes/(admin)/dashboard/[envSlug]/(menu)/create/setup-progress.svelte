@@ -10,7 +10,7 @@
     <div class="relative after:absolute after:left-[1.125rem] after:top-[1.75rem] after:h-[calc(100%-2rem)] after:w-[2px] after:bg-muted">
         <div class="space-y-4">
             {#each steps as step, index}
-                <div class="flex gap-4">
+                <div class="flex flex-row gap-4">
                     <div class="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border bg-background">
                         {#if step.isComplete}
                             <Check class="h-4 w-4 text-primary" />

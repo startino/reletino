@@ -2,6 +2,7 @@ export type ProjectSetup = {
     objective: string;
     selectedSubreddits: string[];
     filteringPrompt: string;
+    projectName: string;
     saasUrl: string;
     saasDescription: string;
 };
