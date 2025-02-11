@@ -4,6 +4,38 @@ from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from pydantic import SecretStr
 from langchain_community.chat_models import ChatPerplexity
 
+
+def gpt_o3_mini(temperature: float = 0.5) -> AzureChatOpenAI:
+    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+    assert (
+        AZURE_OPENAI_API_KEY is not None
+    ), "Environment variable 'AZURE_OPENAI_API_KEY' is not set"
+    
+    return AzureChatOpenAI(
+        api_key=SecretStr(AZURE_OPENAI_API_KEY),
+        azure_deployment="o3-mini",
+        model="o3-mini",
+        azure_endpoint="https://startino.openai.azure.com/",
+        api_version="2024-12-01-preview",
+        max_retries=20,
+        temperature=0.0
+    )
+
+# def gpt_o1_mini(temperature: float = 0.5) -> AzureChatOpenAI:
+#     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+#     assert (
+#         AZURE_OPENAI_API_KEY is not None
+#     ), "Environment variable 'AZURE_OPENAI_API_KEY' is not set"
+    
+#     return AzureChatOpenAI(
+#         api_key=SecretStr(AZURE_OPENAI_API_KEY),
+#         azure_deployment="o1-mini",
+#         model="o1-mini",
+#         azure_endpoint="https://startino.openai.azure.com/",
+#         api_version="2024-10-01-preview",
+#         temperature=0.0
+#     )
+
 def gpt_o1(temperature: float = 0.5) -> AzureChatOpenAI:
     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
     assert (

@@ -119,7 +119,7 @@ const findCompetitionDataSchema = z.object({
 export const projectSchema = z.object({
 	id: z.string(),
 	profile_id: z.string(),
-	title: z.string().min(1, 'Title is required').max(30, 'Title too long'),
+	title: z.string().min(1, 'Title is required').max(40, 'Title too long'),
 	subreddits: z
 		.array(z.string())
 		.min(1, 'Must add at least one subreddit.')
