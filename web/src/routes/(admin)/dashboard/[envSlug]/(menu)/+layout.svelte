@@ -50,6 +50,12 @@
 				active: $page.url.pathname.startsWith(`${basePath}${environment.value?.slug}/profile-research`),
 				icon: UserSearch
 			},
+			{
+				href: `${basePath}${environment.value?.slug}/lead-manager`,
+				label: 'Lead Manager',
+				active: $page.url.pathname.startsWith(`${basePath}${environment.value?.slug}/lead-manager`),
+				icon: Component
+			},
 		];
 	});
 

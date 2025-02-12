@@ -1,8 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { PRIVATE_API_URL } from '$env/static/private';
 import { projectSchema } from '$lib/schemas';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
 
 export async function POST({ request, params, locals: { supabase } }) {
 	try {
@@ -11,10 +9,10 @@ export async function POST({ request, params, locals: { supabase } }) {
 		const { environment_slug, ...projectData } = rawData;
 
 		// Validate the project data
-		const form = await superValidate(projectData, zod(projectSchema));
-		if (!form.valid) {
+		const result = projectSchema.safeParse(projectData);
+		if (!result.success) {
 			return json(
-				{ type: 'error', text: 'Error occurred when validating project data.' },
+				{ type: 'error', text: result.error.message },
 				{ status: 400 }
 			);
 		}
@@ -28,7 +26,7 @@ export async function POST({ request, params, locals: { supabase } }) {
 
 		if (!env || eEnv) {
 			return json(
-				{ type: 'error', text: 'Could not find environment.' },
+				{ type: 'error', text: `Could not find environment. ${eEnv?.message}` },
 				{ status: 404 }
 			);
 		}
@@ -36,7 +34,7 @@ export async function POST({ request, params, locals: { supabase } }) {
 		// Used for telling the user if the server was able to start/stop the project
 		let responseStatus: 'success' | 'error' = 'error';
 
-		if (form.data.running) {
+		if (projectData.running) {
 			// Start the project
 			await fetch(`${PRIVATE_API_URL}/start`, {
 				method: 'POST',
@@ -45,12 +43,12 @@ export async function POST({ request, params, locals: { supabase } }) {
 				},
 				body: JSON.stringify({
 					project: {
-						id: form.data.id,
-						title: form.data.title,
-						profile_id: form.data.profile_id,
-						prompt: form.data.prompt,
-						subreddits: form.data.subreddits,
-						running: form.data.running,
+						id: projectData.id,
+						title: projectData.title,
+						profile_id: projectData.profile_id,
+						prompt: projectData.prompt,
+						subreddits: projectData.subreddits,
+						running: projectData.running,
 					},
 					team_name: env.name,
 				}),
@@ -83,10 +81,10 @@ export async function POST({ request, params, locals: { supabase } }) {
 		}
 
 		// Update project in database
-		const { data, error, status } = await supabase
+		const { data, error } = await supabase
 			.from('projects')
 			.upsert({
-				...form.data,
+				...projectData,
 			})
 			.select();
 
@@ -99,7 +97,7 @@ export async function POST({ request, params, locals: { supabase } }) {
 
 		return json({
 			type: 'success',
-			text: `Project ${form.data.running ? 'started' : 'stopped'} successfully!`,
+			text: `Project ${projectData.running ? 'started' : 'stopped'} successfully!`,
 		});
 	} catch (error) {
 		console.error('Error processing request:', error);

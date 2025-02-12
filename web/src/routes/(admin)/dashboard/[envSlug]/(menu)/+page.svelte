@@ -87,7 +87,7 @@
 		}}
 	>
 		{#snippet itemCell(project, { deleteEntity })}
-			<div class="relative grid gap-4 bg-card rounded-lg transition-opacity duration-200 {loadingProjects.includes(project.id) ? 'opacity-50 pointer-events-none' : ''}">
+			<div class="relative grid h-max gap-4 bg-card rounded-lg transition-opacity duration-200 {loadingProjects.includes(project.id) ? 'opacity-50 pointer-events-none' : ''}">
 				<Button
 					class="flex h-full w-full flex-col p-8 py-12 pb-16 pt-3 {loadingProjects.includes(project.id) ? 'opacity-50' : 'hover:bg-accent/50'} transition-colors"
 					href="{baseURL}/{project.id}"

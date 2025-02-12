@@ -11,7 +11,6 @@
     import { RadioGroup, RadioGroupItem } from '$lib/components/ui/radio-group';
     import { TagInput } from '$lib/components/ui/tag-input';
     import ProgressBar from './progress-bar.svelte';
-    import SetupProgress from './setup-progress.svelte';
     import { generateSubredditsAndPrompt } from './mock-ai-agent';
     import type { ProjectSetup, SetupStep } from '.';
     import { OBJECTIVES } from '.';
@@ -235,7 +234,7 @@
     };
 </script>
 
-<div class="container max-w-3xl py-10">
+<div class="w-full max-w-4xl py-10">
     <Card class="p-6">
         <ProgressBar steps={steps} currentStep={currentStep} />
         <div class="mt-8 space-y-6">
