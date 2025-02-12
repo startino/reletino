@@ -14,10 +14,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.lib.graph.profile import ProfileGraph
-from src.lib.graph.profile.node.drafter import RecommendationOutput
-from src.lib.graph.profile.state import Context, ProfileState
-from src.lib.graph.profile.tools.web_scraper import web_scraper
+from src.lib.graph.project_setup import ProfileGraph
+from src.lib.graph.project_setup.node.drafter import RecommendationOutput
+from src.lib.graph.project_setup.state import Context, ProfileState
+from src.lib.graph.project_setup.tools.web_scraper import web_scraper
 from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models.simple_submission import SimpleSubmission
 from supabase import create_client
@@ -149,6 +149,7 @@ class SetupProjectRequest(BaseModel):
     url: str | None = None
     description: str | None = None
     objective: Literal["find_leads", "find_competitors", "find_ideas", "find_influencers", "find_investors", "find_partners"]
+    mode: Literal["standard", "advanced"]
 
 
 @app.post("/setup-project")
@@ -172,6 +173,7 @@ async def setup_project(q: SetupProjectRequest):
         context=context,
         objective=q.objective,
         messages=[],
+        mode=q.mode  # Pass mode to state
     )
     
     graph = ProfileGraph(initial_state).graph()

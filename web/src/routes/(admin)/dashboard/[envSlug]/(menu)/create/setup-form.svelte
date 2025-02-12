@@ -91,6 +91,21 @@
         }
     ];
 
+    const modes = [
+        {
+            icon: Lightbulb,
+            label: 'Standard Mode',
+            value: 'standard' as const,
+            description: 'Balanced speed and quality for most use cases'
+        },
+        {
+            icon: Target,
+            label: 'Advanced Mode',
+            value: 'advanced' as const,
+            description: 'Higher quality results with longer processing time'
+        }
+    ];
+
     let projectForm = $state<ProjectSetup>({
         objective: '',
         selectedSubreddits: [],
@@ -98,6 +113,7 @@
         projectName: '',
         saasUrl: '',
         saasDescription: '',
+        mode: 'standard' as const,
     });
 
     const processUrl = (url: string) => {
@@ -149,6 +165,7 @@
                         ...(saasInputType === 'url' 
                             ? { url: projectForm.saasUrl }
                             : { description: projectForm.saasDescription }),
+                        mode: projectForm.mode
                     }),
                 }).then(res => res.json());
 
@@ -293,7 +310,7 @@
                                     projectForm.saasUrl = processUrl(e.currentTarget.value);
                                 }}
                             />
-                        {:else}
+                        {:else if saasInputType === 'text'}
                             <Textarea
                                 id="saasDescription"
                                 bind:value={projectForm.saasDescription}
@@ -301,6 +318,29 @@
                                 rows={4}
                             />
                         {/if}
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="flex flex-col gap-2">
+                        <Typography variant="headline-md" class="mb-1">Choose processing mode</Typography>
+                        <Typography variant="body-md" class="mb-4">Select how you want your project to be processed</Typography>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {#each modes as mode}
+                                <button
+                                    class="flex flex-col gap-2 p-6 rounded-lg border-2 transition-all hover:border-primary text-left
+                                        {projectForm.mode === mode.value ? 'border-primary bg-primary/5' : 'border-border'}"
+                                    onclick={() => projectForm.mode = mode.value}
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <svelte:component this={mode.icon} class="w-5 h-5" />
+                                        <span class="font-medium">{mode.label}</span>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground">{mode.description}</p>
+                                </button>
+                            {/each}
+                        </div>
                     </div>
                 </div>
             {:else if currentStep === 2}

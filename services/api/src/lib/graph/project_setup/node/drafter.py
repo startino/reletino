@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
-from src.interfaces.llm import gpt_4o_mini, gpt_o1
+from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1
 from src.interfaces.reddit import get_reddit_instance
-from src.lib.graph.profile.tools.subreddit import Subreddit
-from src.lib.graph.profile.tools.web_scraper import web_scraper
-from src.lib.graph.profile.tools.subreddit import search_relevant_subreddits
-from src.lib.graph.profile.state import Context, ProfileState
+from src.lib.graph.project_setup.tools.subreddit import Subreddit
+from src.lib.graph.project_setup.tools.web_scraper import web_scraper
+from src.lib.graph.project_setup.tools.subreddit import search_relevant_subreddits
+from src.lib.graph.project_setup.state import Context, ProfileState
 from langchain_core.output_parsers import JsonOutputToolsParser
 from langchain_core.messages import AIMessage
 import json
@@ -15,16 +15,22 @@ class RecommendationOutput(BaseModel):
     subreddits: list[Subreddit] = Field(description="The subreddits that are recommended")
     filtering_prompt: str = Field(description="The filtering prompt for the subreddits")
     
+def get_model_for_mode(mode: str):
+    if mode == "advanced":
+        return gpt_o1()
+    return gpt_4o()
+
 class Drafter:
-    def __init__(self, context: Context, objective: str):
-        self.llm = gpt_o1()
-        self.context = context
-        self.objective = objective
-        
-    async def __call__(self, state: ProfileState):
-        
-        """Main function to analyze product and get recommendations"""
-        
+    """A class that drafts project recommendations based on the provided context and objective."""
+    
+    def __init__(self, state: ProfileState):
+        """Initialize the drafter with the given state."""
+        self.llm = get_model_for_mode(state.mode)
+        self.context = state.context
+        self.objective = state.objective
+
+    async def run(self) -> AIMessage:
+        """Run the drafting process and return an AIMessage with recommendations."""
         prompt = ChatPromptTemplate.from_messages([
             ("system", """
 #### **Objective**
@@ -113,21 +119,20 @@ Context: Hyros is an AI-powered ad attribution and optimization platform that he
             ("user", self.context.value)
         ])
         
-        chain = prompt | self.llm.bind_tools([RecommendationOutput], tool_choice="any") | JsonOutputToolsParser(return_id=True)
-        
+        chain = prompt | self.llm.bind_tools([RecommendationOutput], tool_choice="any") | JsonOutputToolsParser(return_id=True)    
         recommendation = (await chain.ainvoke({}))[0]
-        
         recommendation["name"] = recommendation["type"]
 
-        results = [
-            AIMessage(
-                tool_call_id=recommendation["id"],
-                content=json.dumps(recommendation["args"]),
-                name="drafter",
-                tool_calls=[recommendation],
-            )
-        ]
-        
+        return AIMessage(
+            tool_call_id=recommendation["id"],
+            content=json.dumps(recommendation["args"]),
+            name="drafter",
+            tool_calls=[recommendation],
+        )
+
+    async def __call__(self, state: ProfileState) -> dict:
+        """Call method to make the class callable. Returns a dict with messages."""
+        result = await self.run()
         return {
-            "messages": results
+            "messages": [result]
         }
