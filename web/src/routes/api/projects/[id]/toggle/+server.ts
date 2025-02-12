@@ -84,13 +84,19 @@ export async function POST({ request, params, locals: { supabase } }) {
 		const { data, error } = await supabase
 			.from('projects')
 			.upsert({
-				...projectData,
+				profile_id: projectData.profile_id,
+				running: projectData.running,
+				prompt: projectData.prompt,
+				subreddits: projectData.subreddits,
+				dm_style_prompt: projectData.dm_style_prompt,
+				comment_style_prompt: projectData.comment_style_prompt,
+				title: projectData.title,
 			})
 			.select();
 
 		if (error || !data) {
 			return json(
-				{ type: 'error', text: 'Error occurred when saving project.' },
+				{ type: 'error', text: `Error occurred when saving project. ${error?.message}` },
 				{ status: 500 }
 			);
 		}
