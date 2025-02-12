@@ -9,5 +9,6 @@ class Context(BaseModel):
 
 class ProfileState(BaseModel):
     context: Context
-    objective: str = Field(description="The objective of the profile")
+    objective: Literal["find_leads", "find_competitors", "find_ideas", "find_influencers", "find_investors", "find_partners"] = Field(description="The objective of the profile")
     messages: Annotated[list[BaseMessage], add_messages] = []
+    mode: Literal["standard", "advanced"] = Field(description="The mode of the profile")

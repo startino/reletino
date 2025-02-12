@@ -1,15 +1,15 @@
-from src.lib.graph.profile.state import Context, ProfileState
+from src.lib.graph.project_setup.state import Context, ProfileState
 from langgraph.graph import END, START, StateGraph
-from src.lib.graph.profile.node.subreddit_recommender import SubredditRecommender
-from src.lib.graph.profile.node.drafter import Drafter
+from src.lib.graph.project_setup.node.subreddit_recommender import SubredditRecommender
+from src.lib.graph.project_setup.node.drafter import Drafter
 from langgraph.prebuilt import ToolNode
-from src.lib.graph.profile.tools.subreddit import search_relevant_subreddits
+from src.lib.graph.project_setup.tools.subreddit import search_relevant_subreddits
 
 class ProfileGraph:
     def __init__(self, state: ProfileState):
         self.state = state
-        self.drafter = Drafter(context=state.context, objective=state.objective)
-        self.subreddit_recommender = SubredditRecommender(context=state.context, objective=state.objective)
+        self.drafter = Drafter(state=state)
+        self.subreddit_recommender = SubredditRecommender(state=state)
         
     def graph(self):
         workflow = StateGraph(ProfileState)
@@ -52,5 +52,4 @@ class ProfileGraph:
         workflow.add_edge("drafter", END)
         
         return workflow.compile()
-    
     

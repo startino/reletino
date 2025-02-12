@@ -2,10 +2,10 @@ from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
 from src.interfaces.llm import gpt_o1, gpt_4o
 from src.interfaces.reddit import get_reddit_instance
-from src.lib.graph.profile.tools.subreddit import Subreddit
-from src.lib.graph.profile.tools.web_scraper import web_scraper
-from src.lib.graph.profile.tools.subreddit import search_relevant_subreddits
-from src.lib.graph.profile.state import ProfileState, Context
+from src.lib.graph.project_setup.tools.subreddit import Subreddit
+from src.lib.graph.project_setup.tools.web_scraper import web_scraper
+from src.lib.graph.project_setup.tools.subreddit import search_relevant_subreddits
+from src.lib.graph.project_setup.state import ProfileState, Context
 from langchain_core.output_parsers import JsonOutputToolsParser
 from langchain_core.messages import AIMessage
 import json, uuid
@@ -33,21 +33,26 @@ def parse_response(response: dict[str, str], name: str) -> list[AIMessage]:
         )
     ]
 
+def get_model_for_mode(mode: str):
+    if mode == "advanced":
+        return gpt_o1()
+    return gpt_4o()
+
 class SubredditRecommender:
-    def __init__(self, context: Context, objective: str):
-        self.llm = gpt_4o()
-        self.context = context
-        self.objective = objective
+    def __init__(self, state: ProfileState):
+        self.llm = get_model_for_mode(state.mode)
+        self.context = state.context
+        self.objective = state.objective
 
     async def __call__(self, state: ProfileState):
         """Main function to analyze product and get recommendations"""
         
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a specialized subreddit recommendation expert. Your task is to recommend highly relevant subreddits based on the provided product/service information.
+            ("system", """You are a specialized subreddit recommendation expert. Your task is to recommend relevant subreddits based on the provided product/service information.
 
                     Guidelines for recommendations:
-                    1. Recommend 5-7 subreddits that are likely to be active and have a substantial user base
-                    2. Focus on both direct industry/niche subreddits and adjacent communities where potential users might be
+                    1. Recommend 7-15 subreddits that are likely to be active and have a substantial user base
+                    2. Focus on both direct industry/niche subreddits and adjacent communities where prospects might be
                     3. Consider the following factors:
                     - Product/service type and industry
                     - Target audience demographics
@@ -62,9 +67,7 @@ class SubredditRecommender:
 
                     Avoid:
                     - Extremely broad subreddits (e.g., r/all, r/popular)
-                    - Inactive or very small communities
-                    - Off-topic or loosely related subreddits
-                    - NSFW or controversial subreddits"""),
+                    - Off-topic or loosely related subreddits"""),
             ("user", self.context.value)
         ])
         

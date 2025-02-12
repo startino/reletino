@@ -1,7 +1,7 @@
-from src.lib.graph.profile import ProfileGraph
-from src.lib.graph.profile.state import ProfileState, Context
-from src.lib.graph.profile.tools.web_scraper import web_scraper
-from src.lib.graph.profile.node.drafter import RecommendationOutput
+from src.lib.graph.project_setup import ProfileGraph
+from src.lib.graph.project_setup.state import ProfileState, Context
+from src.lib.graph.project_setup.tools.web_scraper import web_scraper
+from src.lib.graph.project_setup.node.drafter import RecommendationOutput
 import json
 
 async def run():
