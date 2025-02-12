@@ -17,7 +17,7 @@
             style="width: {progress}%"
         />
     </div>
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-4 gap-4">
         {#each steps as step, index}
             <div class="text-sm {index <= currentStep ? 'text-primary' : 'text-muted-foreground'}">
                 <div class="font-medium">{step.title}</div>
