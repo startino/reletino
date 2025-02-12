@@ -97,6 +97,7 @@ export async function POST({ request, params, locals: { supabase } }) {
 		if (error || !data) {
 			return json(
 				{ type: 'error', text: `Error occurred when saving project. ${error?.message}` },
+
 				{ status: 500 }
 			);
 		}
