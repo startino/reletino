@@ -83,7 +83,7 @@ export async function POST({ request, params, locals: { supabase } }) {
 		// Update project in database
 		const { data, error } = await supabase
 			.from('projects')
-			.upsert({
+			.update({
 				profile_id: projectData.profile_id,
 				running: projectData.running,
 				prompt: projectData.prompt,
@@ -92,6 +92,7 @@ export async function POST({ request, params, locals: { supabase } }) {
 				comment_style_prompt: projectData.comment_style_prompt,
 				title: projectData.title,
 			})
+			.eq('id', projectId)
 			.select();
 
 		if (error || !data) {
