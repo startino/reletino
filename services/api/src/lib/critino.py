@@ -54,7 +54,6 @@ def get_critiques(
     agent_name: str,
     project_name: str,
     team_name: str,
-    context: str = "",
     timeout: int = 300,
 ) -> str:
     logging.info(f"critino: {agent_name}")

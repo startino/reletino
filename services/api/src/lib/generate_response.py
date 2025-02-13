@@ -7,6 +7,7 @@ from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.lib.xml_utils import submission_to_xml
 from src.models.simple_submission import SimpleSubmission
 from src.models.cot_response import CotResponse
+import json
 
 load_dotenv()
     
@@ -44,7 +45,7 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
     """
 
     structured_llm = llm.with_structured_output(CotResponse)
-    structured_response = structured_llm.invoke(
+    response = structured_llm.invoke(
         textwrap.dedent(
             f"""
             Your job is to:
@@ -73,8 +74,23 @@ def generate_response(submission: SimpleSubmission, team_name: str, project_id: 
             {critino_prompt(examples)}
 
             First, think through your approach step by step, analyzing the post, profile insights, and how to best craft your response.
-            Then provide your final response.
+            Then provide your final response in JSON format with the following structure:
+            {{
+                "chain_of_thought": "Your step by step reasoning",
+                "response": "Your final response"
+            }}
             """
         ))
     
-    return structured_response.response
+    # If the response is a string, try to parse it as JSON
+    if isinstance(response, str):
+        try:
+            response_dict = json.loads(response)
+            return response_dict["response"]
+        except json.JSONDecodeError:
+            # If JSON parsing fails, return the response as is
+            return response
+    elif isinstance(response, dict):
+        return response.get("response", str(response))
+    
+    return response.response
