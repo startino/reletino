@@ -5,6 +5,24 @@ from pydantic import SecretStr
 from langchain_community.chat_models import ChatPerplexity
 
 
+def openrouter_r1(temperature: float = 0.5) -> ChatOpenAI:
+    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+    assert (
+        OPENROUTER_API_KEY is not None
+    ), "Environment variable 'OPENROUTER_API_KEY' is not set"
+
+    return ChatOpenAI(
+        api_key=SecretStr(OPENROUTER_API_KEY),
+        base_url="https://openrouter.ai/api/v1",
+        model="deepseek/deepseek-r1",
+        temperature=temperature,
+        max_retries=20,
+        default_headers={
+            "HTTP-Referer": "https://startino.ai",
+            "X-Title": "Startino AI"
+        }
+    )
+
 def gpt_o3_mini(temperature: float = 0.5) -> AzureChatOpenAI:
     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
     assert (
@@ -18,7 +36,6 @@ def gpt_o3_mini(temperature: float = 0.5) -> AzureChatOpenAI:
         azure_endpoint="https://startino.openai.azure.com/",
         api_version="2024-12-01-preview",
         max_retries=20,
-        temperature=0.0
     )
 
 # def gpt_o1_mini(temperature: float = 0.5) -> AzureChatOpenAI:
