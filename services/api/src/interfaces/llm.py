@@ -18,8 +18,8 @@ def openrouter_r1(temperature: float = 0.5) -> ChatOpenAI:
         temperature=temperature,
         max_retries=20,
         default_headers={
-            "HTTP-Referer": "https://startino.ai",
-            "X-Title": "Startino AI"
+            "HTTP-Referer": "https://releti.no",
+            "X-Title": "Reletino"
         }
     )
 
