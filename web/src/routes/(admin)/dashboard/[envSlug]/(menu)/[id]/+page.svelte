@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SubmissionViewer } from '$lib/components/ui/submission-viewer';
+	import SubmissionViewer from './submission-viewer.svelte';
 	import type { Tables } from '$lib/supabase';
 	import { Toggle } from '$lib/components/ui/toggle';
 	import { LocateOff, CheckCheck, LoaderCircle } from 'lucide-svelte';
