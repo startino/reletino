@@ -51,7 +51,7 @@ class SubredditRecommender:
             ("system", """You are a specialized subreddit recommendation expert. Your task is to recommend relevant subreddits based on the provided product/service information.
 
                     Guidelines for recommendations:
-                    1. Recommend 7-15 subreddits that are likely to be active and have a substantial user base
+                    1. Recommend 10-15 subreddits that are likely to be active and have a substantial user base
                     2. Focus on both direct industry/niche subreddits and adjacent communities where prospects might be
                     3. Consider the following factors:
                     - Product/service type and industry

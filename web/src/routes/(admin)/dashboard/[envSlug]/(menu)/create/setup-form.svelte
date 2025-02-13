@@ -218,7 +218,30 @@
 		if (error) {
 			console.error(error);
 		}
-        goto(`/dashboard/${env.value?.slug}/${data.id}/edit`);
+        // Start the project
+        const response = await fetch(`${PUBLIC_API_URL}/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                project: {
+                    id: data.id,
+                    title: data.title,
+                    profile_id: session.user!.id,
+                    prompt: projectForm.filteringPrompt,
+                    subreddits: projectForm.selectedSubreddits,
+                    running: true,
+                },
+                team_name: env.value?.name,
+            }),
+        })
+
+        if (response.ok) {
+            goto(`/dashboard/${env.value?.slug}/${data.id}/edit`);
+        } else {
+            toast.error('Failed to start project');
+        }
     }
 
     const validateSubreddit = async (subreddit: string): Promise<boolean> => {
