@@ -11,11 +11,7 @@ export const signUpSchema = z
 		password: z
 			.string()
 			.min(8, 'Password must be at least 8 characters long')
-			.max(16, 'Password must be at most 16 characters long')
-			.regex(
-				/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$/,
-				'For security sake, please include lowercase, uppercase letters and digits.'
-			),
+			.max(50, 'Password must be at most 50 characters long'),
 		confirmPassword: z.string(),
 	})
 	.refine(({ password, confirmPassword }) => password === confirmPassword, {
