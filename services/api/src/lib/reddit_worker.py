@@ -107,22 +107,25 @@ class RedditStreamWorker:
                 
                 cache.set(submission.id, submission.id)
                 
-                profile_credits = self.supabase.table("usage").select("credits").eq("profile_id", self.profile_id).execute()
-                
-                if len(profile_credits.data) == 0:
-                    logging.error("Error getting credits from table.")
+                # Update credits atomically using a direct decrement operation
+                try:
+                    credits_update = self.supabase.rpc(
+                        'decrement_credits',
+                        {'user_id': self.profile_id}
+                    ).execute()
+                    
+                    if not credits_update.data:
+                        logging.error("No response data from credits update")
+                        continue
+                        
+                    if len(credits_update.data) > 0 and credits_update.data[0].get('remaining_credits', 0) <= 0:
+                        logging.info(f"No credits remaining for user: {self.profile_id}.")
+                        self.stop()
+                        break
+                        
+                except Exception as e:
+                    logging.error(f"Error updating credits: {str(e)}")
                     continue
-                
-                no_of_credits = profile_credits.data[0]["credits"]
-                
-                if no_of_credits >= 1:
-                    self.supabase.table("usage").update({
-                        "credits": no_of_credits - 1
-                        }).eq("profile_id", self.profile_id).execute()
-                else:
-                    logging.info(f"No credits available for user: {self.profile_id}.")
-                    self.stop()
-                    break
                 
         
     def stop(self):

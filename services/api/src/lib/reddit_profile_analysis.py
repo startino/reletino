@@ -11,7 +11,7 @@ from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1
 from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile
 from src.models.profile import RedditUserProfile
 from src.lib.chain_utils import retry_chain_invoke
-
+from langchain_core.runnables import RunnableConfig
 class State(BaseModel):
     messages: Annotated[List[BaseMessage], add_messages] = []
     profile: RedditUserProfile
@@ -185,11 +185,15 @@ def analyze_reddit_user(username: str, project: str) -> str:
         profile_insights=None,
         project=project
     )
-    
-    final_state = agent.invoke(initial_state)
+
+    config: RunnableConfig = {
+        "configurable": {}
+    }
+
+    final_state = agent.invoke(initial_state, config=config)
 
     with open(f"./.profiles/{username}/profile_insights.txt", "w", encoding="utf-8") as f:
-        f.write(final_state["profile_insights"])
+        f.write(final_state["profile_insights"]) 
     
     return final_state["profile_insights"]
 
