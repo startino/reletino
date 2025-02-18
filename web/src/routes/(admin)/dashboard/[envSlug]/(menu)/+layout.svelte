@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
-	import { Menu, ChevronLeft, ChevronRight, Component, Home, Icon, UserSearch, Settings } from 'lucide-svelte';
-
+	import { Menu, ChevronLeft, ChevronRight, Component, Home, Icon, UserSearch, Settings, AlertCircle } from 'lucide-svelte';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { page } from '$app/stores';
@@ -13,6 +12,7 @@
 	import { getEnvironmentState } from '$lib/states/environment.svelte';
 	import type { ComponentType } from 'svelte';
 	import type { Icon as IconType } from 'lucide-svelte';
+	import * as Alert from '$lib/components/ui/alert';
 
 	let { data, children } = $props();
 
@@ -214,6 +214,15 @@
 					Sign Up to persist your changes
 				</a>
 			</p>
+		{/if}
+
+		{#if credits === 0}
+			<Alert.Root variant="destructive" class="bg-error border border-destructive" role="alert" aria-live="polite">
+				<AlertCircle class="h-4 w-4" aria-hidden="true" />
+				<Alert.Description class="text-white">
+					You have run out of credits. Contact via <a href="mailto:jorge.lewis@starti.no" class="underline font-medium hover:opacity-90">Email (jorge.lewis@starti.no)</a>, WhatsApp (+852 9747 3013), or <a href="https://www.reddit.com/user/Jorge_at_Startino/" class="underline font-medium hover:opacity-90">Reddit (Jorge_at_Startino)</a>.
+				</Alert.Description>
+			</Alert.Root>
 		{/if}
 
 		{@render children()}
