@@ -164,7 +164,14 @@
 			<li class="my-7 w-full">
 				<div class="flex flex-col border rounded-md p-2 w-full relative">
 					{#if !isCollapsed}
-						<Info class="right-2 w-5 absolute" />
+						<Tooltip.Root>
+							<Tooltip.Trigger>
+								<Info class="right-2 w-5 absolute" />
+							</Tooltip.Trigger>
+							<Tooltip.Content>
+								<p>Initial credits are on us ;). Please contact us (jorge@starti.no, Reddit DM, WhatsApp +852 9747 3013) if you'd like more.</p>
+							</Tooltip.Content>
+						</Tooltip.Root>
 					{/if}
 					<Typography variant="body-sm" class="font-light pt-2">
 						{credits}
