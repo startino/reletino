@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
-from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1
+from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1, gpt_o3_mini
 from src.interfaces.reddit import get_reddit_instance
 from src.lib.graph.project_setup.tools.subreddit import Subreddit
 from src.lib.graph.project_setup.tools.web_scraper import web_scraper
@@ -17,7 +17,7 @@ class RecommendationOutput(BaseModel):
     
 def get_model_for_mode(mode: str):
     if mode == "advanced":
-        return gpt_o1()
+        return gpt_o3_mini()
     return gpt_4o()
 
 class Drafter:

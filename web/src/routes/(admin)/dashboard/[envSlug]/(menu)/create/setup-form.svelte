@@ -94,15 +94,15 @@
     const modes = [
         {
             icon: Lightbulb,
-            label: 'Standard Mode',
-            value: 'standard' as const,
-            description: 'Balanced speed and quality for most use cases'
+            label: 'Simple Mode',
+            value: 'simple' as const,
+            description: 'Faster but lower quality'
         },
         {
             icon: Target,
             label: 'Advanced Mode',
             value: 'advanced' as const,
-            description: 'Higher quality results with longer processing time'
+            description: 'Higher quality results but slower'
         }
     ];
 
@@ -113,7 +113,7 @@
         projectName: '',
         saasUrl: '',
         saasDescription: '',
-        mode: 'standard' as const,
+        mode: 'advanced' as const,
     });
 
     const processUrl = (url: string) => {
@@ -428,7 +428,7 @@
                             {/if}
                         </Button>
                         {#if isLoading}
-                            <Typography variant="body-sm" class="text-left">This may take up to a minute</Typography>
+                            <Typography variant="body-sm" class="text-left">{projectForm.mode === 'simple' ? 'This may take up to a minute' : 'This may take up to 3 minutes'}</Typography>
                         {/if}
                     </div>
                 {/if}

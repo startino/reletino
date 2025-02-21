@@ -169,7 +169,7 @@
 								<Info class="right-2 w-5 absolute" />
 							</Tooltip.Trigger>
 							<Tooltip.Content>
-								<p>Initial credits are on us ;). Please contact us (jorge@starti.no, Reddit DM, WhatsApp +852 9747 3013) if you'd like more.</p>
+								<p>Initial credits are on us! Please contact us (jorge@starti.no, Reddit DM, WhatsApp +852 9747 3013) if you'd like more.</p>
 							</Tooltip.Content>
 						</Tooltip.Root>
 					{/if}

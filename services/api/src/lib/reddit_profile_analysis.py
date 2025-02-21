@@ -71,12 +71,11 @@ def generate_insights(state: State):
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", f"# Profile Data\n{format_profile_for_llm(state.profile)}"),
-        MessagesPlaceholder(variable_name="messages")
     ])
     
     chain = prompt | llm
     
-    response = chain.invoke({"messages": state.messages})
+    response = chain.invoke({})
     
     return {
         "messages": [response],
@@ -90,12 +89,11 @@ def reflect(state: State):
         ("system", "Review the previous analysis and provide critique and additional insights."),
         ("system", f"Last analysis: {state.messages[-1].content}"),
         ("system", f"# Profile Data\n{format_profile_for_llm(state.profile)}"),
-        MessagesPlaceholder(variable_name="messages")
     ])
     
     chain = prompt | llm
     
-    response = chain.invoke({"messages": state.messages})
+    response = chain.invoke({})
     
     return {
         "messages": [response],

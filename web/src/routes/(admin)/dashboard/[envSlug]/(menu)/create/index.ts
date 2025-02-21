@@ -5,7 +5,7 @@ export type ProjectSetup = {
     projectName: string;
     saasUrl: string;
     saasDescription: string;
-    mode: 'standard' | 'advanced';
+    mode: 'advanced' | 'simple';
 };
 
 export type SetupStep = {
