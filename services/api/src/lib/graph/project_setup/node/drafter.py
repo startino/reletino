@@ -53,6 +53,7 @@ Your role is to **automatically configure a project** in Reletino based on the u
 - The project name should be a combination of the objective and the SaaS product name given from context.
 - The project name should be no more than 30 characters.
 - The project name should be in sentence case.
+Examples: "Reletino Lead Gen", "Hyros Competitors". 
 ---
 
 ### **Example Input & Output**
