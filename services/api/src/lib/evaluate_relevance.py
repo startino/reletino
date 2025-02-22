@@ -6,7 +6,7 @@ from langsmith import traceable
 from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
 
-from src.interfaces.llm import gpt_o1
+from src.interfaces.llm import gpt_o3_mini
 from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models import Evaluation
 
@@ -122,7 +122,7 @@ def evaluate_submission(
 
     @traceable(name="Senior Evaluation")
     def _senior_evaluation() -> Evaluation | None:
-        llm = gpt_o1()
+        llm = gpt_o3_mini()
 
         structured_llm = llm.with_structured_output(Evaluation)
 
