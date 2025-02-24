@@ -59,6 +59,21 @@ class RedditStreamWorker:
 
                 # Avoid repeating posts using caching
                 is_cached = cache.get(self.project.id+submission.id)
+                
+                # Check for recent submissions from same author
+                current_time = submission.created_utc
+                author_name = submission.author.name if submission.author else "deleted"
+                
+                # Check all cached submissions for recent ones from same author
+                for key in cache.iterkeys():
+                    if str(key).startswith(self.project.id):
+                        cached_data = cache.get(key)
+                        if isinstance(cached_data, dict):
+                            if (cached_data['author'] == author_name and 
+                                current_time - cached_data['timestamp'] < 300):  # 600 seconds = 10 minutes
+                                logging.info(f"Skipping submission from author {author_name} - posted within 5 minutes of previous submission")
+                                continue
+
                 if is_cached:
                     logging.info(f"Skipping cached submission: {submission.id}")
                     continue
@@ -116,7 +131,12 @@ class RedditStreamWorker:
                         
                         logging.info(f"Inserted new submission: {submission.id}")
                         
-                        cache.set(submission.id, submission.id)
+                        # Store submission data in cache
+                        cache.set(self.project.id+submission.id, {
+                            'id': submission.id,
+                            'author': author_name,
+                            'timestamp': current_time
+                        })
                         
                         # Update credits atomically using a direct decrement operation
                         try:
