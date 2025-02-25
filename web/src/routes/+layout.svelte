@@ -4,6 +4,9 @@
 	import { expoOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import { Toaster } from '$lib/components/ui/sonner';
+	import { dev } from '$app/environment';
+	import SEO from '$lib/components/seo/index.svelte';
+	import website from '$lib/config/website';
 
 	import { setEnvironmentState, setAuthState } from '$lib/states';
 	import { onMount } from 'svelte';
@@ -45,6 +48,20 @@
 		});
 	});
 </script>
+
+<SEO
+	title={website.siteTitle}
+	metadescription={website.siteDescription}
+	slug=""
+	ogImage={{
+		url: website.siteImage,
+		alt: "Reletino - AI-Powered Lead Generation"
+	}}
+	ogSquareImage={{
+		url: website.siteImageSquare,
+		alt: "Reletino - AI-Powered Lead Generation"
+	}}
+/>
 
 {#if $navigating}
 	<!-- 

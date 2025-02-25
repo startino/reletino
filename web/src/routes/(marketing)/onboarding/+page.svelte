@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { superForm } from 'sveltekit-superforms/client';
 	import { zod } from 'sveltekit-superforms/adapters';
+	import SEO from '$lib/components/seo/index.svelte';
+	import website from '$lib/config/website';
 
 	import { environmentSchema } from '$lib/schemas';
 	import * as Form from '$lib/components/ui/form';
@@ -40,6 +42,20 @@
 
 	const { form: formData, enhance, errors, delayed } = form;
 </script>
+
+<SEO
+	title="Create Your Team"
+	metadescription="Get started with Reletino by creating your team and discovering Reddit leads for your SaaS business."
+	slug="onboarding"
+	ogImage={{
+		url: website.siteImage,
+		alt: "Create your Reletino team"
+	}}
+	ogSquareImage={{
+		url: website.siteImageSquare,
+		alt: "Create your Reletino team"
+	}}
+/>
 
 <div class="mx-auto max-w-xl pt-24">
 	{#if !envCheck}

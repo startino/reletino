@@ -1,26 +1,36 @@
 <script lang="ts">
-	import { WebsiteName, WebsiteBaseUrl, WebsiteDescription } from '$lib/config';
-	import { Button, buttonVariants } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
+	import { Button } from '$lib/components/ui/button';
 	import { Typography } from '$lib/components/ui/typography';
+	import SEO from '$lib/components/seo/index.svelte';
+	import website from '$lib/config/website';
+
+	const { siteTitle, siteDescription } = website;
 
 	const ldJson = {
 		'@context': 'https://schema.org',
 		'@type': 'WebSite',
-		name: WebsiteName,
-		url: WebsiteBaseUrl,
+		name: siteTitle,
+		url: website.siteUrl,
+		description: siteDescription
 	};
 	const jsonldScript = `<script type="application/ld+json">${
 		JSON.stringify(ldJson) + '<'
 	}/script>`;
 </script>
 
-<svelte:head>
-	<title>{WebsiteName}</title>
-	<meta name="description" content={WebsiteDescription} />
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	{@html jsonldScript}
-</svelte:head>
+<SEO
+	title="Home"
+	metadescription={siteDescription}
+	slug=""
+	ogImage={{
+		url: website.siteImage,
+		alt: "Reletino - AI-Powered Lead Generation"
+	}}
+	ogSquareImage={{
+		url: website.siteImageSquare,
+		alt: "Reletino - AI-Powered Lead Generation"
+	}}
+/>
 
 <main class="bg-background z-10 -mt-32">
 	<div class="relative">

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
+	import SEO from '$lib/components/seo/index.svelte';
+	import website from '$lib/config/website';
 
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -23,6 +25,20 @@
 	const { form: formData, enhance, errors, delayed } = form;
 	let showSuccess = $state(false);
 </script>
+
+<SEO
+	title="Contact Us"
+	metadescription="Get in touch with the Reletino team. Schedule a demo, discuss your needs, or get answers to your technical questions about our AI-powered lead generation platform."
+	slug="contact_us"
+	ogImage={{
+		url: website.siteImage,
+		alt: "Contact Reletino Team"
+	}}
+	ogSquareImage={{
+		url: website.siteImageSquare,
+		alt: "Contact Reletino Team"
+	}}
+/>
 
 <div
 	class="flex flex-col lg:flex-row mx-auto my-4 min-h-[70vh] place-items-center lg:place-items-start place-content-center"
