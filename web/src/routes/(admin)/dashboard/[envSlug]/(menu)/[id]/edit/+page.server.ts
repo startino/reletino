@@ -39,9 +39,6 @@ export const actions = {
 			}
 		}
 
-		// Used for telling the user if the server was able to start/stop the project
-		let responseStatus: 'success' | 'error' = 'error';
-
 		const { data: env, error: eEnv } = await supabase
 			.from('environments')
 			.select('name')
@@ -57,9 +54,27 @@ export const actions = {
 				});
 		}
 
+		// First save the project to the database
+		const { data, error, status } = await supabase
+			.from('projects')
+			.upsert({
+				...formData.data,
+			})
+			.select();
+
+		if (error || !data) {
+			return contentType === 'application/json'
+				? { type: 'error', text: 'Error occurred when saving project.' }
+				: message(formData, {
+					type: 'error',
+					text: 'Error occurred when saving project.',
+				});
+		}
+
+		// Trigger backend operation asynchronously
 		if (formData.data.running) {
-			// Start the project
-			await fetch(`${PRIVATE_API_URL}/start`, {
+			// Start the project asynchronously
+			fetch(`${PRIVATE_API_URL}/start`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -75,12 +90,12 @@ export const actions = {
 					},
 					team_name: env.name,
 				}),
-			})
-				.then((res) => res.json())
-				.then((data) => (responseStatus = data.status));
+			}).catch(error => {
+				console.error('Error starting project:', error);
+			});
 		} else {
-			// Stop the project
-			await fetch(`${PRIVATE_API_URL}/stop`, {
+			// Stop the project asynchronously
+			fetch(`${PRIVATE_API_URL}/stop`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -88,48 +103,19 @@ export const actions = {
 				body: JSON.stringify({
 					project_id: formData.data.id,
 				}),
-			})
-				.then((res) => res.json())
-				.then((data) => (responseStatus = data.status));
+			}).catch(error => {
+				console.error('Error stopping project:', error);
+			});
 		}
-
-		if (responseStatus == 'error') {
-			return contentType === 'application/json'
-				? { type: 'error', text: "Our server couldn't fulfill your request. Try again or contact me: jorge.lewis@starti.no" }
-				: message(formData, {
-					type: 'error',
-					text: "Our server couldn't fulfill your request. Try again or contact me: jorge.lewis@starti.no",
-				});
-		}
-
-		const { data, error, status } = await supabase
-			.from('projects')
-			.upsert({
-				...formData.data,
-			})
-			.select();
 
 		if (status == 201) {
 			return contentType === 'application/json'
 				? { type: 'success', text: 'Project Created!' }
 				: message(formData, { type: 'success', text: 'Project Created!' });
-		} else if (status == 200) {
+		} else {
 			return contentType === 'application/json'
 				? { type: 'success', text: 'Project Updated!' }
 				: message(formData, { type: 'success', text: 'Project Updated!' });
 		}
-
-		if (error || !data) {
-			return contentType === 'application/json'
-				? { type: 'error', text: 'Error occurred when saving project.' }
-				: message(formData, {
-					type: 'error',
-					text: 'Error occurred when saving project.',
-				});
-		}
-
-		return contentType === 'application/json'
-			? { type: 'success', text: 'Project Updated!' }
-			: message(formData, { type: 'success', text: 'Project Updated!' });
 	},
 };

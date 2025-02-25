@@ -60,6 +60,9 @@
 					toast.error(form.message.text);
 				} else if (form.message.type == 'success') {
 					toast.success(form.message.text);
+					// Reset the loading state immediately after successful save
+					$delayed = false;
+					$timeout = false;
 				}
 			}
 		},
