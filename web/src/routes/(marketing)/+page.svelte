@@ -92,4 +92,23 @@
 			></iframe>
 		</div>
 	</div>
+
+	<footer class="mt-12 border-t border-gray-200 pt-8">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<Typography variant="body-sm">
+				Name: Futino Limited
+			</Typography>
+			<Typography variant="body-sm">
+				Address: G, 124, WANG TONG, LANTAU ISLAND, HONG KONG
+			</Typography>
+			<Typography variant="body-sm">
+				Domain: releti.no
+			</Typography>
+			<Typography variant="body-sm">
+				Contact: <a href="mailto:jonas.lindberg@starti.no" class="text-primary hover:underline"
+					>jonas.lindberg@starti.no</a
+				>
+			</Typography>
+		</div>
+	</footer>
 </main>
