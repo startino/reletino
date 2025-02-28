@@ -25,7 +25,6 @@ from supabase import create_client
 from src.interfaces import db
 from src.models.project import Project
 from src.lib.reddit_worker import RedditStreamWorker
-from src.lib.autofill_project import autofill_form, FormField
 from src.lib.generate_response import generate_response
 from praw.models import Submission
 

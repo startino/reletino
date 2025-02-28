@@ -7,7 +7,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1
+from src.interfaces.llm import gpt_4o, gpt_4o_mini, gemini_flash_2
 from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile
 from src.models.profile import RedditUserProfile
 from src.lib.chain_utils import retry_chain_invoke
@@ -67,7 +67,7 @@ You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzi
 
 @traceable(name="Generate Insights")
 def generate_insights(state: State):
-    llm = gpt_4o()
+    llm = gemini_flash_2()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", f"# Profile Data\n{format_profile_for_llm(state.profile)}"),
@@ -83,7 +83,7 @@ def generate_insights(state: State):
 
 @traceable(name="Reflect Insights")
 def reflect(state: State):
-    llm = gpt_4o()
+    llm = gemini_flash_2()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", "Review the previous analysis and provide critique and additional insights."),
@@ -101,7 +101,7 @@ def reflect(state: State):
 
 @traceable(name="Summarize Insights")
 def summarize(state: State):
-    llm = gpt_4o_mini()
+    llm = gemini_flash_2()
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Based on the analysis, create a final summary of insights about the user."),
         ("system", f"Last analysis: {str(state.messages[-1].content).replace('{', '{{').replace('}', '}}')}"),
