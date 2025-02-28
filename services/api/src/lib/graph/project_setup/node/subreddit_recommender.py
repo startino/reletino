@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
-from src.interfaces.llm import gpt_o1, gpt_4o, gpt_o3_mini
+from src.interfaces.llm import gemini_flash_2, gpt_o1, gpt_4o, gpt_o3_mini, openrouter_r1
 from src.interfaces.reddit import get_reddit_instance
 from src.lib.graph.project_setup.tools.subreddit import Subreddit
 from src.lib.graph.project_setup.tools.web_scraper import web_scraper
@@ -35,8 +35,8 @@ def parse_response(response: dict[str, str], name: str) -> list[AIMessage]:
 
 def get_model_for_mode(mode: str):
     if mode == "advanced":
-        return gpt_o3_mini()
-    return gpt_4o()
+        return openrouter_r1()
+    return gemini_flash_2()
 
 class SubredditRecommender:
     def __init__(self, state: ProfileState):
