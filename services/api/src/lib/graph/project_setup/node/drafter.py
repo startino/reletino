@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
-from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1, gpt_o3_mini, gemini_flash_2, openrouter_r1
+from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o1, gpt_o3_mini
 from src.interfaces.reddit import get_reddit_instance
 from src.lib.graph.project_setup.tools.subreddit import Subreddit
 from src.lib.graph.project_setup.tools.web_scraper import web_scraper
@@ -16,9 +16,8 @@ class RecommendationOutput(BaseModel):
     filtering_prompt: str = Field(description="The filtering prompt for the subreddits")
     
 def get_model_for_mode(mode: str):
-    if mode == "advanced":
-        return openrouter_r1()
-    return gemini_flash_2()
+    # Always use o3_mini regardless of mode
+    return gpt_o3_mini()
 
 class Drafter:
     """A class that drafts project recommendations based on the provided context and objective."""
@@ -34,10 +33,10 @@ class Drafter:
         prompt = ChatPromptTemplate.from_messages([
             ("system", """
 #### **Objective**
-Your role is to **automatically configure a project** in Reletino based on the user’s SaaS/business context. This includes:
+Your role is to **automatically configure a project** in Reletino based on the user's SaaS/business context. This includes:
 1. Identifying relevant **subreddits** where potential leads are likely to post.
-2. **Drafting a tailored prompt** for the Filter Agent to evaluate posts based on the user’s ideal customer profile.
-3. **Ensuring high-quality filtering** by aligning with the user’s business objectives and preferences.
+2. **Drafting a tailored prompt** for the Filter Agent to evaluate posts based on the user's ideal customer profile.
+3. **Ensuring high-quality filtering** by aligning with the user's business objectives and preferences.
 4. **Ensuring the project name is accurate** by combining the objective and the SaaS product name given from context.
 ---
 

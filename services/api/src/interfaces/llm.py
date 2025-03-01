@@ -17,10 +17,7 @@ def gemini_flash_2(temperature: float = 0.5) -> ChatOpenAI:
         model="google/gemini-2.0-flash-001",
         temperature=temperature,
         max_retries=20,
-        default_headers={
-            "HTTP-Referer": "https://releti.no",
-            "X-Title": "Reletino"
-        }
+        default_headers={"HTTP-Referer": "https://releti.no", "X-Title": "Reletino"},
     )
 
 
@@ -36,98 +33,124 @@ def openrouter_r1(temperature: float = 0.5) -> ChatOpenAI:
         model="deepseek/deepseek-r1",
         temperature=temperature,
         max_retries=20,
-        default_headers={
-            "HTTP-Referer": "https://releti.no",
-            "X-Title": "Reletino"
-        }
+        default_headers={"HTTP-Referer": "https://releti.no", "X-Title": "Reletino"},
     )
 
+
 def gpt_o3_mini(temperature: float = 0.5) -> AzureChatOpenAI:
-    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+    AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+    assert AZURE_API_KEY is not None, "Environment variable 'AZURE_API_KEY' is not set"
+
+    AZURE_API_URL = os.getenv("AZURE_API_URL")
+    assert AZURE_API_URL is not None, "Environment variable 'AZURE_API_URL' is not set"
+
+    AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
     assert (
-        AZURE_OPENAI_API_KEY is not None
-    ), "Environment variable 'AZURE_OPENAI_API_KEY' is not set"
-    
+        AZURE_API_VERSION is not None
+    ), "Environment variable 'AZURE_API_VERSION' is not set"
+
     return AzureChatOpenAI(
-        api_key=SecretStr(AZURE_OPENAI_API_KEY),
+        api_key=SecretStr(AZURE_API_KEY),
         azure_deployment="o3-mini",
         model="o3-mini",
-        azure_endpoint="https://startino.openai.azure.com/",
-        api_version="2024-12-01-preview",
+        azure_endpoint=AZURE_API_URL,
+        api_version=AZURE_API_VERSION,
         max_retries=20,
     )
 
+
 # def gpt_o1_mini(temperature: float = 0.5) -> AzureChatOpenAI:
-#     AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+#     AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 #     assert (
-#         AZURE_OPENAI_API_KEY is not None
-#     ), "Environment variable 'AZURE_OPENAI_API_KEY' is not set"
-    
+#         AZURE_API_KEY is not None
+#     ), "Environment variable 'AZURE_API_KEY' is not set"
+#
+#     AZURE_API_URL = os.getenv("AZURE_API_URL")
+#     assert (
+#         AZURE_API_URL is not None
+#     ), "Environment variable 'AZURE_API_URL' is not set"
+#
+#     AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
+#     assert (
+#         AZURE_API_VERSION is not None
+#     ), "Environment variable 'AZURE_API_VERSION' is not set"
+#
 #     return AzureChatOpenAI(
-#         api_key=SecretStr(AZURE_OPENAI_API_KEY),
+#         api_key=SecretStr(AZURE_API_KEY),
 #         azure_deployment="o1-mini",
 #         model="o1-mini",
-#         azure_endpoint="https://startino.openai.azure.com/",
-#         api_version="2024-10-01-preview",
+#         azure_endpoint=AZURE_API_URL,
+#         api_version=AZURE_API_VERSION,
 #         temperature=0.0
 #     )
 
+
 def gpt_o1(temperature: float = 0.5) -> AzureChatOpenAI:
-    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+    AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+    assert AZURE_API_KEY is not None, "Environment variable 'AZURE_API_KEY' is not set"
+
+    AZURE_API_URL = os.getenv("AZURE_API_URL")
+    assert AZURE_API_URL is not None, "Environment variable 'AZURE_API_URL' is not set"
+
+    AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
     assert (
-        AZURE_OPENAI_API_KEY is not None
-    ), "Environment variable 'AZURE_OPENAI_API_KEY' is not set"
+        AZURE_API_VERSION is not None
+    ), "Environment variable 'AZURE_API_VERSION' is not set"
 
     return AzureChatOpenAI(
-        api_key=SecretStr(AZURE_OPENAI_API_KEY),
+        api_key=SecretStr(AZURE_API_KEY),
         azure_deployment="o1",
         model="o1",
-        azure_endpoint="https://startino.openai.azure.com/",
-        api_version="2024-12-01-preview",
+        azure_endpoint=AZURE_API_URL,
+        api_version=AZURE_API_VERSION,
         max_retries=20,
     )
 
+
 def gpt_4o_mini(temperature: float = 0.5) -> AzureChatOpenAI:
-    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
+    AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+    assert AZURE_API_KEY is not None, "Environment variable 'AZURE_API_KEY' is not set"
+
+    AZURE_API_URL = os.getenv("AZURE_API_URL")
+    assert AZURE_API_URL is not None, "Environment variable 'AZURE_API_URL' is not set"
+
+    AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
     assert (
-        AZURE_OPENAI_API_KEY is not None
-    ), "Environment variable 'AZURE_OPENAI_API_KEY' is not set"
-    
-    AZURE_OPENAI_API_ENDPOINT = os.getenv("AZURE_OPENAI_API_ENDPOINT")
-    assert (
-        AZURE_OPENAI_API_ENDPOINT is not None
-    ), "Environment variable 'AZURE_OPENAI_API_ENDPOINT' is not set"
-    
+        AZURE_API_VERSION is not None
+    ), "Environment variable 'AZURE_API_VERSION' is not set"
+
     return AzureChatOpenAI(
         streaming=True,
         azure_deployment="gpt-4o-mini",
         temperature=temperature,
-        api_key=SecretStr(AZURE_OPENAI_API_KEY),
-        azure_endpoint=AZURE_OPENAI_API_ENDPOINT,
+        api_key=SecretStr(AZURE_API_KEY),
+        azure_endpoint=AZURE_API_URL,
         model="gpt-4o-mini",
-        api_version="2024-06-01",
+        api_version=AZURE_API_VERSION,
         max_retries=20,
     )
 
-def gpt_4o(temperature: float = 0.5) -> AzureChatOpenAI:
-    AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-    assert (
-        AZURE_OPENAI_API_KEY is not None
-    ), "Environment variable 'AZURE_OPENAI_API_KEY' is not set"
 
-    AZURE_OPENAI_API_ENDPOINT = os.getenv("AZURE_OPENAI_API_ENDPOINT")
+def gpt_4o(temperature: float = 0.5) -> AzureChatOpenAI:
+    AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+    assert AZURE_API_KEY is not None, "Environment variable 'AZURE_API_KEY' is not set"
+
+    AZURE_API_URL = os.getenv("AZURE_API_URL")
+    assert AZURE_API_URL is not None, "Environment variable 'AZURE_API_URL' is not set"
+
+    AZURE_API_VERSION = os.getenv("AZURE_API_VERSION")
     assert (
-        AZURE_OPENAI_API_ENDPOINT is not None
-    ), "Environment variable 'AZURE_OPENAI_API_ENDPOINT' is not set"
+        AZURE_API_VERSION is not None
+    ), "Environment variable 'AZURE_API_VERSION' is not set"
 
     return AzureChatOpenAI(
         streaming=True,
         azure_deployment="gpt-4o",
         temperature=temperature,
-        api_key=SecretStr(AZURE_OPENAI_API_KEY),
-        azure_endpoint=AZURE_OPENAI_API_ENDPOINT,
+        api_key=SecretStr(AZURE_API_KEY),
+        azure_endpoint=AZURE_API_URL,
         model="gpt-4o",
-        api_version="2024-06-01",
+        api_version=AZURE_API_VERSION,
         max_retries=20,
     )
 

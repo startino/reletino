@@ -7,11 +7,12 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from src.interfaces.llm import gpt_4o, gpt_4o_mini, gemini_flash_2, gpt_o3_mini
+from src.interfaces.llm import gpt_4o, gpt_4o_mini, gpt_o3_mini
 from src.lib.scrape_reddit_profile import format_profile_for_llm, get_reddit_profile
 from src.models.profile import RedditUserProfile
 from src.lib.chain_utils import retry_chain_invoke
 from langchain_core.runnables import RunnableConfig
+
 class State(BaseModel):
     messages: Annotated[List[BaseMessage], add_messages] = []
     profile: RedditUserProfile

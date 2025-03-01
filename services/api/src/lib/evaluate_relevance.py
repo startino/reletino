@@ -6,7 +6,7 @@ from langsmith import traceable
 from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
 
-from src.interfaces.llm import gemini_flash_2, gpt_4o, gpt_o3_mini, openrouter_r1
+from src.interfaces.llm import gpt_4o, gpt_o1, gpt_o3_mini
 from src.lib.reddit_profile_analysis import analyze_reddit_user
 from src.models import Evaluation
 
@@ -15,7 +15,7 @@ from src.lib.xml_utils import submission_to_xml
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+# AZURE_API_KEY is now loaded directly in the LLM interface functions
 
 REASONING_PROMPT = """
 ALWAYS start your reasoning with:
@@ -28,6 +28,7 @@ Perform individual reasoning:
 (if any examples from Critino) 3. Considering the critino examples, [...], therefore this aspect is [...].
 Use new lines and numbers to separate your thoughts.
 """
+
 
 @traceable(run_type="chain", name="Evaluate Submission", output_type=Evaluation)
 def evaluate_submission(
@@ -56,7 +57,7 @@ def evaluate_submission(
     )
 
     def _junior_evaluation() -> Evaluation | None:
-        llm = gemini_flash_2()
+        llm = gpt_o3_mini()
 
         structured_llm = llm.with_structured_output(Evaluation)
 
@@ -64,8 +65,9 @@ def evaluate_submission(
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                evaluation = structured_llm.invoke(textwrap.dedent(
-                f"""
+                evaluation = structured_llm.invoke(
+                    textwrap.dedent(
+                        f"""
                 {REASONING_PROMPT}
                 
                 # Context
@@ -94,9 +96,10 @@ def evaluate_submission(
 
                 {critino_prompt(examples)}
                 """
-                ))
+                    )
+                )
 
-                return evaluation # type: ignore
+                return evaluation  # type: ignore
             except Exception as e:
                 if attempt == max_retries - 1:  # Last attempt
                     raise e  # Re-raise the exception if all retries failed
@@ -105,17 +108,17 @@ def evaluate_submission(
     junior_evaluation = _junior_evaluation()
 
     if junior_evaluation is None:
-        return None, None # Don't research profiles of irrelevant posts
+        return None, None  # Don't research profiles of irrelevant posts
 
     if junior_evaluation.is_relevant is False:
-        return junior_evaluation, None # Don't research profiles of irrelevant posts
-    
+        return junior_evaluation, None  # Don't research profiles of irrelevant posts
+
     # Do further research before making a final decision
     profile_insights = analyze_reddit_user(submission.author.name, project_prompt)
 
     @traceable(name="Senior Evaluation")
     def _senior_evaluation() -> Evaluation | None:
-        llm = openrouter_r1()
+        llm = gpt_o1()
 
         structured_llm = llm.with_structured_output(Evaluation)
 
@@ -154,12 +157,12 @@ def evaluate_submission(
                     )
                 )
 
-                return senior_evaluation # type: ignore
+                return senior_evaluation  # type: ignore
             except Exception as e:
                 if attempt == max_retries - 1:  # Last attempt
                     raise e  # Re-raise the exception if all retries failed
                 continue
 
     senior_evaluation = _senior_evaluation()
-    
+
     return senior_evaluation, profile_insights
