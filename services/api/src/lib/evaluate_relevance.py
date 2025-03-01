@@ -57,7 +57,7 @@ def evaluate_submission(
     )
 
     def _junior_evaluation() -> Evaluation | None:
-        llm = gpt_o3_mini()
+        llm = gpt_4o()
 
         structured_llm = llm.with_structured_output(Evaluation)
 
