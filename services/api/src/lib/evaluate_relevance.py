@@ -118,7 +118,7 @@ def evaluate_submission(
 
     @traceable(name="Senior Evaluation")
     def _senior_evaluation() -> Evaluation | None:
-        llm = gpt_o1()
+        llm = gpt_o3_mini()
 
         structured_llm = llm.with_structured_output(Evaluation)
 
