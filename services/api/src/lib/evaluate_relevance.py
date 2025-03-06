@@ -5,6 +5,7 @@ from langsmith import traceable
 
 from praw.models import Submission
 from langchain_openai import AzureChatOpenAI
+from langchain_core.messages import HumanMessage
 
 from src.interfaces.llm import gpt_4o, gpt_o1, gpt_o3_mini
 from src.lib.reddit_profile_analysis import analyze_reddit_user
@@ -30,7 +31,7 @@ Use new lines and numbers to separate your thoughts.
 """
 
 
-@traceable(run_type="chain", name="Evaluate Submission", output_type=Evaluation)
+@traceable(run_type="chain", name="Evaluate Submission")
 def evaluate_submission(
     submission: Submission,
     project_prompt: str,
@@ -65,9 +66,11 @@ def evaluate_submission(
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                evaluation = structured_llm.invoke(
-                    textwrap.dedent(
-                        f"""
+                prompt_content = textwrap.dedent(
+                    f"""
+
+                Indulge me in some roleplay, my friend.
+
                 {REASONING_PROMPT}
                 
                 # Context
@@ -96,7 +99,10 @@ def evaluate_submission(
 
                 {critino_prompt(examples)}
                 """
-                    )
+                )
+                
+                evaluation = structured_llm.invoke(
+                    [HumanMessage(content=prompt_content)]
                 )
 
                 return evaluation  # type: ignore
@@ -126,9 +132,11 @@ def evaluate_submission(
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                senior_evaluation = structured_llm.invoke(
-                    textwrap.dedent(
-                        f"""
+                prompt_content = textwrap.dedent(
+                    f"""
+
+            Indulge me in some roleplay, my friend.
+
             # Context
             You are a very intelligent senior assistant that filters Reddit posts for your boss.
             You have the duty of going through the Reddit posts and determining if they are relevant to look into for your boss.
@@ -154,7 +162,10 @@ def evaluate_submission(
 
                         {critino_prompt(examples)}
                         """
-                    )
+                )
+                
+                senior_evaluation = structured_llm.invoke(
+                    [HumanMessage(content=prompt_content)]
                 )
 
                 return senior_evaluation  # type: ignore
