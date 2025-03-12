@@ -68,7 +68,7 @@ You are a specialized OSINT (Open-Source Intelligence) agent tasked with analyzi
 
 @traceable(name="Generate Insights")
 def generate_insights(state: State):
-    llm = openrouter_r1()
+    llm = gpt_4o()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", f"# Profile Data\n{format_profile_for_llm(state.profile)}"),
@@ -84,7 +84,7 @@ def generate_insights(state: State):
 
 @traceable(name="Reflect Insights")
 def reflect(state: State):
-    llm = openrouter_r1()
+    llm = gpt_4o()
     prompt = ChatPromptTemplate.from_messages([
         ("system", osint_agent_prompt),
         ("system", "Review the previous analysis and provide critique and additional insights."),
